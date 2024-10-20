@@ -47,7 +47,7 @@ model Template {
   parentTemplate    Template?   // optional if not forked. 
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  blogPosts      BlogPost[]  @relation("TemplateBlogPost") // Many-to-many with BlogPost
+  blogPosts      BlogPost[]  // Many-to-many with BlogPost
 
 }
 
@@ -65,12 +65,12 @@ model Code {
 
 model BlogPost {
  id          Int     @id @default(autoincrement())
- author      User    @relation(fields = [authorId, references=[id]])
+ author      User    @relation(fields = [authorId], references=[id])
  authorId    Int
  title       String
  description      String
  tags        String[]
- templates   Template[]   @relation("TemplateBlogPost") // Many-to-many with Template
+ templates   Template[]   // Many-to-many with Template
  comments    Comment[]
  upvoteOrDownvote   Int  @default(0)
  abuseReports  AbuseReport[]
@@ -80,11 +80,11 @@ model BlogPost {
 
 model Comment {
   id         Int     @id @default(autoincrement())
- author      User    @relation(fields = [authorId, references=[id]])
+ author      User    @relation(fields = [authorId], references=[id])
  authorId    Int
  content     String
  upvoteOrDownvote   Int  @default(0)
- replies    Comment[]    @relation("Replies")
+ replies    Comment[]    
  repliedToComment Comment? //comment that this comment replied to - optional - doesn't have to be a replied comment
  abuseReports    AbuseReport[]
  createdAt      DateTime     @default(now())
@@ -92,7 +92,7 @@ model Comment {
 
 model AbuseReport {
   id         Int     @id @default(autoincrement())
-  author      User    @relation(fields = [authorId, references=[id]])
+  author      User    @relation(fields = [authorId], references=[id])
  authorId    Int
  description     String
  createdAt      DateTime     @default(now())
