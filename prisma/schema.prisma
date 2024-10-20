@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           Int         @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  avatar       String     //avatar
+  email        String      @unique
+  phoneNumber  String      @unique
+  password     String
+  savedTemplates Template[] // One-to-many relationship with templates
+  blogPosts    BlogPost[]  // One-to-many relationship with blog posts
+  comments     Comment[]   // One-to-many relationship with comments
+  abuseReports AbuseReport[] // One-to-many relationship with abuse reports
+  role         Role        @default(USER) // User or Admin
+}
+
+// enum defines predefined inputs of the role attribute above: USER, ADMIN
+enum Role {
+  USER
+  ADMIN
+}
+
+model Template {
+  id          Int     @id @default(autoincrement())
+  owner       User   @relation(fields = [ownerId], references=[id])
+  ownerId     Int
+  title       String
+  explanation      String?
+  tags        String[]
+  code        Code     @relation(fields = [codeId], references=[id])
+  codeId      Int
+  isForked    Boolean    @default(false)
+  parentTemplate    Template?   // optional if not forked. 
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  blogPosts      BlogPost[]  @relation("TemplateBlogPost") // Many-to-many with BlogPost
+
+}
+
+model Code {
+  id          Int     @id @default(autoincrement())
+  parentTemplate    Template    @relation(fields = [parentTemplateId], references=[id])
+  parentTemplateId   Int
+  language     String
+  input     String?
+  output     String?
+  error      String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model BlogPost {
+ id          Int     @id @default(autoincrement())
+ author      User    @relation(fields = [authorId, references=[id]])
+ authorId    Int
+ title       String
+ description      String
+ tags        String[]
+ templates   Template[]   @relation("TemplateBlogPost") // Many-to-many with Template
+ comments    Comment[]
+ upvoteOrDownvote   Int  @default(0)
+ abuseReports  AbuseReport[]
+ createdAt      DateTime     @default(now())
+ updatedAt      DateTime     @updatedAt
+}
+
+model Comment {
+  id         Int     @id @default(autoincrement())
+ author      User    @relation(fields = [authorId, references=[id]])
+ authorId    Int
+ content     String
+ upvoteOrDownvote   Int  @default(0)
+ replies    Comment[]    @relation("Replies")
+ repliedToComment Comment? //comment that this comment replied to - optional - doesn't have to be a replied comment
+ abuseReports    AbuseReport[]
+ createdAt      DateTime     @default(now())
+}
+
+model AbuseReport {
+  id         Int     @id @default(autoincrement())
+  author      User    @relation(fields = [authorId, references=[id]])
+ authorId    Int
+ description     String
+ createdAt      DateTime     @default(now())
+ reportedBlog   BlogPost?
+ reportedComment  Comment?
+}
+
+
+
