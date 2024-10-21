@@ -39,12 +39,12 @@ enum templateTag {
   JavaScript
   Java
   C
-  C++
+  CPlus
   Python
   Arrays
   Strings
   Hash
-  Bit Manipulation
+  BitManipulation
   DP
   Stack
   Queue
@@ -56,8 +56,8 @@ enum templateTag {
   DFS
   Database
   Heap
-  Two Pointer
-  Sliding Window
+  TwoPointer
+  SlidingWindow
   Recursive
   Shell
 }
@@ -66,7 +66,7 @@ enum blogTag {
   JavaScript
   Java
   C
-  C++
+  CPlus
   Python
   Easy
   Medium
@@ -74,7 +74,7 @@ enum blogTag {
   Arrays
   Strings
   Hash
-  Bit Manipulation
+  BitManipulation
   DP
   Stack
   Queue
@@ -86,34 +86,32 @@ enum blogTag {
   DFS
   Database
   Heap
-  Two Pointer
-  Sliding Window
+  TwoPointer
+  SlidingWindow
   Recursive
   Shell
 }
 
-
 model Template {
   id          Int    @id @default(autoincrement())
-  owner       User   @relation(fields = [ownerId], references=[id])
   ownerId     Int
+  owner       User   @relation(fields:[ownerId], references:[id])
   title       String
   explanation      String?
   tags        templateTag
-  code        Code     @relation(fields = [codeId], references=[id])
+  code        Code     @relation(fields:[codeId], references:[id])
   codeId      Int
   isForked    Boolean    @default(false)
   parentTemplate    Template?   // optional if not forked. 
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   blogPosts      BlogPost[]  // Many-to-many with BlogPost
-
 }
 
 model Code {
   id          Int     @id @default(autoincrement())
-  parentTemplate    Template    @relation(fields = [parentTemplateId], references=[id])
   parentTemplateId   Int
+  parentTemplate    Template    @relation(fields:[parentTemplateId], references:[id])
   language     String
   input     String?
   output     String?
@@ -124,8 +122,8 @@ model Code {
 
 model BlogPost {
  id          Int     @id @default(autoincrement())
- author      User    @relation(fields = [authorId], references=[id])
  authorId    Int
+ author      User    @relation(fields: [authorId], references: [id])
  title       String
  description      String
  tags        blogTag
@@ -139,11 +137,11 @@ model BlogPost {
 
 model Comment {
   id         Int     @id @default(autoincrement())
- author      User    @relation(fields = [authorId], references=[id])
- authorId    Int
+authorId    Int
+ author      User    @relation(fields: [authorId], references: [id])
  content     String
  upvoteOrDownvote   Int  @default(0)
- replies    Comment[]    
+ replies    Comment[]
  repliedToComment Comment? //comment that this comment replied to - optional - doesn't have to be a replied comment
  abuseReports    AbuseReport[]
  createdAt      DateTime     @default(now())
@@ -151,8 +149,8 @@ model Comment {
 
 model AbuseReport {
   id         Int     @id @default(autoincrement())
-  author      User    @relation(fields = [authorId], references=[id])
- authorId    Int
+  authorId    Int
+  author      User    @relation(fields:[authorId], references:[id])
  description     String
  createdAt      DateTime     @default(now())
  reportedBlog   BlogPost?
