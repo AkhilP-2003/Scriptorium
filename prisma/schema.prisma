@@ -35,13 +35,71 @@ enum Role {
   ADMIN
 }
 
+enum templateTag {
+  JavaScript
+  Java
+  C
+  C++
+  Python
+  Arrays
+  Strings
+  Hash
+  Bit Manipulation
+  DP
+  Stack
+  Queue
+  LinkedList
+  Sorting
+  Greedy
+  Tree
+  BFS
+  DFS
+  Database
+  Heap
+  Two Pointer
+  Sliding Window
+  Recursive
+  Shell
+}
+
+enum blogTag {
+  JavaScript
+  Java
+  C
+  C++
+  Python
+  Easy
+  Medium
+  Hard
+  Arrays
+  Strings
+  Hash
+  Bit Manipulation
+  DP
+  Stack
+  Queue
+  LinkedList
+  Sorting
+  Greedy
+  Tree
+  BFS
+  DFS
+  Database
+  Heap
+  Two Pointer
+  Sliding Window
+  Recursive
+  Shell
+}
+
+
 model Template {
   id          Int    @id @default(autoincrement())
   owner       User   @relation(fields = [ownerId], references=[id])
   ownerId     Int
   title       String
   explanation      String?
-  tags        String[]
+  tags        templateTag
   code        Code     @relation(fields = [codeId], references=[id])
   codeId      Int
   isForked    Boolean    @default(false)
@@ -70,7 +128,7 @@ model BlogPost {
  authorId    Int
  title       String
  description      String
- tags        String[]
+ tags        blogTag
  templates   Template[]   // Many-to-many with Template
  comments    Comment[]
  upvoteOrDownvote   Int  @default(0)
