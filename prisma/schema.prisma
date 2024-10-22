@@ -26,14 +26,14 @@ model User {
   blogPosts    BlogPost[]  // One-to-many relationship with blog posts
   comments     Comment[]   // One-to-many relationship with comments
   abuseReports AbuseReport[] // One-to-many relationship with abuse reports
-  role         Role        @default(USER) // User or Admin
+  // role         Role        @default(USER) // User or Admin
 }
 
 // enum defines predefined inputs of the role attribute above: USER, ADMIN
-enum Role {
-  USER
-  ADMIN
-}
+// enum Role {
+//   USER
+//   ADMIN
+// }
 
 // enum templateTag {
 //   JavaScript
@@ -99,7 +99,7 @@ model Template {
   title       String
   explanation      String
   // tags        templateTag
-  code        Code  //ONE TO ONE RELATIONSHIP WITH CODE
+  code        Code? //ONE TO ONE RELATIONSHIP WITH CODE
   codeId      Int
   isForked    Boolean    @default(false)
   parentTemplateId    Int?   // optional if not forked. 
