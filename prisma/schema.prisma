@@ -35,71 +35,71 @@ enum Role {
   ADMIN
 }
 
-enum templateTag {
-  JavaScript
-  Java
-  C
-  CPlus
-  Python
-  Arrays
-  Strings
-  Hash
-  BitManipulation
-  DP
-  Stack
-  Queue
-  LinkedList
-  Sorting
-  Greedy
-  Tree
-  BFS
-  DFS
-  Database
-  Heap
-  TwoPointer
-  SlidingWindow
-  Recursive
-  Shell
-}
+// enum templateTag {
+//   JavaScript
+//   Java
+//   C
+//   CPlus
+//   Python
+//   Arrays
+//   Strings
+//   Hash
+//   BitManipulation
+//   DP
+//   Stack
+//   Queue
+//   LinkedList
+//   Sorting
+//   Greedy
+//   Tree
+//   BFS
+//   DFS
+//   Database
+//   Heap
+//   TwoPointer
+//   SlidingWindow
+//   Recursive
+//   Shell
+// }
 
-enum blogTag {
-  JavaScript
-  Java
-  C
-  CPlus
-  Python
-  Easy
-  Medium
-  Hard
-  Arrays
-  Strings
-  Hash
-  BitManipulation
-  DP
-  Stack
-  Queue
-  LinkedList
-  Sorting
-  Greedy
-  Tree
-  BFS
-  DFS
-  Database
-  Heap
-  TwoPointer
-  SlidingWindow
-  Recursive
-  Shell
-}
+// enum blogTag {
+//   JavaScript
+//   Java
+//   C
+//   CPlus
+//   Python
+//   Easy
+//   Medium
+//   Hard
+//   Arrays
+//   Strings
+//   Hash
+//   BitManipulation
+//   DP
+//   Stack
+//   Queue
+//   LinkedList
+//   Sorting
+//   Greedy
+//   Tree
+//   BFS
+//   DFS
+//   Database
+//   Heap
+//   TwoPointer
+//   SlidingWindow
+//   Recursive
+//   Shell
+// }
 
 model Template {
   id          Int    @id @default(autoincrement())
-  ownerId     Int     @unique
+  ownerId     Int     
   owner       User   @relation(fields:[ownerId], references:[id])
   title       String
   explanation      String
-  tags        templateTag
-  code        Code
+  // tags        templateTag
+  code        Code  //ONE TO ONE RELATIONSHIP WITH CODE
   codeId      Int
   isForked    Boolean    @default(false)
   parentTemplateId    Int?   // optional if not forked. 
@@ -110,7 +110,7 @@ model Template {
 
 model Code {
   id          Int     @id @default(autoincrement())
-  parentTemplateId   Int @unique
+  parentTemplateId   Int @unique  //ONE TO ONE RELATIONSHIP WITH TEMPLATE
   parentTemplate    Template    @relation(fields:[parentTemplateId], references:[id])
   language     String
   input     String?
@@ -122,12 +122,12 @@ model Code {
 
 model BlogPost {
  id          Int     @id @default(autoincrement())
- authorId    Int      @unique
+ authorId    Int      
  author      User    @relation(fields: [authorId], references: [id])
  title       String
  description      String
- tags        blogTag
- templateId   Int   
+//  tags        blogTag
+ templateId   Int?   
  templates   Template?    @relation(fields: [templateId], references: [id])
  comments    Comment[]
  upvoteOrDownvote   Int  @default(0)
@@ -138,10 +138,10 @@ model BlogPost {
 
 model Comment {
   id         Int     @id @default(autoincrement())
-authorId    Int      @unique
+authorId    Int      
  author      User    @relation(fields: [authorId], references: [id])
  content     String
- blogId    Int      @unique
+ blogId    Int      
   blog      BlogPost    @relation(fields:[blogId], references:[id])
  upvoteOrDownvote   Int  @default(0)
 //  replies    Comment[]
@@ -152,13 +152,14 @@ authorId    Int      @unique
 
 model AbuseReport {
   id         Int     @id @default(autoincrement())
-  authorId    Int     @unique
+  status     String  @default("OPEN")
+  authorId    Int     
   author      User    @relation(fields:[authorId], references:[id])
  description     String
  createdAt      DateTime     @default(now())
- blogId    Int    @unique
+ blogId    Int?    
   blog      BlogPost?    @relation(fields:[blogId], references:[id])
- commentId    Int     @unique
+ commentId    Int?     @unique
   comment      Comment?    @relation(fields:[commentId], references:[id])
 }
 
