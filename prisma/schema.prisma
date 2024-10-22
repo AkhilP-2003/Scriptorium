@@ -14,26 +14,26 @@ datasource db {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  firstName    String
-  lastName     String
-  userName     String      @unique
-  avatar       String     //avatar
-  email        String      @unique
-  phoneNumber  String      @unique
-  password     String
+  id             Int           @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  userName       String        @unique
+  avatar         String //avatar
+  email          String        @unique
+  phoneNumber    String        @unique
+  password       String
   savedTemplates Template[] // One-to-many relationship with templates
-  blogPosts    BlogPost[]  // One-to-many relationship with blog posts
-  comments     Comment[]   // One-to-many relationship with comments
-  abuseReports AbuseReport[] // One-to-many relationship with abuse reports
-  role         Role        @default(USER) // User or Admin
+  blogPosts      BlogPost[] // One-to-many relationship with blog posts
+  comments       Comment[] // One-to-many relationship with comments
+  abuseReports   AbuseReport[] // One-to-many relationship with abuse reports
+  role           String        @default("USER") // User or Admin
 }
 
 // enum defines predefined inputs of the role attribute above: USER, ADMIN
-enum Role {
-  USER
-  ADMIN
-}
+// enum Role {
+//   USER
+//   ADMIN
+// }
 
 // enum templateTag {
 //   JavaScript
@@ -93,73 +93,74 @@ enum Role {
 // }
 
 model Template {
-  id          Int    @id @default(autoincrement())
-  ownerId     Int     
-  owner       User   @relation(fields:[ownerId], references:[id])
-  title       String
+  id               Int        @id @default(autoincrement())
+  ownerId          Int
+  owner            User       @relation(fields: [ownerId], references: [id])
+  title            String
   explanation      String
   // tags        templateTag
-  code        Code  //ONE TO ONE RELATIONSHIP WITH CODE
-  codeId      Int
-  isForked    Boolean    @default(false)
-  parentTemplateId    Int?   // optional if not forked. 
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  blogPosts      BlogPost[]  
+  code             Code? //ONE TO ONE RELATIONSHIP WITH CODE
+  codeId           Int
+  isForked         Boolean    @default(false)
+  parentTemplateId Int? // optional if not forked. 
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  blogPosts        BlogPost[]
+  tags             String
 }
 
 model Code {
-  id          Int     @id @default(autoincrement())
-  parentTemplateId   Int @unique  //ONE TO ONE RELATIONSHIP WITH TEMPLATE
-  parentTemplate    Template    @relation(fields:[parentTemplateId], references:[id])
-  language     String
-  input     String?
-  output     String?
-  error      String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id               Int      @id @default(autoincrement())
+  parentTemplateId Int      @unique //ONE TO ONE RELATIONSHIP WITH TEMPLATE
+  parentTemplate   Template @relation(fields: [parentTemplateId], references: [id])
+  language         String
+  input            String?
+  output           String?
+  error            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model BlogPost {
- id          Int     @id @default(autoincrement())
- authorId    Int      
- author      User    @relation(fields: [authorId], references: [id])
- title       String
- description      String
-//  tags        blogTag
- templateId   Int?   
- templates   Template?    @relation(fields: [templateId], references: [id])
- comments    Comment[]
- upvoteOrDownvote   Int  @default(0)
- abuseReports  AbuseReport[]
- createdAt      DateTime     @default(now())
- updatedAt      DateTime     @updatedAt
+  id               Int           @id @default(autoincrement())
+  authorId         Int
+  author           User          @relation(fields: [authorId], references: [id])
+  title            String
+  description      String
+  //  tags        blogTag
+  templateId       Int?
+  templates        Template?     @relation(fields: [templateId], references: [id])
+  comments         Comment[]
+  upvoteOrDownvote Int           @default(0)
+  abuseReports     AbuseReport[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  tags             String
 }
 
 model Comment {
-  id         Int     @id @default(autoincrement())
-authorId    Int      
- author      User    @relation(fields: [authorId], references: [id])
- content     String
- blogId    Int      
-  blog      BlogPost    @relation(fields:[blogId], references:[id])
- upvoteOrDownvote   Int  @default(0)
-//  replies    Comment[]
-//  repliedToComment Comment? //comment that this comment replied to - optional - doesn't have to be a replied comment
- abuseReports    AbuseReport[]
- createdAt      DateTime     @default(now())
+  id               Int           @id @default(autoincrement())
+  authorId         Int
+  author           User          @relation(fields: [authorId], references: [id])
+  content          String
+  blogId           Int
+  blog             BlogPost      @relation(fields: [blogId], references: [id])
+  upvoteOrDownvote Int           @default(0)
+  //  replies    Comment[]
+  //  repliedToComment Comment? //comment that this comment replied to - optional - doesn't have to be a replied comment
+  abuseReports     AbuseReport[]
+  createdAt        DateTime      @default(now())
 }
 
 model AbuseReport {
-  id         Int     @id @default(autoincrement())
-  status     String  @default("OPEN")
-  authorId    Int     
-  author      User    @relation(fields:[authorId], references:[id])
- description     String
- createdAt      DateTime     @default(now())
- blogId    Int?    
-  blog      BlogPost?    @relation(fields:[blogId], references:[id])
- commentId    Int?     @unique
-  comment      Comment?    @relation(fields:[commentId], references:[id])
+  id          Int       @id @default(autoincrement())
+  status      String    @default("OPEN")
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id])
+  description String
+  createdAt   DateTime  @default(now())
+  blogId      Int?
+  blog        BlogPost? @relation(fields: [blogId], references: [id])
+  commentId   Int?      @unique
+  comment     Comment?  @relation(fields: [commentId], references: [id])
 }
-
