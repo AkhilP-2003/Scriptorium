@@ -94,23 +94,23 @@ enum blogTag {
 
 model Template {
   id          Int    @id @default(autoincrement())
-  ownerId     Int
+  ownerId     Int     @unique
   owner       User   @relation(fields:[ownerId], references:[id])
   title       String
-  explanation      String?
+  explanation      String
   tags        templateTag
-  code        Code     @relation(fields:[codeId], references:[id])
+  code        Code
   codeId      Int
   isForked    Boolean    @default(false)
-  parentTemplate    Template?   // optional if not forked. 
+  parentTemplateId    Int?   // optional if not forked. 
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  blogPosts      BlogPost[]  // Many-to-many with BlogPost
+  blogPosts      BlogPost[]  
 }
 
 model Code {
   id          Int     @id @default(autoincrement())
-  parentTemplateId   Int
+  parentTemplateId   Int @unique
   parentTemplate    Template    @relation(fields:[parentTemplateId], references:[id])
   language     String
   input     String?
@@ -122,12 +122,13 @@ model Code {
 
 model BlogPost {
  id          Int     @id @default(autoincrement())
- authorId    Int
+ authorId    Int      @unique
  author      User    @relation(fields: [authorId], references: [id])
  title       String
  description      String
  tags        blogTag
- templates   Template[]   // Many-to-many with Template
+ templateId   Int   
+ templates   Template?    @relation(fields: [templateId], references: [id])
  comments    Comment[]
  upvoteOrDownvote   Int  @default(0)
  abuseReports  AbuseReport[]
@@ -137,25 +138,27 @@ model BlogPost {
 
 model Comment {
   id         Int     @id @default(autoincrement())
-authorId    Int
+authorId    Int      @unique
  author      User    @relation(fields: [authorId], references: [id])
  content     String
+ blogId    Int      @unique
+  blog      BlogPost    @relation(fields:[blogId], references:[id])
  upvoteOrDownvote   Int  @default(0)
- replies    Comment[]
- repliedToComment Comment? //comment that this comment replied to - optional - doesn't have to be a replied comment
+//  replies    Comment[]
+//  repliedToComment Comment? //comment that this comment replied to - optional - doesn't have to be a replied comment
  abuseReports    AbuseReport[]
  createdAt      DateTime     @default(now())
 }
 
 model AbuseReport {
   id         Int     @id @default(autoincrement())
-  authorId    Int
+  authorId    Int     @unique
   author      User    @relation(fields:[authorId], references:[id])
  description     String
  createdAt      DateTime     @default(now())
- reportedBlog   BlogPost?
- reportedComment  Comment?
+ blogId    Int    @unique
+  blog      BlogPost?    @relation(fields:[blogId], references:[id])
+ commentId    Int     @unique
+  comment      Comment?    @relation(fields:[commentId], references:[id])
 }
-
-
 
