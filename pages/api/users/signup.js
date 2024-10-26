@@ -65,9 +65,8 @@ export default async function handler(req, res) {
             email: user.email,
             phoneNumber: user.phoneNumber,
             role: user.role
-        } })
-        
-
+        } });
+    
     } else {
         // another method type
         return res.status(400).json({error: "Invalid Method"});

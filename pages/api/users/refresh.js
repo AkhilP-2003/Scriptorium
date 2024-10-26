@@ -12,13 +12,13 @@ export default function handler(req, res) {
             return res.status(401).json({ error: "Invalid credentials" });
         }
         // Generate a new access token using the payload from the refresh token
-        const newAccessToken = generateAccessToken({ userName: refresh.userName, role: refresh.role });
+        const newAccessToken = generateAccessToken({ userName: refresh.userName, email: refresh.email, role: refresh.role });
 
         // Return the new access token in the response
         return res.status(200).json({
             "accessToken": newAccessToken,
         });
-    }else {
+    } else {
         return res.status(400).json({ error: "Method Not Allowed" });
     }
 
