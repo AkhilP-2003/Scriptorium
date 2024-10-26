@@ -20,7 +20,7 @@ model User {
   userName       String        @unique
   avatar         String //avatar
   email          String        @unique
-  phoneNumber    String        @unique
+  phoneNumber    String?        @unique
   password       String
   savedTemplates Template[] // One-to-many relationship with templates
   blogPosts      BlogPost[] // One-to-many relationship with blog posts
