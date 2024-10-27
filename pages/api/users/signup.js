@@ -32,7 +32,6 @@ export default async function handler(req, res) {
             // is phone num exists and is not valid
             return res.status(400).json({ error: 'Invalid phone number' });
         }
-
         // check if user already exists in db
         const userExists = await prisma.user.findFirst({
             where: {
