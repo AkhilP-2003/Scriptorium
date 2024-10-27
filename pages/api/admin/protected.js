@@ -1,21 +1,15 @@
 import {prisma} from "@/prisma/client";
 import { verifyAccessToken, verifyRefreshToken } from "../../utils/auth";
+import { jwtMiddleware } from "../middleware";
 
-export default function handler(req, res) {
+async function handler(req, res) {
     if (req.method === "GET") {
-
-        const auth = verifyAccessToken(req.headers.authorization);
-        if (!auth || (auth.role !== "ADMIN")) {
-            res.status(400).json({error: "Not authorized"});
-        } else {
-            // authorized for this page.
-            return res.status(200).json({message: `hello ${auth.userName}`})
-        }
-
-
-
+        // This route is only accessible by users with the ADMIN role
+        return res.status(200).json({ message:`'Welcome, Admin ${req.user.userName}!` });
     } else {
-        return res.status(400).json({error: "Method not allowed"});
+        return res.status(400).json({ error: "Method not allowed" });
     }
 
 }
+
+export default jwtMiddleware(handler, ["ADMIN"]);
