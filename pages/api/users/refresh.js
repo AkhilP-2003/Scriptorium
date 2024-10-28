@@ -1,10 +1,10 @@
 import { prisma } from "@/prisma/client";
-import { verifyRefreshToken, generateAccessToken} from "@/utils/auth";
+import { generateAccessToken,verifyRefreshToken } from "../../../utils/auth";
 
 export default function handler(req, res) {
     if (req.method === "POST") {
-        
-        const {refreshToken} = req.body
+
+        const {refreshToken} = req.body;
         if (!refreshToken) {
             return res.status(400).json({error: "Invalid credentials"});
         }

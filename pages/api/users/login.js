@@ -1,5 +1,5 @@
 import { prisma } from "@/prisma/client";
-import { comparePassword, generateRefreshToken, generateAccessToken } from "@/utils/auth";
+import { comparePassword, generateRefreshToken, generateAccessToken} from "../../../utils/auth";
 
 export default async function handler(req, res) {
     if (req.method === "POST") {

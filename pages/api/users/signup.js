@@ -1,5 +1,5 @@
 import { prisma } from "@/prisma/client";
-import { hashPassword } from "@/utils/auth";
+import { hashPassword } from "../../../utils/auth";
 
 const isValidPhoneNumber = (phone) => {
     const phoneRegex = /^[0-9]{10}$/; // phone num
