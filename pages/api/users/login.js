@@ -1,5 +1,5 @@
 import { prisma } from "@/prisma/client";
-import { comparePassword, generateRefreshToken, generateAccessToken } from "@/utils/auth";
+import { comparePassword, generateRefreshToken, generateAccessToken} from "../../../utils/auth";
 
 export default async function handler(req, res) {
     if (req.method === "POST") {
@@ -18,8 +18,8 @@ export default async function handler(req, res) {
             return res.status(401).json({error: "Invalid credentials"});
         }
         // if everything is valid, then generate new refresh + access token
-        const accessToken = generateAccessToken({id: existingUser.id, userName: existingUser.userName, role: existingUser.role});
-        const refreshToken = generateRefreshToken({id: existingUser.id, userName: existingUser.userName,role: existingUser.role});
+        const accessToken = generateAccessToken({id: existingUser.id, userName: existingUser.userName, email: existingUser.email, role: existingUser.role});
+        const refreshToken = generateRefreshToken({id: existingUser.id, userName: existingUser.userName, email: existingUser.email,role: existingUser.role});
         
         return res.status(200).json({
             "accessToken": accessToken, "refreshToken": refreshToken
