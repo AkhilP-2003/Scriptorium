@@ -5,7 +5,7 @@ export function jwtMiddleware(handler, roles = []) {
         const authHeader = req.headers.authorization;
 
         if (!authHeader) {
-            return res.status(403).json({ error: 'Authorization header is missing' });
+            return res.status(403).json({ error: "Authorization header is missing" });
         }
         const token = authHeader;
 
@@ -13,7 +13,7 @@ export function jwtMiddleware(handler, roles = []) {
             const payload = verifyAccessToken(token);
 
             if (!payload) {
-                return res.status(403).json({ error: 'Invalid or expired token' });
+                return res.status(403).json({ error: "Invalid or expired token" });
             }
 
             req.user = payload;
