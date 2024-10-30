@@ -20,7 +20,7 @@ model User {
   userName       String        @unique
   avatar         String //avatar
   email          String        @unique
-  phoneNumber    String?        @unique
+  phoneNumber    String?       @unique
   password       String
   savedTemplates Template[] // One-to-many relationship with templates
   blogPosts      BlogPost[] // One-to-many relationship with blog posts
@@ -28,7 +28,6 @@ model User {
   abuseReports   AbuseReport[] // One-to-many relationship with abuse reports
   role           String        @default("USER") // User or Admin
 }
-
 
 model Template {
   id               Int        @id @default(autoincrement())
@@ -60,36 +59,36 @@ model Code {
 }
 
 model BlogPost {
-  id               Int           @id @default(autoincrement())
-  authorId         Int
-  author           User          @relation(fields: [authorId], references: [id])
-  title            String
-  description      String
+  id           Int           @id @default(autoincrement())
+  authorId     Int
+  author       User          @relation(fields: [authorId], references: [id])
+  title        String
+  description  String
   //  tags        blogTag
-  templateId       Int?
-  templates        Template?     @relation(fields: [templateId], references: [id])
-  comments         Comment[]
-  upvote Int           @default(0)
-  downvote Int           @default(0)
-  abuseReports     AbuseReport[]
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  tags             String
-  hidden           Boolean       @default(false) // New flag for hiding
+  templateId   Int?
+  templates    Template?     @relation(fields: [templateId], references: [id])
+  comments     Comment[]
+  upvote       Int           @default(0)
+  downvote     Int           @default(0)
+  abuseReports AbuseReport[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  tags         String
+  hidden       Boolean       @default(false) // New flag for hiding
 }
 
 model Comment {
-  id               Int           @id @default(autoincrement())
-  authorId         Int
-  author           User          @relation(fields: [authorId], references: [id])
-  content          String
-  blogId           Int
-  blog             BlogPost      @relation(fields: [blogId], references: [id])
-  upvote Int           @default(0)
-  downvote Int           @default(0)
-  abuseReports     AbuseReport[]
-  createdAt        DateTime      @default(now())
-  hidden           Boolean       @default(false) // New flag for hiding
+  id           Int           @id @default(autoincrement())
+  authorId     Int
+  author       User          @relation(fields: [authorId], references: [id])
+  content      String
+  blogId       Int
+  blog         BlogPost      @relation(fields: [blogId], references: [id])
+  upvote       Int           @default(0)
+  downvote     Int           @default(0)
+  abuseReports AbuseReport[]
+  createdAt    DateTime      @default(now())
+  hidden       Boolean       @default(false) // New flag for hiding
 }
 
 model AbuseReport {
