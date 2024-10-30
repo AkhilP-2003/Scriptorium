@@ -1,5 +1,5 @@
 // get/delete/update this blog with this id
-import { prisma } from "@/prisma/client";
+import { prisma } from "../../../../prisma/client";
 
 async function handler(req, res) {
     if (req.method === "GET") {
@@ -9,10 +9,11 @@ async function handler(req, res) {
         if (!id) {
             return res.status(400).json({error: "Please provide blog to select"});
         }
+        const currId = parseInt(id);
 
-        const blog = await prisma.blogpost.findUnique({
+        const blog = await prisma.blogPost.findUnique({
             where: {
-                ...(id && { id: parseInt(id) }),  // Filter by ID
+                ...(id && { id: currId }),  // Filter by ID
             },
             include: {
                 author: true,  // Include author information in the result
@@ -42,18 +43,18 @@ async function handler(req, res) {
             if (!authorId || !title || !description || !tags) {
                 return res.status(400).json({error: "Please provide fields for new edit"});
             }
-
-            const existingPost = await prisma.blogpost.findUnique({
-                where: { id: id },
+            const currId = parseInt(id);
+            const existingPost = await prisma.blogPost.findUnique({
+                where: { id: currId },
               });
 
-            if (user.id !== parseInt(existingPost.authorId)) {
+            if (parseInt(user.id) !== parseInt(existingPost.authorId)) {
                 return res.status(400).json({error: "You do not have permission to edit this blog"});
             }
 
             // Update the blog
-            const updatedBlog = await prisma.book.update({
-                where: { id: parseInt(id) },  // Find the book by ID
+            const updatedBlog = await prisma.blogPost.update({
+                where: { id: currId },  // Find the book by ID
                 data: {
                 ...(title && { title }),  // Update title if provided
                 ...(description && { description }),  // Update isbn if provided
@@ -69,8 +70,39 @@ async function handler(req, res) {
     } else if (req.method === "DELETE") {
 
         return jwtMiddleware(async (req, res) => {
-            
+            // want to delete the blog with this id.
+            const { id } = req.query;
+            const {user} = req;
+            if (!id) {
+                return res.status(400).json({error: "Please provide blog to delete."});
+            }
+            const currId = parseInt(id);
 
+            const existingBlog = await prisma.blogPost.findUnique({
+                where: {id: currId},
+            });
+            if (!existingBlog) {
+                return res.status(400).json({error: "Blog does not exist"});
+            }
+            
+            if (parseInt(user.id) !== parseInt(existingBlog.authorId)) {
+                return res.status(400).json({error: "You do not have permission to delete this blog"});
+            }
+
+            await prisma.$transaction ( function (prisma){
+                // Delete the blogpost by id, making sure the user.id (current user's id)
+                // is equal to the blogposts author id.
+                const deletedPost = prisma.blogPost.delete({
+                    where: { id: currId },
+                });
+        
+                return res.status(200).json({
+                message: `Blogpost deleted successfully`,
+                deletedBook,
+                });
+            }); 
+
+        
         })(req, res);
 
     } else {

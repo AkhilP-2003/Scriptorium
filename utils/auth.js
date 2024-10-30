@@ -44,7 +44,7 @@ export function verifyRefreshToken(token) { // if not expired,
     // we can use this to not log in again, until the expiration.
     // verify refresh token
     try {
-        return jwt.verify(token, JWT_ACCESS_SECRET);
+        return jwt.verify(token, JWT_REFRESH_SECRET);
     } catch(error) {
         return null;
     }

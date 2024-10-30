@@ -1,11 +1,12 @@
-import { prisma } from "@/prisma/client";
+import { prisma } from "../../../prisma/client";
+import {cookies} from "next/headers";
 
 export default function handler(req, res) {
     if (req.method === "POST") {
         // Remove refreshTokens from database for this user, right?
         const authHeader = req.headers['cookie']; // get the session cookie from request header
         if (!authHeader) {
-            return res.sendStatus(204).json({error: "no cookies"});
+            return res.status(204).json({error: "no cookies"});
         }
         // Extract the JWT and refresh token from the cookies
         const cookies = authHeader.split(';').reduce((acc, cookie) => {
@@ -23,10 +24,12 @@ export default function handler(req, res) {
 
         try {
             //Clear the access token and refresh token cookies
-            res.setHeader('Set-Cookie', [
-              'accessToken=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict;',
-              'refreshToken=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict;'
-            ]);
+            // res.setHeader('Set-Cookie', [
+            //   'accessToken=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict;',
+            //   'refreshToken=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict;'
+            // ]);
+
+            
       
             return res.status(200).json({ message: 'Successfully logged out' });
 
