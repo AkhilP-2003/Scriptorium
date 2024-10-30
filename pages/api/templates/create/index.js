@@ -1,5 +1,5 @@
-import {prisma} from "@/prisma/client";
-import { jwtMiddleware } from "../middleware";
+import prisma from "../../../../utils/db"
+import { jwtMiddleware } from "../../middleware"
 
 // POST request logic for creating a new template as an authanticated user
 const handler = async (req, res) => {
@@ -10,6 +10,7 @@ const handler = async (req, res) => {
     return res.status(405).json({error: "Method not allowed"})
   }
 
+    // extracting the fields from the json obj from the body of the request
   const { title, explanation, tags, codeId} = req.body
 
   // check if all the required fields are provided
@@ -41,3 +42,6 @@ const handler = async (req, res) => {
 }
 
 export default jwtMiddleware(handler) // checks if the user is authenticated
+
+
+// NOTE TO PAGINATE THE LIST OF TEMPLATES LATER
