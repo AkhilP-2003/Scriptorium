@@ -22,7 +22,7 @@ const handler = async (req, res) => {
 
     // create a new template with the required fields in our db
     const newTemplate = await prisma.template.create({
-      date: {
+      data: {
         title,
         explanation,
         tags,
