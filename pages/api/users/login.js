@@ -21,6 +21,8 @@ export default async function handler(req, res) {
         const accessToken = generateAccessToken({id: existingUser.id, userName: existingUser.userName, email: existingUser.email, role: existingUser.role});
         const refreshToken = generateRefreshToken({id: existingUser.id, userName: existingUser.userName, email: existingUser.email,role: existingUser.role});
         
+
+        // its going to be encryped so we can show this information.
         return res.status(200).json({
             "accessToken": accessToken, "refreshToken": refreshToken
         });

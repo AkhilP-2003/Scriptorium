@@ -1,21 +1,16 @@
-import { prisma } from "@/prisma/client";
+import { prisma } from "../../../prisma/client";
 import { hashPassword } from "../../../utils/auth";
-
-const isValidPhoneNumber = (phone) => {
-    const phoneRegex = /^[0-9]{10}$/; // phone num
-    return phoneRegex.test(phone);
-};
 
 export default async function handler(req, res) {
     if (req.method === "POST") {
         var validator = require("email-validator"); // email validator
         // signup logic: create access + refresh token, save user to db using bcrypt
-        const {firstName, lastName, userName, email, password, phoneNumber = "", role="USER"} = req.body;
+        const {firstName, lastName, userName, avatar, email, password, phoneNumber = "", role="USER"} = req.body;
         // default role us USER
         // validation checks
-        if (!firstName || !lastName || !userName || !password || !email) {
+        if (!firstName || !lastName || !userName || !password || !email || !avatar) {
             // i made phone number a default of empty string, not necessary to input
-            return res.status(400).json({error: "Please provide all registration fields"});
+            return res.status(400).json({error: `Please provide all registration fields`});
         }
 
         // incorrect password length
@@ -50,7 +45,7 @@ export default async function handler(req, res) {
 
         const user = await prisma.user.create({
             data: {
-                firstName, lastName, userName, email, phoneNumber, role, password: await hashPassword(password)
+                firstName, lastName, userName, avatar, email, phoneNumber, role, password: await hashPassword(password)
             },
             select: {
                 firstName: true, lastName: true, email: true, userName: true, role:true, phoneNumber:true
@@ -72,3 +67,8 @@ export default async function handler(req, res) {
     }
 
 }
+
+const isValidPhoneNumber = (phone) => {
+    const phoneRegex = /^[0-9]{10}$/; // phone num
+    return phoneRegex.test(phone);
+};

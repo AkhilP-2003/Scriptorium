@@ -1,4 +1,4 @@
-import { prisma } from "@/prisma/client";
+import { prisma } from "../../../prisma/client";
 import { generateAccessToken,verifyRefreshToken } from "../../../utils/auth";
 
 export default function handler(req, res) {
