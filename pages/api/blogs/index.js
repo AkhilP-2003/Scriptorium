@@ -22,6 +22,18 @@ async function handler(req, res) {
                     }
                 })
             },
+            orderBy: [
+                {
+                    _count: {
+                        upvotes: 'desc',  // sort by most upvotes first
+                    },
+                },
+                {
+                    _count: {
+                        downvotes: 'asc', // then sort by least downvotes
+                    },
+                },
+            ],
             include: {
                 author: true,
                 templates: true,  // Include author an template information in the result
