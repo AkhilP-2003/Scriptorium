@@ -6,20 +6,27 @@ import {jwtMiddleware} from "@/pages/api/middleware";  // Import the JWT middlew
 async function handler(req, res) {
     if (req.method === "GET") {
         // get all blogposts
-        const {tags, description, title, templates } = req.query;
+        const {tags, description, title, templateTitle } = req.query;
         // maybe filter by tags, description etc here. 
-        const blogs = await prisma.blogPost.findUnique({
+        const blogs = await prisma.blogPost.findMany({
             take: 6,
             skip: 1,
             where: {
+                hidden: false, // only show blogs that are NOT HIDDEN - NOT FLAGGED
                 ...(tags && { tags: { contains: tags } }),  // Filter by tags if provided
                 ...(description && { description: { contains: description } }),  // Filter by desc if provided
                 ...(title && { title: { contains: title } }),  // Filter by title (partial match)
-                ...(templates && { templates: { contains: templates } })
+                ...(templateTitle && {
+                    templates: {
+                        title: { contains: templateTitle }  // filter by template title if provided
+                    }
+                })
             },
             include: {
                 author: true,
-                templates: true  // Include author an template information in the result
+                templates: true,  // Include author an template information in the result
+                upvotes: true,  // Assume you have an upvotes relationship set up
+                downvotes: true, // Assume you have a downvotes relationship set up
             },
         });
         return res.status(200).json(blogs);
@@ -28,14 +35,14 @@ async function handler(req, res) {
         // create a blogpost for this user. MAYBE HAVE A CREATE BLOGPOST BUTTON
         // make sure they have proper auth beforehand with their id. - wrap middleware around this post request.
         return jwtMiddleware(async (req, res) => {
-            const {title, description, tags, templateId=null} = req.body;
+            const {title, description, tags, templateId} = req.body;
             const {user} = req;
 
             if (!user) {
                 return res.status(403).json({ error: "User is not authenticated." });
             }
 
-            if (!title || !description || !tags) {
+            if (!title || !description || !tags || title.trim() === "" || description.trim() === "" || tags.trim() === "") {
                 return res.status(400).json({error: "Missing required fields"});
             }
             
@@ -45,7 +52,7 @@ async function handler(req, res) {
                 const existingUser = await prisma.user.findUnique({
                     where: {id: parseInt(user.id)}
                 })
-
+                
                 if (!existingUser) {
                     return res.status(403).json({ error: "User is not authenticated to write a blog" });
                 }
@@ -72,9 +79,10 @@ async function handler(req, res) {
                 return res.status(200).json({created_blog});
 
             } catch(error) {
+                console.error(error);
                 return res.status(500).json({error: `${error} an error occured while creating blog for this user`});
             }
-        })(req, res);
+        },["ADMIN", "USER"])(req, res);
 
     } else {
         return res.status(400).json({error: "Method not allowed"});

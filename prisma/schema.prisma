@@ -75,6 +75,7 @@ model BlogPost {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   tags             String
+  hidden           Boolean       @default(false) // New flag for hiding
 }
 
 model Comment {
@@ -88,6 +89,7 @@ model Comment {
   downvote Int           @default(0)
   abuseReports     AbuseReport[]
   createdAt        DateTime      @default(now())
+  hidden           Boolean       @default(false) // New flag for hiding
 }
 
 model AbuseReport {
