@@ -1,5 +1,7 @@
 // get/delete/update this blog with this id
 import { prisma } from "../../../../prisma/client";
+import {jwtMiddleware} from "@/pages/api/middleware";  // Import the JWT middleware
+
 
 async function handler(req, res) {
     if (req.method === "GET") {
@@ -10,14 +12,24 @@ async function handler(req, res) {
             return res.status(400).json({error: "Please provide blog to select"});
         }
         const currId = parseInt(id);
+        // here also rate blogs by upvote/downvote
+
 
         const blog = await prisma.blogPost.findUnique({
             where: {
                 ...(id && { id: currId }),  // Filter by ID
+                hidden: false, // don't report the hidden ones.
             },
             include: {
                 author: true,  // Include author information in the result
-                comments: true,
+                comments: {
+                    include: {
+                        author: true, // Include comment author
+                        content: true,
+                        upvote: true,
+                        downvote: true,
+                    }
+                },
                 templates:true,
                 title: true,
                 description:true,
@@ -26,46 +38,73 @@ async function handler(req, res) {
                 downvote: true
             },
         })
+
+        if (!blog) {
+            return res.status(404).json({ error: "Blog post not found because it doesn't exist or is hidden" });
+        }  
+
         return res.status(200).json(blog);
 
     } else if (req.method === "POST" || req.method === "PUT") {
+        // this is edit this blog with this id.
+
         return jwtMiddleware(async (req, res) => {
-            const {id} = req.query;
-            const {title, description, tags, templates, authorId, comments} = req.body;
-            const {user} = req;
+            const {id} = req.query; // id of blog to change.
+            const {title, description, tags, templates} = req.body; // fields to change.
+            const {user} = req; // to check for auth.
+
+
             // a user can only edit this blog if they are the author.
-            // what about making a comment?
-            // my thinking is they can make a comment here. but they can't be a visitor.
+
             if (!id) {
                 return res.status(400).json({error: "Please provide blog to edit."});
             }
             // check whether or not the current blog id's author is this person
-            if (!authorId || !title || !description || !tags) {
-                return res.status(400).json({error: "Please provide fields for new edit"});
-            }
+            // if (!authorId || !title || !description || !tags) {
+            //     return res.status(400).json({error: "Please provide fields for new edit"});
+            // }
+
             const currId = parseInt(id);
             const existingPost = await prisma.blogPost.findUnique({
                 where: { id: currId },
               });
 
-            if (parseInt(user.id) !== parseInt(existingPost.authorId)) {
-                return res.status(400).json({error: "You do not have permission to edit this blog"});
+            if (!existingPost) {
+                return res.status(400).json({error: "Blog to edit does not exist"});
             }
 
-            // Update the blog
-            const updatedBlog = await prisma.blogPost.update({
-                where: { id: currId },  // Find the book by ID
-                data: {
-                ...(title && { title }),  // Update title if provided
-                ...(description && { description }),  // Update isbn if provided
-                ...(tags && {tags}),  // Update publishedDate if provided
-                }, // still need to finish
-            });
+            if (user.role === "USER" || user.role === "ADMIN") {
+                if (parseInt(user.id) !== parseInt(existingPost.authorId)) {
+                    return res.status(400).json({error: "You do not have permission to edit this blog"});
+                }
+
+                if (existingPost.hidden === true) {
+                    // can't edit, because flagged.
+                    return res.status(400).json({error: "You do not have permission to edit this blog because it is flagged"});
+                }
+    
+                // update the blog post
+                // make sure if the blog is not hidden, then u can edit. if so, u cant.
+                const updatedBlog = await prisma.blogPost.update({
+                    where: { id: currId },
+                    data: {
+                        title: title || existingPost.title,
+                        description: description || existingPost.description,
+                        tags: tags || existingPost.tags,
+                        templates: {
+                            set: templates ? templates.map((templateId) => ({ id: templateId })) : [], // Update templates
+                        },
+                    },
+                });
+            } else {
+                return res.status(400).json({error: "You do not have permission to edit this blog"});
+            }
+    
 
         
             return res.status(200).json(updatedBlog);
 
-        })(req, res);
+        }, ["ADMIN", "USER"])(req, res);
 
     } else if (req.method === "DELETE") {
 
@@ -98,12 +137,12 @@ async function handler(req, res) {
         
                 return res.status(200).json({
                 message: `Blogpost deleted successfully`,
-                deletedBook,
+                deletedPost,
                 });
             }); 
 
         
-        })(req, res);
+        }, ["ADMIN", "USER"])(req, res);
 
     } else {
         return res.status(400).json({error: "Invalid Method"})
@@ -112,6 +151,6 @@ async function handler(req, res) {
 
 }
 
-export default jwtMiddleware(handler, ["USER"]);
+export default handler;
 
 
