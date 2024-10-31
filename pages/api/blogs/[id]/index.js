@@ -119,7 +119,9 @@ async function handler(req, res) {
 
             const existingBlog = await prisma.blogPost.findUnique({
                 where: {id: currId},
+
             });
+
             if (!existingBlog) {
                 return res.status(400).json({error: "Blog does not exist"});
             }
@@ -128,19 +130,41 @@ async function handler(req, res) {
                 return res.status(400).json({error: "You do not have permission to delete this blog"});
             }
 
-            await prisma.$transaction ( function (prisma){
-                // Delete the blogpost by id, making sure the user.id (current user's id)
-                // is equal to the blogposts author id.
-                const deletedPost = prisma.blogPost.delete({
-                    where: { id: currId },
-                });
-        
-                return res.status(200).json({
-                message: `Blogpost deleted successfully`,
-                deletedPost,
-                });
-            }); 
+            try{ 
+                await prisma.$transaction ( function (prisma){
+                    // Delete the blogpost by id, making sure the user.id (current user's id)
+                    // is equal to the blogposts author id.
+    
+                    //  delete the comments on deletion of this blogpost too.
+                    prisma.comment.deleteMany({
+                        where: { blogId: currId },
+                    });
 
+                    // Delete abuse reports related to the blog post
+                    prisma.abuseReport.deleteMany({
+                        where: {
+                            OR: [
+                                { blogId: currId }, // Abuse reports on the blog itself
+                                { comment: { blogId: currId } }, // Abuse reports on comments attached to the blog
+                            ],
+                        },
+                    });
+                    
+                    const deletedPost = prisma.blogPost.delete({
+                        where: { id: currId },
+                    });
+            
+                    return res.status(200).json({
+                    message: `Blogpost deleted successfully`,
+                    deletedPost,
+                    });
+                }); 
+            } catch(error){
+                console.error(error);
+                return res.status(500).json({error: "Something went wrong in deletion of this blog"})
+            }
+
+            
         
         }, ["ADMIN", "USER"])(req, res);
 
