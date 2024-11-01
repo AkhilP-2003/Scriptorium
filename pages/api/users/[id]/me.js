@@ -1,1 +1,0 @@
-// get/ POST - update my own account if current user is me.

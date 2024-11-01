@@ -25,17 +25,9 @@ async function handler(req, res) {
                 comments: {
                     include: {
                         author: true, // Include comment author
-                        content: true,
-                        upvote: true,
-                        downvote: true,
                     }
                 },
                 templates:true,
-                title: true,
-                description:true,
-                tags: true,
-                upvote: true,
-                downvote: true
             },
         })
 
@@ -50,7 +42,7 @@ async function handler(req, res) {
 
         return jwtMiddleware(async (req, res) => {
             const {id} = req.query; // id of blog to change.
-            const {title, description, tags, templates} = req.body; // fields to change.
+            const {title, description, tags, templateIdsToAdd, templateIdsToRemove }= req.body; // fields to change.
             const {user} = req; // to check for auth.
 
 
@@ -69,40 +61,78 @@ async function handler(req, res) {
                 where: { id: currId },
               });
 
+
             if (!existingPost) {
                 return res.status(400).json({error: "Blog to edit does not exist"});
             }
 
-            if (user.role === "USER" || user.role === "ADMIN") {
-                if (parseInt(user.id) !== parseInt(existingPost.authorId)) {
-                    return res.status(400).json({error: "You do not have permission to edit this blog"});
-                }
 
-                if (existingPost.hidden === true) {
-                    // can't edit, because flagged.
-                    return res.status(400).json({error: "You do not have permission to edit this blog because it is flagged"});
-                }
-    
-                // update the blog post
-                // make sure if the blog is not hidden, then u can edit. if so, u cant.
-                const updatedBlog = await prisma.blogPost.update({
-                    where: { id: currId },
-                    data: {
-                        title: title || existingPost.title,
-                        description: description || existingPost.description,
-                        tags: tags || existingPost.tags,
-                        templates: {
-                            set: templates ? templates.map((templateId) => ({ id: templateId })) : [], // Update templates
-                        },
-                    },
-                });
-            } else {
+            if (user.role !== "USER" && user.role !== "ADMIN") {
                 return res.status(400).json({error: "You do not have permission to edit this blog"});
             }
-    
+            if (parseInt(user.id) !== parseInt(existingPost.authorId)) {
+                return res.status(400).json({error: "You are now the owner so you do not have permission to edit this blog"});
+            }
 
+            if (existingPost.hidden === true) {
+                // can't edit, because flagged, even if u r the author.
+                return res.status(400).json({error: "You do not have permission to edit this blog because it is flagged"});
+            }
+
+            // prepare the data for updating
+            const dataToUpdate = {
+                title: title || existingPost.title,
+                description: description || existingPost.description,
+                tags: tags || existingPost.tags,
+            };
+
+            // handle adding/removing templates if provided
+            if (templateIdsToAdd || templateIdsToRemove) {
+                dataToUpdate.templates = {
+                    ...(templateIdsToAdd && templateIdsToAdd.length > 0
+                        ? { connect: templateIdsToAdd.map(id => ({ id: parseInt(id) })) } // Add templates
+                        : {}),
+                    ...(templateIdsToRemove && templateIdsToRemove.length > 0
+                        ? { disconnect: templateIdsToRemove.map(id => ({ id: parseInt(id) })) } // Remove templates
+                        : {}),
+                };
+            }
+
+            try { // update the blog post
+                const updatedBlog = await prisma.blogPost.update({
+                    where: { id: currId },
+                    data: dataToUpdate,
+                    include: {
+                        author: true,
+                        templates: true, // incldue connected templates
+                    }
+                });
+
+                if (!updatedBlog) {
+                    return res.status(400).json({error: "Something went wrong in edting the blogpost"});
+                }
+
+                return res.status(200).json(updatedBlog);
+
+            } catch(error) {
+                console.log(error);
+                return res.status(500).json({error: "something went wrong trying to update the blog"})
+            }
         
-            return res.status(200).json(updatedBlog);
+
+            // const updatedBlog = await prisma.blogPost.update({
+            //     where: { id: currId },
+            //     data: {
+            //         title: title || existingPost.title,
+            //         description: description || existingPost.description,
+            //         tags: tags || existingPost.tags,
+            //         templates: {
+            //             connect: templateIdsToAdd ? templateIdsToAdd.map(id => ({ id: parseInt(id) })) : [],  // Add templates
+            //             disconnect: templateIdsToRemove ? templateIdsToRemove.map(id => ({ id: parseInt(id) })) : []  // Remove templates
+            //         },
+            //     },
+            // });
+        
 
         }, ["ADMIN", "USER"])(req, res);
 
@@ -149,6 +179,7 @@ async function handler(req, res) {
                             ],
                         },
                     });
+                    // check that the deletion is deletion from user's blogpost
                     
                     const deletedPost = prisma.blogPost.delete({
                         where: { id: currId },
