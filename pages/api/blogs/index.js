@@ -8,51 +8,46 @@ async function handler(req, res) {
         // get all blogposts
         const {tags, description, title, templateTitle } = req.query;
         if (!tags && !description && !title && !templateTitle) {
-            const b = await prisma.blogPost.findMany({take: 6,
+            const b = await prisma.blogPost.findMany({
+                take: 6,
                 where: {
-                    hidden: false,
+                    hidden: false,  // Only show visible blogs
+                },
+                orderBy: {
+                    upvote: 'desc',  // Order by the most upvotes
+                },
+                include: {
+                    author: true,
+                    templates: true,  // Include the related templates
                 },
             });
+            console.log(tags, description, title, templateTitle)
             return res.status(200).json(b);
         }
-        // doesn'tt filter..!!!!
-        // maybe filter by tags, description etc here. 
+
+
         const blogs = await prisma.blogPost.findMany({
             take: 6,
             where: {
                 hidden: false, // only show blogs that are NOT HIDDEN - NOT FLAGGED
-                ...(tags && { tags: { contains: tags } }),  // Filter by tags if provided
-                ...(description && { description: { contains: description } }),  // Filter by desc if provided
-                ...(title && { title: { contains: title } }),  // Filter by title (partial match)
+                ...(tags && { tags: { contains: tags} }),  // Filter by tags if provided
+                ...(description && { description: { contains: description} }),  // Filter by desc if provided
+                ...(title && { title: { contains: title} }),  // Filter by title (partial match)
                 ...(templateTitle && {
                     templates: {
-                        title: { contains: templateTitle }  // filter by template title if provided
-                    }
-                })
+                        title: { contains: templateTitle } // filter by template title if provided
+                    },
+                }),
             },
-            // orderBy: {
-            //     upvote: {
-            //       _count: 'desc',
-            //     },
-            //   },
-            
-            // orderBy: [
-            //     {
-            //         _count: {
-            //             upvotes: 'desc',  // sort by most upvotes first
-            //         },
-            //     },
-            //     {
-            //         _count: {
-            //             downvotes: 'asc', // then sort by least downvotes
-            //         },
-            //     },
-            // ],
+            orderBy: {
+                upvote: 'desc',  //order by upvotes, regardless of filters
+            },
             include: {
                 author: true,
-                templates: true,  // Include author an template information in the result
+                templates: true,  // =include auhtor
             },
         });
+        console.log(tags, description, title, templateTitle)
         return res.status(200).json(blogs);
 
     } else if (req.method === "POST") {
@@ -88,10 +83,12 @@ async function handler(req, res) {
                         tags,
                         authorId: parseInt(user.id),
                         // author: existingUser,
-                        templates: templateIds && templateIds.length > 0 ? {
+                        templates: templateIds && templateIds.length > 0
+                        ? {
                             connect: templateIds.map(id => ({ id: parseInt(id) })),  // Link the templates to the blog post
-                        } : undefined, 
-                    },
+                        }
+                        : undefined,  // No templates to connect if templateIds is not provided
+                        }, 
                     include: {
                         author: true,
                         templates: true,

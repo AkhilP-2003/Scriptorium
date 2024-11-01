@@ -68,6 +68,9 @@ async function handler(req, res) {
             }
 
             try {
+                if (userName.trim() === "" || firstName.trim() === "" || lastName.trim() === "" || avatar.trim() === "" || email.trim() === "" || role.trim === "") {
+                    return res.status(400).json({error: "Please make valid edits"});
+                }
 
                 // Check if the username or email already exists (if they are being updated)
                 if (userName) {
