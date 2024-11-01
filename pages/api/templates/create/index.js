@@ -49,7 +49,9 @@ const handler = async (req, res) => {
         explanation,
         tags,
         codeId,
-        ownderId: req.user.id    // the user ID is verified via JWt auth
+        ownderId: req.user.id,    // the user ID is verified via JWt auth
+        isForked,
+        parentTemplateId: parentTemplateId || null
       }
     })
 
