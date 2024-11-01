@@ -47,7 +47,7 @@ async function handler(req, res) {
         // create a blogpost for this user. MAYBE HAVE A CREATE BLOGPOST BUTTON
         // make sure they have proper auth beforehand with their id. - wrap middleware around this post request.
         return jwtMiddleware(async (req, res) => {
-            const {title, description, tags, templateId} = req.body;
+            const {title, description, tags, templateIds} = req.body;
             const {user} = req;
 
             if (!user) {
@@ -76,7 +76,9 @@ async function handler(req, res) {
                         tags,
                         authorId: parseInt(user.id),
                         // author: existingUser,
-                        templateId: templateId ? parseInt(templateId) : null,
+                        templates: {
+                            connect: templateIds.map(id => ({ id: parseInt(id) })),  // Link the templates to the blog post
+                        },
                     },
                     include: {
                         author: true,

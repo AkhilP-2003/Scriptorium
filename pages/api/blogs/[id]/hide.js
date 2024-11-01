@@ -37,6 +37,8 @@ async function handler(req, res) {
                 // if the blog post is not found, return error
                 if (!hiddenPost) {
                     return res.status(404).json({ error: "Blog post not found." });
+                // DON'T FORGET THE MARK THE RELATED ABUSE REPORT'S ASSOCIATED WITH THIS BLOG AS CLOSED.
+                
                 }
                 return res.status(200).json({ message: "Blog post hidden successfully.", hiddenPost });
             } catch(error) {

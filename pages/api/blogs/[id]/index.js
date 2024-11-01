@@ -149,6 +149,7 @@ async function handler(req, res) {
                             ],
                         },
                     });
+                    // check that the deletion is deletion from user's blogpost
                     
                     const deletedPost = prisma.blogPost.delete({
                         where: { id: currId },
