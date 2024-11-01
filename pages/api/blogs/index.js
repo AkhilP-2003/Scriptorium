@@ -7,47 +7,54 @@ async function handler(req, res) {
     if (req.method === "GET") {
         // get all blogposts
         const {tags, description, title, templateTitle } = req.query;
-        // maybe filter by tags, description etc here. 
+        if (!tags && !description && !title && !templateTitle) {
+            const b = await prisma.blogPost.findMany({
+                take: 6,
+                where: {
+                    hidden: false,  // Only show visible blogs
+                },
+                orderBy: {
+                    upvote: 'desc',  // Order by the most upvotes
+                },
+                include: {
+                    author: true,
+                    templates: true,  // Include the related templates
+                },
+            });
+            console.log(tags, description, title, templateTitle)
+            return res.status(200).json(b);
+        }
+
+
         const blogs = await prisma.blogPost.findMany({
             take: 6,
-            skip: 1,
             where: {
                 hidden: false, // only show blogs that are NOT HIDDEN - NOT FLAGGED
-                ...(tags && { tags: { contains: tags } }),  // Filter by tags if provided
-                ...(description && { description: { contains: description } }),  // Filter by desc if provided
-                ...(title && { title: { contains: title } }),  // Filter by title (partial match)
+                ...(tags && { tags: { contains: tags} }),  // Filter by tags if provided
+                ...(description && { description: { contains: description} }),  // Filter by desc if provided
+                ...(title && { title: { contains: title} }),  // Filter by title (partial match)
                 ...(templateTitle && {
                     templates: {
-                        title: { contains: templateTitle }  // filter by template title if provided
-                    }
-                })
+                        title: { contains: templateTitle } // filter by template title if provided
+                    },
+                }),
             },
-            orderBy: [
-                {
-                    _count: {
-                        upvotes: 'desc',  // sort by most upvotes first
-                    },
-                },
-                {
-                    _count: {
-                        downvotes: 'asc', // then sort by least downvotes
-                    },
-                },
-            ],
+            orderBy: {
+                upvote: 'desc',  //order by upvotes, regardless of filters
+            },
             include: {
                 author: true,
-                templates: true,  // Include author an template information in the result
-                upvotes: true,  // Assume you have an upvotes relationship set up
-                downvotes: true, // Assume you have a downvotes relationship set up
+                templates: true,  // =include auhtor
             },
         });
+        console.log(tags, description, title, templateTitle)
         return res.status(200).json(blogs);
 
     } else if (req.method === "POST") {
         // create a blogpost for this user. MAYBE HAVE A CREATE BLOGPOST BUTTON
         // make sure they have proper auth beforehand with their id. - wrap middleware around this post request.
         return jwtMiddleware(async (req, res) => {
-            const {title, description, tags, templateId} = req.body;
+            const {title, description, tags, templateIds} = req.body;
             const {user} = req;
 
             if (!user) {
@@ -76,8 +83,12 @@ async function handler(req, res) {
                         tags,
                         authorId: parseInt(user.id),
                         // author: existingUser,
-                        templateId: templateId ? parseInt(templateId) : null,
-                    },
+                        templates: templateIds && templateIds.length > 0
+                        ? {
+                            connect: templateIds.map(id => ({ id: parseInt(id) })),  // Link the templates to the blog post
+                        }
+                        : undefined,  // No templates to connect if templateIds is not provided
+                        }, 
                     include: {
                         author: true,
                         templates: true,

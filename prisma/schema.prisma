@@ -64,9 +64,7 @@ model BlogPost {
   author       User          @relation(fields: [authorId], references: [id])
   title        String
   description  String
-  //  tags        blogTag
-  templateId   Int?
-  templates    Template?     @relation(fields: [templateId], references: [id])
+  templates    Template[]
   comments     Comment[]
   upvote       Int           @default(0)
   downvote     Int           @default(0)
