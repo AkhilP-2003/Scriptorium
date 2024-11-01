@@ -7,10 +7,18 @@ async function handler(req, res) {
     if (req.method === "GET") {
         // get all blogposts
         const {tags, description, title, templateTitle } = req.query;
+        if (!tags && !description && !title && !templateTitle) {
+            const b = await prisma.blogPost.findMany({take: 6,
+                where: {
+                    hidden: false,
+                },
+            });
+            return res.status(200).json(b);
+        }
+        // doesn'tt filter..!!!!
         // maybe filter by tags, description etc here. 
         const blogs = await prisma.blogPost.findMany({
             take: 6,
-            skip: 1,
             where: {
                 hidden: false, // only show blogs that are NOT HIDDEN - NOT FLAGGED
                 ...(tags && { tags: { contains: tags } }),  // Filter by tags if provided
@@ -22,23 +30,27 @@ async function handler(req, res) {
                     }
                 })
             },
-            orderBy: [
-                {
-                    _count: {
-                        upvotes: 'desc',  // sort by most upvotes first
-                    },
-                },
-                {
-                    _count: {
-                        downvotes: 'asc', // then sort by least downvotes
-                    },
-                },
-            ],
+            // orderBy: {
+            //     upvote: {
+            //       _count: 'desc',
+            //     },
+            //   },
+            
+            // orderBy: [
+            //     {
+            //         _count: {
+            //             upvotes: 'desc',  // sort by most upvotes first
+            //         },
+            //     },
+            //     {
+            //         _count: {
+            //             downvotes: 'asc', // then sort by least downvotes
+            //         },
+            //     },
+            // ],
             include: {
                 author: true,
                 templates: true,  // Include author an template information in the result
-                upvotes: true,  // Assume you have an upvotes relationship set up
-                downvotes: true, // Assume you have a downvotes relationship set up
             },
         });
         return res.status(200).json(blogs);
@@ -76,9 +88,9 @@ async function handler(req, res) {
                         tags,
                         authorId: parseInt(user.id),
                         // author: existingUser,
-                        templates: {
+                        templates: templateIds && templateIds.length > 0 ? {
                             connect: templateIds.map(id => ({ id: parseInt(id) })),  // Link the templates to the blog post
-                        },
+                        } : undefined, 
                     },
                     include: {
                         author: true,

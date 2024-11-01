@@ -24,6 +24,17 @@ async function handler(req, res) {
             }
 
             try {
+
+                // check if blog exists
+                const blogPost = await prisma.blogPost.findUnique({
+                    where: {
+                        id: currId,
+                    },
+                });
+
+                if (!blogPost) {
+                    return res.status(404).json({ error: "Blog post not found." });
+                }
                 // here, role is admin. they can hide the blogpost.
                 const hiddenPost = await prisma.blogPost.update({ 
                     where: {
@@ -37,10 +48,24 @@ async function handler(req, res) {
                 // if the blog post is not found, return error
                 if (!hiddenPost) {
                     return res.status(404).json({ error: "Blog post not found." });
-                // DON'T FORGET THE MARK THE RELATED ABUSE REPORT'S ASSOCIATED WITH THIS BLOG AS CLOSED.
-                
                 }
-                return res.status(200).json({ message: "Blog post hidden successfully.", hiddenPost });
+                // DON'T FORGET THE MARK THE RELATED ABUSE REPORT'S ASSOCIATED WITH THIS BLOG AS CLOSED.
+
+                const closedReports = await prisma.abuseReport.updateMany({
+                    where: {
+                        blogId: currId,
+                    },
+                    data: {
+                        status: "CLOSED",
+                    },
+
+                });
+        
+                return res.status(200).json({
+                    message: "Blog post hidden and abuse reports closed successfully.",
+                    hiddenPost,
+                    closedReports,
+                });
             } catch(error) {
                 console.error(error);
                 return res.status(500).json({ error: "somethign went wrong trying to hide the blog post by the admin." });
