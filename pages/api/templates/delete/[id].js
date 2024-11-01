@@ -18,16 +18,35 @@ const handler = async (req, res) => {
   }
 
   // get the template associated with the id 
-  existingTemplate = await prisma.template.findUNique({ where: { id: parseInt(id)} })
+  const existingTemplate = await prisma.template.findUNique({ where: { id: parseInt(id)} })
 
   // check if the template is not found
-  if (!template){
+  if (!existingTemplate){
     return res.status(403).json({ error: "Template not found"})
-  } else if (template.ownerId !== req.user.id) {                                 // check if the wrong user is accessing the template
+  } else if (existingTemplate.ownerId !== req.user.id) {                                 // check if the wrong user is accessing the template
     return res.status(403).json({ error: "Unauthorized to delete template"})
   }
 
   try {
+
+    // check if the template being deleted is a parent template to other forked templates
+    const forkedTemplates = await prisma.template.findMany({
+      where: { parentTemplateId: parseInt(id)}
+    })
+
+    // get the total num of templates that have forked the parent template
+    const numForked = forkedTemplates.length
+
+    // update forked templates to remove their dependency (i.e th e isForked and parenttemplateid attr are adjusted) on the deleted template
+    if (numForked > 0) {
+      await prisma.template.updateMany({
+        where: { parentTemplateId: parseInt(id) },
+        data: {
+          parentTemplateId: null,
+          isForked: false,
+        },
+      });
+    }
 
     // find the template associated with the id given and delete it 
     await prisma.template.delete({ where: { id: parseInt(id) } })
