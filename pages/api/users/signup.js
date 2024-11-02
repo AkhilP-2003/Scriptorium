@@ -23,6 +23,10 @@ export default async function handler(req, res) {
         }
         let phoneNumberToCheck = phoneNumber && isValidPhoneNumber(phoneNumber) ? phoneNumber : null;
 
+        if (role !== "USER" && role !== "ADMIN") {
+            return res.status(400).json({error: "role accepts USER or ADMIN"});
+        }
+
         if (phoneNumber && !isValidPhoneNumber(phoneNumber)) {
             // is phone num exists and is not valid
             return res.status(400).json({ error: 'Invalid phone number' });
