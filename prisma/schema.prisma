@@ -50,9 +50,9 @@ model Code {
   id                   Int      @id @default(autoincrement())
   associatedTemplateId Int      @unique //ONE TO ONE RELATIONSHIP WITH TEMPLATE
   associatedTemplate   Template @relation(fields: [associatedTemplateId], references: [id])
-  code                 String   //The actual code itself
-  language             String   
-  input                String?   //stdin for the code
+  code                 String //The actual code itself
+  language             String
+  input                String? //stdin for the code
   output               String?
   error                String?
   createdAt            DateTime @default(now())
@@ -87,7 +87,10 @@ model Comment {
   downvote     Int           @default(0)
   abuseReports AbuseReport[]
   createdAt    DateTime      @default(now())
-  hidden       Boolean       @default(false) // New flag for hiding
+  hidden       Boolean       @default(false)
+  parentId     Int? // optional field indicating if the comment is a reply to another comment
+  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies      Comment[]     @relation("CommentReplies")
 }
 
 model AbuseReport {
