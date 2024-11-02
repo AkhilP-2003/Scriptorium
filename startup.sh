@@ -3,3 +3,4 @@
 #all required packages via npm, run all migrations, and check that the required 
 #compilers/interpreters are already installed. ** Also, this script must also create 
 #an admin user, with the username and password being included in the docs **.
+
