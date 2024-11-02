@@ -19,6 +19,12 @@ async function handler(req, res) {
                 include: {
                     author: true,
                     templates: true,  // Include the related templates
+                OR: [
+                    { hidden: false }, // get all visible comments
+                    ...(req.user
+                        ? [{ hidden: true, authorId: req.user.id }] // get hidden comments only if the user is the author
+                        : [])
+                    ]
                 },
             });
             console.log(tags, description, title, templateTitle)
