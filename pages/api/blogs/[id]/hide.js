@@ -49,8 +49,6 @@ async function handler(req, res) {
                 if (!hiddenPost) {
                     return res.status(404).json({ error: "Blog post not found." });
                 }
-                // DON'T FORGET THE MARK THE RELATED ABUSE REPORT'S ASSOCIATED WITH THIS BLOG AS CLOSED.
-
                 const closedReports = await prisma.abuseReport.updateMany({
                     where: {
                         blogId: currId,
