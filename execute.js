@@ -10,13 +10,8 @@ if (!fs.existsSync(TEMP_DIR)) {
     fs.mkdirSync(TEMP_DIR);
 }
 
-export default function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method not allowed' });
-    }
-
-    const { code, language, stdin = "" } = req.body;
-
+export function executeCode(code, language, stdin, res) {
+    
     // Handle Java class naming if necessary
     const classNameMatch = code.match(/class\s+(\w+)/);
     const className = classNameMatch ? classNameMatch[1] : `Class_${uuidv4()}`;

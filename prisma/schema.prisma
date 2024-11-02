@@ -50,8 +50,9 @@ model Code {
   id                   Int      @id @default(autoincrement())
   associatedTemplateId Int      @unique //ONE TO ONE RELATIONSHIP WITH TEMPLATE
   associatedTemplate   Template @relation(fields: [associatedTemplateId], references: [id])
-  language             String
-  input                String?
+  code                 String   //The actual code itself
+  language             String   
+  input                String?   //stdin for the code
   output               String?
   error                String?
   createdAt            DateTime @default(now())
