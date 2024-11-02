@@ -82,7 +82,7 @@ const handler = async (req, res) => {
 
         orderBy: {
 
-          upvote: "desc", // order the comments based on upvotes
+          upvote: "desc" // order the comments based on upvotes
 
         },
 
@@ -100,7 +100,7 @@ const handler = async (req, res) => {
 
             orderBy: {
               
-              createdAt: "asc", // show replies in ascending order by time (we can change this order if preferred)
+              createdAt: "asc" // show replies in ascending order by time (we can change this order if preferred)
 
             },
 
