@@ -67,31 +67,34 @@ const handler = async (req, res) => {
 
       // get the list of comments belonging to this blog post
       const comments = await prisma.comment.findMany({
-        
-        where: {
-          
-          blogId: parseInt(id),     // get the comments related to this specific blog post that the user/visitor is looking at
-          parentId: null,           // only get top-level comments (not replies)
-          hidden: false             // only show visible comments
 
+        where: {
+
+          blogId: parseInt(id), // get the comments related to this specific blog post
+          parentId: null, // only get top-level comments (not replies)
+          
+          OR: [
+            { hidden: false }, // get all visible comments
+            ...(req.user
+              ? [{ hidden: true, authorId: req.user.id }] // get hidden comments only if the user is the author
+              : [])
+          ]
+          
         },
 
         skip: (currentPage - 1) * pageSize, // calculate the number of items to skip for pagination
-
         take: pageSize, // limit the number of items per page
 
         orderBy: {
-
           upvote: "desc" // order the comments based on upvotes
-
         },
 
         include: {
-
+          
           author: true,
 
           replies: {
-
+            
             include: {
 
               author: true
@@ -99,12 +102,12 @@ const handler = async (req, res) => {
             },
 
             orderBy: {
-              
+
               createdAt: "asc" // show replies in ascending order by time (we can change this order if preferred)
+              
+            }
 
-            },
-
-          },
+          }
 
         }
 
