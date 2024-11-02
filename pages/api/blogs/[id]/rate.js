@@ -19,7 +19,7 @@ async function handler(req, res) {
         const blogPostId = parseInt(id);
 
         try {
-            if (user.role !== "USER") {
+            if (user.role !== "USER" && user.role !== "ADMIN") {
                 return res.status(400).json({ error: "Invalid Credentials" });
             }
             // handle voting on blog posts
@@ -47,7 +47,7 @@ async function handler(req, res) {
             return res.status(500).json({ error: "An error occurred while registering the vote." });
         }
 
-        }, ["USER"])(req, res);
+        }, ["USER", "ADMIN"])(req, res);
         
 
     } else {

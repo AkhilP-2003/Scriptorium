@@ -186,8 +186,7 @@ async function handler(req, res) {
                     });
             
                     return res.status(200).json({
-                    message: `Blogpost deleted successfully`,
-                    deletedPost,
+                    message: `Blogpost ${currId} deleted successfully`
                     });
                 }); 
             } catch(error){
