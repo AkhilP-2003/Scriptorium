@@ -72,6 +72,10 @@ async function handler(req, res) {
                     return res.status(400).json({error: "Please make valid edits"});
                 }
 
+                if (role !== "USER" && role !== "ADMIN") {
+                    return res.status(400).json({error: "role accepts USER or ADMIN"});
+                }
+
                 // Check if the username or email already exists (if they are being updated)
                 if (userName) {
                     const existingUserName = await prisma.user.findUnique({

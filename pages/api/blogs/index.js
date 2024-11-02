@@ -99,7 +99,7 @@ async function handler(req, res) {
                     return res.status(403).json({ error: "Something went wrong creating the blog" });
                 }
 
-                return res.status(200).json({created_blog});
+                return res.status(200).json(created_blog);
 
             } catch(error) {
                 console.error(error);
