@@ -67,7 +67,7 @@ const handler = async (req, res) => {
         error,
         associatedTemplateId: newTemplate.id, //set later
       },
-    });
+    })
 
 
     // await prisma.code.update({
@@ -81,14 +81,14 @@ const handler = async (req, res) => {
         codeId: newCode.id, // Update the template to reference the created code
         code: { connect: { id: newCode.id } }, // Connect the created Code to the Template
       },
-    });
+    })
 
 
     // return the new template thats been created
     return res.status(201).json({
       template: newTemplate,
       message: isForked ? "Template successfully forked from an existing template" : "Your new template is ready"  // the notif that its a forked version
-    });
+    })
     
   // handle the case where something goes wrong while trying to create a template
   } catch (error) {

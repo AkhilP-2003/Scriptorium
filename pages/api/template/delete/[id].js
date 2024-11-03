@@ -45,7 +45,7 @@ const handler = async (req, res) => {
           parentTemplateId: null,
           isForked: false,
         },
-      });
+      })
     }
 
     // find the template associated with the id given and delete it 
