@@ -42,42 +42,54 @@ fi
 # 3. Seed the database with an admin user directly
 echo "Creating admin user..."
 
-# Use node command to directly execute JavaScript that interacts with Prisma to create an admin user.
-node -e "
+NODE_SCRIPT=$(cat << 'EOF'
     const { PrismaClient } = require('@prisma/client');
     const bcrypt = require('bcryptjs');
     const prisma = new PrismaClient();
 
-    async function createAdmin() {
-        const hashedPassword = await bcrypt.hash('adminpassword', 10);  // Replace 'adminpassword' with secure password if needed
-        await prisma.user.upsert({
-            where: { email: 'admin@example.com' }, // Change as needed
-            update: {},
-            create: {
-                email: 'admin@example.com',  // Admin email
-                password: hashedPassword,  // Admin password (hashed)
-                userName: 'admin',  // Admin username
-                role: 'ADMIN',  // Admin role
-                firstName: 'adminfirst',
-                lastName: 'adminlast',
-                avatar: 'www.icon.com',
-                phoneNumber: '1113111111'
-            },
-        });
-        console.log('Admin user created');
+    async function createAdminUser() {
+        try {
+            const adminEmail = 'admin@example.com';
+            const adminPass = 'admin123';
+            if (!adminPass) throw new Error('Admin password not provided');
+        
+            const hashedPassword = await bcrypt.hash(adminPass, 10);  // Replace 'adminpassword' with a secure password
+            await prisma.user.upsert({
+                where: { email: adminEmail },  // Admin email
+                update: {
+                    password: hashedPassword,
+                },
+                create: {
+                    email: adminEmail,  // Admin email
+                    password: hashedPassword,  // Hashed password
+                    userName: 'admin',  // Admin username
+                    role: 'ADMIN',  // Admin role
+                    firstName: 'adminfirst',
+                    lastName: 'adminlast',
+                    phoneNumber: '1112111413',
+                    avatar: 'www.icon.com'
+                },
+            });
+            console.log('Admin user created successfully');
+            console.log('admin email:', adminEmail);
+            console.log('admin password:', adminPass);
+
+
+        } catch (error) {
+            console.error('Error creating admin user:', error);
+            process.exit(1);  // Exit with error code
+        } finally {
+            await prisma.$disconnect();
+        }
     }
 
-    createAdmin()
-      .catch((e) => {
-        console.error(e);
-        process.exit(1);
-      })
-      .finally(async () => {
-        await prisma.$disconnect();
-      });
-"
-if [[ $? -ne 0 ]]; then
-    echo "Error: Admin user creation failed."
+    createAdminUser();
+EOF
+)
+
+# Execute the script stored in the NODE_SCRIPT variable
+if ! node -e "$NODE_SCRIPT"; then
+    echo "Error: Failed to create admin user."
     exit 1
 fi
 
