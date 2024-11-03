@@ -37,7 +37,7 @@ model Template {
   explanation      String
   // tags        templateTag
   code             Code?
-  codeId           Int?
+  codeId           Int? // code id is optional again
   isForked         Boolean    @default(false)
   parentTemplateId Int? // optional if not forked. 
   createdAt        DateTime   @default(now())

@@ -10,7 +10,7 @@ const handler = async (req, res) => {
   }
 
   // extracting the fields from the json obj from the body of the request
-  const { title, explanation, tags, codeId} = req.body  // in our case we are extracting the info that the authenticateduser wants to update the template with
+  const { title, explanation, tags, code, language, input = ""} = req.body  // in our case we are extracting the info that the authenticateduser wants to update the template with
   const { id } = req.query // template id from the url query param
 
   // check if the template id is not provided
