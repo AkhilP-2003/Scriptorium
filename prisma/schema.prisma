@@ -36,8 +36,8 @@ model Template {
   title            String
   explanation      String
   // tags        templateTag
-  code             Code?
-  codeId           Int?
+  code             Code? //ONE TO ONE RELATIONSHIP WITH CODE
+  codeId           Int
   isForked         Boolean    @default(false)
   parentTemplateId Int? // optional if not forked. 
   createdAt        DateTime   @default(now())
