@@ -13,14 +13,14 @@ async function handler(req, res) {
         }
 
         const userId = parseInt(id);
-
+        // can't see hidden blog posts no matter what. even is the user is me. hidden ones are only avaialbe in view-hdiden
         try {
             const existingUser = await prisma.user.findUnique({
                 where: {
                     id: userId,
                 },
                 include: {
-                    blogPosts: true,
+                    blogPosts: {where: {hidden: false}},
                     savedTemplates: true,
                 }
 
