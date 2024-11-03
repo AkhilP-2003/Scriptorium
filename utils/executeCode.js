@@ -21,7 +21,11 @@ export async function executeCode(code, language, stdin = "") {
             fs.writeFileSync(fileName, code);
             return await executePythonCode(fileName, stdin);
         case 'java':
+            try{
             fileName = path.join(TEMP_DIR, `${path.basename(code.match(/class\s+(\w+)/)[1])}.java`);
+            } catch (error){
+                throw new Error("Invalid Java Script");
+            }
             fs.writeFileSync(fileName, code);
             return await executeJavaCode(fileName, stdin);
         case 'c':
