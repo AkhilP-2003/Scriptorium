@@ -10,8 +10,16 @@ if (!fs.existsSync(TEMP_DIR)) {
     fs.mkdirSync(TEMP_DIR);
 }
 
-export function executeCode(code, language, stdin, res) {
-    
+export default function handler(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method not allowed' });
+    }
+
+    const { code, language, stdin = "" } = req.body;
+
+    if (!code || !language){
+        return res.status(400).json({ message: 'Code and language are required' });
+    }
     // Handle Java class naming if necessary
     const classNameMatch = code.match(/class\s+(\w+)/);
     const className = classNameMatch ? classNameMatch[1] : `Class_${uuidv4()}`;
@@ -40,9 +48,39 @@ export function executeCode(code, language, stdin, res) {
             fs.writeFileSync(fileName, code);
             executeCppCode(fileName, res, stdin);
             break;
+        case 'javascript':
+            fileName = path.join(TEMP_DIR, `${jobId}.js`);
+            fs.writeFileSync(fileName, code);
+            executeJavaScriptCode(fileName, res, stdin);
+            break;
         default:
             return res.status(400).json({ status: "error", output: "Unsupported language" });
     }
+}
+
+function executeJavaScriptCode(filePath, res, stdin) {
+    const process = spawn('node', [filePath]);
+
+    process.stdin.write(stdin); // Write stdin input
+    process.stdin.end();
+
+    let output = '';
+    process.stdout.on('data', (data) => {
+        output += data.toString();
+    });
+
+    let error = '';
+    process.stderr.on('data', (data) => {
+        error += data.toString();
+    });
+
+    process.on('close', (code) => {
+        cleanup(filePath);
+        if (code !== 0) {
+            return res.status(200).json({ status: "error", output: error });
+        }
+        return res.status(200).json({ status: "success", output: output });
+    });
 }
 
 // Execute Python code with spawn
