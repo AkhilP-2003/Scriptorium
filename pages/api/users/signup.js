@@ -14,8 +14,8 @@ export default async function handler(req, res) {
         }
 
         // incorrect password length
-        if (password.length < 7 || password.length > 20 || !validator.validate(email)) {
-            return res.status(400).json({error: "Please provide a valid password"});
+        if (password.length < 7 || password.length > 20) {
+            return res.status(400).json({error: "Password length must be at least 7 but less than or equal to 20"});
         }
         // incorrect password email
         if (!validator.validate(email)) {
