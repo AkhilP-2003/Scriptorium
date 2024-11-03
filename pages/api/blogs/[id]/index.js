@@ -161,17 +161,17 @@ async function handler(req, res) {
             }
 
             try{ 
-                await prisma.$transaction ( function (prisma){
+                await prisma.$transaction ( async function (prisma){
                     // Delete the blogpost by id, making sure the user.id (current user's id)
                     // is equal to the blogposts author id.
     
                     //  delete the comments on deletion of this blogpost too.
-                    prisma.comment.deleteMany({
+                    await prisma.comment.deleteMany({
                         where: { blogId: currId },
                     });
 
                     // Delete abuse reports related to the blog post
-                    prisma.abuseReport.deleteMany({
+                    await prisma.abuseReport.deleteMany({
                         where: {
                             OR: [
                                 { blogId: currId }, // Abuse reports on the blog itself
@@ -181,10 +181,13 @@ async function handler(req, res) {
                     });
                     // check that the deletion is deletion from user's blogpost
                     
-                    const deletedPost = prisma.blogPost.delete({
+                    const deletedPost = await prisma.blogPost.delete({
                         where: { id: currId },
                     });
-            
+                    
+                    if (!deletedPost) {
+                        return res.status(400).json({error: "something went wrong with deletion"})
+                    }
                     return res.status(200).json({
                     message: `Blogpost ${currId} deleted successfully`
                     });
