@@ -36,7 +36,7 @@ model Template {
   title            String
   explanation      String
   // tags        templateTag
-  code             Code? //ONE TO ONE RELATIONSHIP WITH CODE
+  code             Code?      @relation(fields: [codeId], references: [id]) // ONE-TO-ONE 
   codeId           Int
   isForked         Boolean    @default(false)
   parentTemplateId Int? // optional if not forked. 
