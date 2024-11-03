@@ -1,5 +1,6 @@
 // get/ POST - update my own account if current user is me.
 import { prisma } from "../../../../prisma/client";
+import { hashPassword } from "../../../../utils/auth";
 import { jwtMiddleware } from "../../middleware";
 
 async function handler(req, res) {
@@ -41,7 +42,7 @@ async function handler(req, res) {
         return jwtMiddleware(async (req, res) => {
 
             const {id} = req.query;
-            const {firstName, lastName, userName, avatar, phoneNumber, email, role } = req.body;
+            const {firstName, lastName, userName, avatar, phoneNumber, email, role, password } = req.body;
             const {user} = req;
             if (!id) {
                 return res.status(400).json({error: "User Id is not provided"});
@@ -68,16 +69,29 @@ async function handler(req, res) {
             }
 
             try {
-                if (userName.trim() === "" || firstName.trim() === "" || lastName.trim() === "" || avatar.trim() === "" || email.trim() === "" || role.trim === "") {
-                    return res.status(400).json({error: "Please make valid edits"});
+
+                if (role) {
+                    if (role !== "USER" && role !== "ADMIN") {
+                        return res.status(400).json({error: "role accepts USER or ADMIN"});
+                    }
+                }
+                if (firstName) {
+                    if (firstName.trim === "") {
+                        return res.status(400).json({error: "please intput a first name"});
+                    }
                 }
 
-                if (role !== "USER" && role !== "ADMIN") {
-                    return res.status(400).json({error: "role accepts USER or ADMIN"});
+                if (lastName) {
+                    if (lastName.trim === "") {
+                        return res.status(400).json({error: "please intput a first name"});
+                    }
                 }
 
                 // Check if the username or email already exists (if they are being updated)
                 if (userName) {
+                    if (userName.trim() === "") {
+                        return res.status(400).json({ error: "Provide valid username" });
+                    }
                     const existingUserName = await prisma.user.findUnique({
                         where: { userName }
                     });
@@ -93,6 +107,10 @@ async function handler(req, res) {
                     if (existingEmail && existingEmail.id !== id_from_auth) {
                         return res.status(400).json({ error: "Email is already in use" });
                     }
+                    var validator = require("email-validator"); // email validator
+                    if (!validator.validate(email)) {
+                        return res.status(400).json({ error: "Provide valid email" });
+                    }
                 }
 
                 if (phoneNumber) {
@@ -102,7 +120,22 @@ async function handler(req, res) {
                     if (existingNumer && existingNumer.id !== id_from_auth) {
                         return res.status(400).json({ error: "Phone Number is already in use" });
                     }
+
+                    let phoneNumberToCheck = phoneNumber && isValidPhoneNumber(phoneNumber) ? phoneNumber : null;
+
+                    if (phoneNumber && !isValidPhoneNumber(phoneNumber)) {
+                        // is phone num exists and is not valid
+                        return res.status(400).json({ error: 'Invalid phone number' });
+                    }
                 }
+
+                if (password) {
+                    if (password.length < 7 || password.length > 20) {
+                        return res.status(400).json({ error: "Provide valid password" });
+                    }
+                    var hashedPassword = await hashPassword(password);
+                }
+
                 const updatedProfile = await prisma.user.update({
                     where: {
                         id: userId, // Ensures we are updating the correct user
@@ -114,8 +147,10 @@ async function handler(req, res) {
                         avatar: avatar || undefined,
                         phoneNumber: phoneNumber || undefined,
                         email: email || undefined,
-                        role: role || undefined
+                        role: role || undefined,
+                        password: hashedPassword || undefined
                     },
+                    
                 });
                 return res.status(200).json({ message: "Profile updated successfully", updatedProfile });
 
@@ -136,6 +171,11 @@ async function handler(req, res) {
 
 
 }
+
+const isValidPhoneNumber = (phone) => {
+    const phoneRegex = /^[0-9]{10}$/; // phone num
+    return phoneRegex.test(phone);
+};
 
 export default handler;
 

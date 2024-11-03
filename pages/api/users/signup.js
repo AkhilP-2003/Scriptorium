@@ -52,11 +52,12 @@ export default async function handler(req, res) {
                 firstName, lastName, userName, avatar, email, phoneNumber, role, password: await hashPassword(password)
             },
             select: {
-                firstName: true, lastName: true, email: true, userName: true, role:true, phoneNumber:true
+                id: true, firstName: true, lastName: true, email: true, userName: true, role:true, phoneNumber:true
             }
         });
 
         return res.status(200).json({user: {
+            id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
             userName: user.userName,

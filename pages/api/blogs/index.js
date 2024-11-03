@@ -19,7 +19,7 @@ async function handler(req, res) {
                 include: {
                     author: true,
                     templates: true,  // Include the related templates
-                },
+                }
             });
             console.log(tags, description, title, templateTitle)
             return res.status(200).json(b);
