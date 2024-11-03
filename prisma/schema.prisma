@@ -36,8 +36,8 @@ model Template {
   title            String
   explanation      String
   // tags        templateTag
-  code             Code?      @relation(fields: [codeId], references: [id]) // ONE-TO-ONE 
-  codeId           Int
+  code             Code?      
+  codeId           Int?
   isForked         Boolean    @default(false)
   parentTemplateId Int? // optional if not forked. 
   createdAt        DateTime   @default(now())
