@@ -20,11 +20,16 @@ const handler = async (req, res) => {
   // get the template associated with the id 
   const existingTemplate = await prisma.template.findUnique({ where: { id: parseInt(id)} })
 
+  //get the associated code with this template
+  const associatedCode = await prisma.code.findUnique({where: {associatedTemplateId: parseInt(id)}}); 
+
   // check if the template is not found
   if (!existingTemplate){
     return res.status(403).json({ error: "Template not found"})
   } else if (existingTemplate.ownerId !== req.user.id) {                                 // check if the wrong user is accessing the template
     return res.status(403).json({ error: "Unauthorized to delete template"})
+  } else if (!associatedCode){
+    return res.status(403).json({error: "Could not find associated code with this template"});
   }
 
   try {
@@ -49,8 +54,9 @@ const handler = async (req, res) => {
     }
 
     // find the template associated with the id given and delete it 
+    await prisma.code.delete({where: { id: associatedCode.id}});
     await prisma.template.delete({ where: { id: parseInt(id) } })
-    return res.status(200).json({ msg: "Your template has been deleted"})
+    return res.status(200).json({ msg: "Your template and its code has been deleted!"})
 
     // handle any errors that may occur
   } catch (error) {
