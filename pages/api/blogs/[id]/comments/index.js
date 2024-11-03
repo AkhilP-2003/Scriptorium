@@ -72,13 +72,7 @@ const handler = async (req, res) => {
 
           blogId: parseInt(id), // get the comments related to this specific blog post
           parentId: null, // only get top-level comments (not replies)
-          
-          OR: [
-            { hidden: false }, // get all visible comments
-            ...(req.user
-              ? [{ hidden: true, authorId: req.user.id }] // get hidden comments only if the user is the author
-              : [])
-          ]
+          hidden: false       // only get visible comments
           
         },
 
@@ -134,6 +128,7 @@ const handler = async (req, res) => {
 // only wrap the POST request handler in jwtMiddleware
 const handlerWithAuth = (req, res) => {
 
+  // make sure if its a post request, the user is authenticated and authorized
   if (req.method === "POST") {
 
     return jwtMiddleware(handler, ["USER", "ADMIN"])(req, res) // uses currying here (i.e,, jwtMiddleware returns a function that then takes in req and res as params
