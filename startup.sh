@@ -58,6 +58,10 @@ node -e "
                 password: hashedPassword,  // Admin password (hashed)
                 userName: 'admin',  // Admin username
                 role: 'ADMIN',  // Admin role
+                firstName: 'adminfirst',
+                lastName: 'adminlast',
+                avatar: 'www.icon.com',
+                phoneNumber: '1113111111'
             },
         });
         console.log('Admin user created');
