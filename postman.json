@@ -1,0 +1,1453 @@
+{
+	"info": {
+		"_postman_id": "a0aa2d04-e5c1-4f34-8955-4125a370b7c4",
+		"name": "pp1_backend",
+		"description": "collection for testing the backend of scriptorium",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27398578",
+		"_collection_link": "https://scriptoriumbackend.postman.co/workspace/11ff5cdb-3213-4c92-a54a-003e8fb535fd/collection/27398578-a0aa2d04-e5c1-4f34-8955-4125a370b7c4?action=share&source=collection_link&creator=27398578"
+	},
+	"item": [
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "signup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"user2\",\n    \"firstName\": \"fname\",\n    \"lastName\": \"lastname\",\n    \"avatar\": \"www.icon.com\",\n    \"email\": \"user2@example.com\",\n    \"password\": \"johndoe123\",\n    \"role\": \"USER\", // USER or ADMIN\n    \"phoneNumber\": \"1111111112\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"description": "### API Request Description\n\nThis endpoint allows users to sign up by providing their user details including username, first name, last name, avatar URL, email, password, role, and phone number.\n\n- `userName` (string): The username of the user.\n    \n- `firstName` (string): The first name of the user.\n    \n- `lastName` (string): The last name of the user.\n    \n- `avatar` (string): The URL of the user's avatar.\n    \n- `email` (string): The email address of the user.\n    \n- `password` (string): The password for the user account.\n    \n- `role` (string): The role of the user (e.g., USER, ADMIN).\n    \n- `phoneNumber` (string): The phone number of the user.\n    \n\n### API Response\n\nThe response of this request is in JSON format and includes the following schema:\n\n``` json\n{\n    \"user\": {\n        \"id\": 0,\n        \"firstName\": \"\",\n        \"lastName\": \"\",\n        \"userName\": \"\",\n        \"email\": \"\",\n        \"phoneNumber\": \"\",\n        \"role\": \"\"\n    }\n}\n\n ```\n\nThe `user` object in the response contains the user details with the following fields:\n\n- `id` (number): The unique identifier of the user.\n    \n- `firstName` (string): The first name of the user.\n    \n- `lastName` (string): The last name of the user.\n    \n- `userName` (string): The username of the user.\n    \n- `email` (string): The email address of the user.\n    \n- `phoneNumber` (string): The phone number of the user.\n    \n- `role` (string): The role of the user."
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+									"// Save the token as an environment variable",
+									"pm.environment.set(\"accessToken\", jsonData.accessToken);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"user2\",\n    \"password\": \"johndoe123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						},
+						"description": "The `POST /api/users/login` endpoint is used to authenticate a user and obtain access and refresh tokens.\n\nLogin is needed to perform USER and ADMIN level actions in the application.\n\n### Request Body\n\n- `userName` (string): The username of the user.\n    \n- `password` (string): The password of the user.\n    \n\n### Response\n\nThe response for this request is a JSON object with the following schema:\n\n``` json\n{\n    \"accessToken\": {\n      \"type\": \"string\"\n    },\n    \"refreshToken\": {\n      \"type\": \"string\"\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "get-profile-of-user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.globals.set()"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/users/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"3"
+							]
+						},
+						"description": "The endpoint retrieves user data for a single user. Please pass in the id of the user in the url (api/users/{id}).\n\nUsers cannot see hidden posts here, even if the user who the user is serching is the same as the user logged in.\n\nThe response returned is in JSON format and has the following schema:\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"id\": {\n            \"type\": \"number\"\n        },\n        \"firstName\": {\n            \"type\": \"string\"\n        },\n        \"lastName\": {\n            \"type\": \"string\"\n        },\n        \"userName\": {\n            \"type\": \"string\"\n        },\n        \"avatar\": {\n            \"type\": \"string\"\n        },\n        \"email\": {\n            \"type\": \"string\"\n        },\n        \"phoneNumber\": {\n            \"type\": \"string\"\n        },\n        \"password\": {\n            \"type\": \"string\"\n        },\n        \"role\": {\n            \"type\": \"string\"\n        },\n        \"blogPosts\": {\n            \"type\": \"array\"\n        },\n        \"savedTemplates\": {\n            \"type\": \"array\"\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "edit-profile-of-user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"whatever\",\n    \"lastName\": \"whatevr\",\n    \"userName\": null,\n    \"phoneNumber\": \"0000000110\",\n    \"avatar\": \"www.newicon.com\",\n    \"role\": \"ADMIN\",\n    \"password\": null,\n    \"email\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"3"
+							]
+						},
+						"description": "The endpoint allows users to perform editing of a user's profile who owns this account by passing in a user id in the request quary parameter, and the data to send in the request body. The allowed methods are POST and GET. The payload should include the user's details such as name, email, and role. An example request and response will be added to illustrate the usage of this endpoint.\n\n### Example Request\n\n``` json\n{\n  \"firstName\": \"whatever\",\n  \"lastName\": \"whatevr\",\n  \"userName\": null,\n  \"phoneNumber\": \"0000000110\",\n  \"avatar\": \"www.newicon.com\",\n  \"role\": null,\n  \"password\": null,\n  \"email\": null\n}\n\n ```\n\n### Example Response\n\n- Status: 200\n    \n- {\"message\": \"\",\"updatedProfile\": { \"id\": 0, \"firstName\": \"\", \"lastName\": \"\", \"userName\": \"\", \"avatar\": \"\", \"email\": \"\", \"phoneNumber\": \"\", \"password\": \"\", \"role\": \"\"}}\n    \n\n### Payload\n\nThe request should have a raw body with the following parameters:\n\n- firstName (text): The first name of the user.\n    \n- lastName (text): The last name of the user.\n    \n- phoneNumber (text): The phone number of the user.\n    \n- avatar (text): The URL of the user's avatar image.\n    \n- role (text, optional):\n    \n\n### Example\n\n``` json\n{\n    \"firstName\": \"whatever\",\n    \"lastName\": \"whatevr\",\n    \"phoneNumber\": \"0000000110\",\n    \"avatar\": \"www.newicon.com\"\n}\n\n ```\n\n### Response\n\nUpon successful execution, the endpoint returns a JSON object with a status code of 200 and the following structure:\n\n``` json\n{\n    \"message\": \"\",\n    \"updatedProfile\": {\n        \"id\": 0,\n        \"firstName\": \"\",\n        \"lastName\": \"\",\n        \"userName\": \"\",\n        \"avatar\": \"\",\n        \"email\": \"\",\n        \"phoneNumber\": \"\",\n        \"password\": \"\",\n        \"role\": \"\"\n    }\n}\n\n ```\n\nThe request body should contain the user's details such as first name, last name, phone number, avatar URL, role, username, password, and email.\n\nThe parameters for this endpoint include the ID of the user in the URL path and the user details in the request body. The user details are optional, and only the fields that need to be updated or created should be included in the request body.\n\nThis endpoint allows you to update your user information.\n\n#### Request Body\n\n- `firstName` (text, optional): The first name of the user.\n    \n- `lastName` (text, optional): The last name of the user.\n    \n- `phoneNumber` (text, optional): The phone number of the user.\n    \n- `avatar` (text, optional): The URL of the user's avatar image.\n    \n- `role` (text, optional): The role of the user.\n    \n- `userName` (text, optional): The username of the user.\n    \n- `password` (text, optional): The password of the user.\n    \n- `email` (text, optional): The email address of the user.\n    \n\n#### Response\n\nThe response is in JSON format with the following schema:\n\n``` json\n{\n  \"firstName\": \"\"\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "refresh",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"// Save the token as an environment variable",
+									"pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+									"pm.environment.set(\"accessToken\", jsonData.accessToken);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlck5hbWUiOiJ1c2VyMSIsImVtYWlsIjoidXNlcjFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczMDU5Mjc4NiwiZXhwIjoxNzMwNjc5MTg2fQ.LpC-5DxoNIm-cuNz5fAJ7VxkhUDVMNoVlXvjfEmEFYc\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"refresh"
+							]
+						},
+						"description": "### Refresh User Access Token\n\nThis endpoint is used to refresh the user's access token by providing the refresh token.\n\n**Request Body**\n\n- refreshToken (string, required): The refresh token used to generate a new access token.\n    \n\nExample:\n\n``` json\n{\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6Ik ...\"\n}\n\n ```\n\n**Response**  \nThe response is in JSON format and includes the new access token.\n\nExample:\n\n``` json\n{\n  \"accessToken\": \"\"\n}\n\n ```"
+					},
+					"response": []
+				}
+			],
+			"description": "user endpoints\n\n- login\n    \n- signup\n    \n- edit profile of a user\n    \n- get the profile of a specific user\n    \n- refresh access token"
+		},
+		{
+			"name": "blog",
+			"item": [
+				{
+					"name": "create a blog",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"blog 6 description\",\n    \"tags\": \"arrays, hashmaps\",\n    \"title\": \"blog 6\",\n    \"templateIds\": [3, 2] // add these template with given id's to this blog, could be null also\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogs",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs"
+							]
+						},
+						"description": "This endpoint allows you to create a new blog by sending an HTTP POST request to the specified URL. The request should include a JSON payload in the raw request body with the following parameters:\n\n- `description` (string): The description of the blog.\n    \n- `tags` (string): Tags associated with the blog.\n    \n- `title` (string): The title of the blog.\n    \n- `templateIds` (array): IDs of templates related to the blog.\n    \n\nUpon successful creation, the response will include the details of the newly created blog."
+					},
+					"response": []
+				},
+				{
+					"name": "get list of blogs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blogs?tags&description&title&templateTitle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs"
+							],
+							"query": [
+								{
+									"key": "tags",
+									"value": null
+								},
+								{
+									"key": "description",
+									"value": null
+								},
+								{
+									"key": "title",
+									"value": null
+								},
+								{
+									"key": "templateTitle",
+									"value": null
+								}
+							]
+						},
+						"description": "# Get Blogs\n\nThis endpoint retrieves a list of blogs based on the provided query parameters. Its going to return blogs based on filtering by the query parameters, ordered by upvotes.\n\n## Request\n\n### Query Parameters\n\n- `tags` (optional): Filter blogs by tags.\n    \n- `description` (optional): Filter blogs by description.\n    \n- `title` (optional): Filter blogs by title.\n    \n- `templateTitle` (optional): Filter blogs by template title.\n    \n\nReturn ordered by upvotes.\n\n## Response\n\nThe response for this request is a JSON object representing the list of blogs ordered by highest upvotes. The schema for the response can be described as follows:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"blogs\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"id\": {\n            \"type\": \"string\"\n          },\n          \"title\": {\n            \"type\": \"string\"\n          },\n          \"description\": {\n            \"type\": \"string\"\n          },\n          \"tags\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"string\"\n            }\n          }\n        }\n      }\n    }\n  }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "rate a blog",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"voteType\": \"\" // \"upvote\" or \"downvote\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/1/rate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"1",
+								"rate"
+							]
+						},
+						"description": "### Rate Blog\n\nThis endpoint allows the user to rate a specific blog by providing an upvote or downvote.\n\n#### Request Body\n\n- `voteType` (string, required): The type of vote, which can be either \"upvote\" or \"downvote\".\n    \n\n#### Response\n\nThe response will be in JSON format and includes the following schema:\n\n``` json\n{\n    \"voteType\": \"\" //upvote or downvote\n}\n\n ```\n\nThe last execution returned a status of 200 with the following response body:\n\n``` json\n{\n    \"message\": \"string\",\n    \"updatedBlogPost\": {\n        \"id\": \"number\",\n        \"authorId\": \"number\",\n        \"title\": \"string\",\n        \"description\": \"string\",\n        \"upvote\": \"number\",\n        \"downvote\": \"number\",\n        \"createdAt\": \"string\",\n        \"updatedAt\": \"string\",\n        \"tags\": \"string\",\n        \"hidden\": \"boolean\"\n    }\n}\n\n ```\n\nThis endpoint allows the user to rate a specific blog by providing an upvote or downvote."
+					},
+					"response": []
+				},
+				{
+					"name": "hide a blog",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/7/hide",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"7",
+								"hide"
+							]
+						},
+						"description": "# Hide Blog Endpoint\n\nThis endpoint allows an admin to hide a specific blog with the given ID. Hiding a blog will mark its attribute \"hidden\" to true, and now users won't be able to see it in get requests anymore (you can try this my providing the same blog id in the next request and seeing it will not show).\n\nThis url accepts a blog id to hide. (api/blogs/{id}/hide)\n\n## Request\n\n- Method: POST\n    \n- URL: `http://localhost:3000/api/blogs/{id}/hide`\n    \n\n## Response\n\nThe response for this request will be a JSON schema with the following properties:\n\n- `message` (string) - Provides a message regarding the operation.\n    \n\nExample Response:\n\n``` json\n{\n  \"message\": \"Blog with ID 1 has been successfully hidden.\"\n   \"hiddenPost\": {\n        \"id\": 1,\n        \"authorId\": 1,\n        \"title\": \"blog 1\",\n        \"description\": \"blog 1 description\",\n        \"upvote\": 1,\n        \"downvote\": 1,\n        \"createdAt\": \"2024-11-03T06:07:00.281Z\",\n        \"updatedAt\": \"2024-11-03T06:18:55.832Z\",\n        \"tags\": \"arrays, hashmaps\",\n        \"hidden\": true\n    },\n    \"closedReports\": {\n        \"count\": 0\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "get a blog",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"2"
+							]
+						},
+						"description": "# Blog Details\n\nThis endpoint retrieves the details of a specific blog.\n\n(api/blogs/{id}).\n\n## Method\n\nGET\n\n## Payload\n\nThis endpoint does not require a request payload.\n\n## Example\n\n### Request\n\n```\nGET http://localhost:3000/api/blogs/2\n\n ```\n\n### Response\n\n``` json\n{\n    \"id\": 0,\n    \"authorId\": 0,\n    \"title\": \"\",\n    \"description\": \"\",\n    \"upvote\": 0,\n    \"downvote\": 0,\n    \"createdAt\": \"\",\n    \"updatedAt\": \"\",\n    \"tags\": \"\",\n    \"hidden\": true,\n    \"author\": {\n        \"id\": 0,\n        \"firstName\": \"\",\n        \"lastName\": \"\",\n        \"userName\": \"\",\n        \"avatar\": \"\",\n        \"email\": \"\",\n        \"phoneNumber\": \"\",\n        \"password\": \"\",\n        \"role\": \"\"\n    },\n    \"comments\": [],\n    \"templates\": []\n}\n\n ```\n\nThis endpoint retrieves a specific blog with the ID passed into the request parameter.\n\n#### Response\n\nThe response will be in JSON format with an array of blog data. Here is a sample JSON schema for the response:\n\n``` json\n[]\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "edit a blog",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"blog 10 title change\",\n    \"description\": \"blog 10 title CHANGE\",\n    \"tags\": \"arrays, hashmaps\",\n    \"templateIdsToAdd\": [6], // example template id to add to this blog\n    \"templateIdsToRemove\": [4]// example template id to remove from thsi blog\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"6"
+							]
+						},
+						"description": "### Request Description\n\nThis endpoint is used to update a specific blog with the given ID in the query parameter. The request should be sent as an HTTP POST to the specified URL with the blog ID in the endpoint. The request body should contain the updated title, description, tags, templatesIdsToAdd, and templatesIdsToRemove.\n\nIf the blog is flagged (marked as hidden: true), then no one can edit this blog.\n\n#### Request Body (all fields are optional)\n\n- title (string): The updated title of the blog.\n    \n- description (string): The updated description of the blog.\n    \n- tags (string): The updated tags for the blog.\n    \n- templatesIdsToAdd (array): IDs of templates to be added to the blog.\n    \n- templatesIdsToRemove (array): IDs of templates to be removed from the blog.\n    \n\n### Response\n\nThe response will be in JSON format with the following schema:\n\n``` json\n{\n  \"id\": 0,\n  \"authorId\": 0,\n  \"title\": \"\",\n  \"description\": \"\",\n  \"upvote\": 0,\n  \"downvote\": 0,\n  \"createdAt\": \"\",\n  \"updatedAt\": \"\",\n  \"tags\": \"\",\n  \"hidden\": true,\n  \"author\": {\n    \"id\": 0,\n    \"firstName\": \"\",\n    \"lastName\": \"\",\n    \"userName\": \"\",\n    \"avatar\": \"\",\n    \"email\": \"\",\n    \"phoneNumber\": \"\",\n    \"password\": \"\",\n    \"role\": \"\"\n  },\n  \"templates\": []\n}\n\n ```\n\nThe response will include the updated blog details, including the ID, author information, title, description, upvote count, downvote count, creation and update timestamps, tags, and hidden status."
+					},
+					"response": []
+				},
+				{
+					"name": "delete a blog",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"5"
+							]
+						},
+						"description": "### DELETE /api/blogs/2\n\nThis endpoint is used to delete a specific blog with the ID of {id} at the end of the endpoint (api/blogs/{id}) inly if the user is the author of that blog.\n\n#### Request\n\nNo request body is required for this request.\n\n#### Response\n\nThe response for this request is a JSON object with the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```\n\nThe response contains a status code of 200 and a JSON object with a \"message\" key, which provides information about the success of the deletion operation."
+					},
+					"response": []
+				},
+				{
+					"name": "view hidden blogs of logged in user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/view-hidden",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"view-hidden"
+							]
+						},
+						"description": "This endpoint makes an HTTP GET request to retrieve hidden blog posts of this user that are flagged. The response will be in JSON format and will include an array of blog posts with their respective details. Below is the JSON schema for the response.\n\nOnly posts hidden for the current logged in user will be seen here, thus fulfilling the fact that other users won't be able to see hidden posts, but only the authors will, and they wont be able to edit them.\n\n``` json\n[\n    {\n        \"id\": \"number\",\n        \"authorId\": \"number\",\n        \"title\": \"string\",\n        \"description\": \"string\",\n        \"upvote\": \"number\",\n        \"downvote\": \"number\",\n        \"createdAt\": \"string\",\n        \"updatedAt\": \"string\",\n        \"tags\": \"string\",\n        \"hidden\": \"boolean\"\n    }\n]\n\n ```\n\nThe response will include the blog post details such as ID, author ID, title, description, upvotes, downvotes, creation and update timestamps, tags, and a boolean flag indicating if the post is hidden.\n\nNo request body is required for this GET request."
+					},
+					"response": []
+				},
+				{
+					"name": "report a blog",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"this blog is mean to me\",\n    \"blogId\": 7\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"report"
+							]
+						},
+						"description": "### POST /api/report\n\nThis endpoint is used to report a blog.\n\n#### Request Body\n\n- `description` (string) - The description of the report.\n    \n- `blogId` (number) - The ID of the blog being reported.\n    \n\n#### Response\n\nThe response will be in JSON format with the following schema:\n\n``` json\n{\n    \"report\": {\n        \"id\": 0,\n        \"status\": \"OPEN\",\n        \"authorId\": 0,\n        \"description\": \"\",\n        \"createdAt\": \"\",\n        \"blogId\": 0,\n        \"commentId\": null\n    }\n}\n\n ```\n\nThe `report` object contains the details of the reported blog, including its ID, status, author ID, description, creation timestamp, blog ID, and associated comment ID (if any)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "templates",
+			"item": [
+				{
+					"name": "get list of templates",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/template",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"template"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						},
+						"description": "### GET /api/template\n\nThis endpoint retrieves a list of templates.\n\n#### Request\n\nThis is a GET request to fetch the list of templates.\n\n#### Response\n\nThe response will be in JSON format and will have the following schema:\n\n``` json\n{\n  \"templates\": [\n    {\n      \"id\": \"number\",\n      \"ownerId\": \"number\",\n      \"title\": \"string\",\n      \"explanation\": \"string\",\n      \"codeId\": \"number\",\n      \"isForked\": \"boolean\",\n      \"parentTemplateId\": \"number or null\",\n      \"createdAt\": \"string\",\n      \"updatedAt\": \"string\",\n      \"tags\": \"string\"\n    }\n  ],\n  \"currentPage\": \"number\",\n  \"pageSize\": \"number\"\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "create a template",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Java Calculator Template\",\n    \"explanation\": \"A simple calculator that performs basic arithmetic operations.\",\n    \"tags\": \"Java, Calculator\",\n    \"code\": \"import java.util.Scanner;\\n\\npublic class Calculator {\\n    public static void main(String[] args) {\\n        Scanner scanner = new Scanner(System.in);\\n        double num1 = scanner.nextDouble();\\n        double num2 = scanner.nextDouble();\\n        char operator = scanner.next().charAt(0);\\n        double result;\\n\\n        switch (operator) {\\n            case '+':\\n                result = num1 + num2;\\n                break;\\n            case '-':\\n                result = num1 - num2;\\n                break;\\n            case '*':\\n                result = num1 * num2;\\n                break;\\n            case '/':\\n                if (num2 != 0) {\\n                    result = num1 / num2;\\n                } else {\\n                    System.out.println(\\\"Cannot divide by zero\\\");\\n                    return;\\n                }\\n                break;\\n            default:\\n                System.out.println(\\\"Invalid operator\\\");\\n                return;\\n        }\\n\\n        System.out.printf(\\\"Result: %.2f\\\", result);\\n    }\\n}\",\n    \"language\": \"java\",\n    \"input\": \"5.0\\n3.0\\n+\\n\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/template/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"template",
+								"create"
+							]
+						},
+						"description": "### Create Template\n\nThis endpoint allows the user to create a new template by providing the title, explanation, tags, code, and language.\n\n#### Request Body\n\n- title (string, required): The title of the new template.\n    \n- explanation (string, required): A brief explanation of the new template.\n    \n- tags (string, required): Tags associated with the new template.\n    \n- code (string, required): The code content of the new template.\n    \n- language (string, required): The programming language of the code.\n    \n\n#### Response\n\nThe response will be in JSON format with the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"template\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"id\": { \"type\": \"integer\" },\n        \"ownerId\": { \"type\": \"integer\" },\n        \"title\": { \"type\": \"string\" },\n        \"explanation\": { \"type\": \"string\" },\n        \"codeId\": { \"type\": \"null\" },\n        \"isForked\": { \"type\": \"boolean\" },\n        \"parentTemplateId\": { \"type\": \"null\" },\n        \"createdAt\": { \"type\": \"string\" },\n        \"updatedAt\": { \"type\": \"string\" },\n        \"tags\": { \"type\": \"string\" }\n      }\n    },\n    \"message\": { \"type\": \"string\" }\n  }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "fork a template as a user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"this is my forked template\",\n    \"explanation\": \"trying out new stuff from forked\",\n    \"tags\": \"coooool\",\n    \"code\": \"print('hi')\",\n    \"language\": \"python\",\n    \"parentTemplateId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/template/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"template",
+								"create"
+							]
+						},
+						"description": "### Create Template\n\nThis endpoint allows the user to create a new template by providing the necessary details.\n\n**Request Body**\n\n- title (text, required): The title of the template.\n    \n- explanation (text, required): A brief explanation of the template.\n    \n- tags (text, required): Tags associated with the template.\n    \n- code (text, required): The code content of the template.\n    \n- language (text, required): The programming language of the template.\n    \n- parentTemplateId (integer, required): The ID of the parent template if this template is a forked version.\n    \n\n**Response**\n\n- Status: 201\n    \n- Content-Type: application/json\n    \n- template (object): Details of the created template including ID, owner ID, title, explanation, code ID, forked status, parent template ID, creation and update timestamps, and tags.\n    \n- message (string): Any additional message related to the response."
+					},
+					"response": []
+				},
+				{
+					"name": "delete a template",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/template/delete/4 ",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"template",
+								"delete",
+								"4 "
+							]
+						},
+						"description": "The API endpoint sends an HTTP DELETE request to [http://localhost:3000/api/template/delete/4](http://localhost:3000/api/template/delete/4) to delete a specific template. Upon successful execution, the response will have a status code of 200 and a content type of application/json. The response body will be a JSON object with a \"msg\" key, which may contain a message or be empty.\n\n**Query Parameters**\n\n- \\[id\\] -> refers to the id of the template of which the user/admin wants to delete (template/delete/\\[id\\])\n    \n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"msg\": {\n            \"type\": \"string\"\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "edit template",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"new title2\",\n    \"explanation\": \"new explanation\",\n    \"input\": \"5.0 4.0 -\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/template/edit/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"template",
+								"edit",
+								"7"
+							]
+						},
+						"description": "### Update Template\n\nThis endpoint is used to update a specific template with the provided ID.\n\n#### Request\n\n- Method: PUT\n    \n- Endpoint: `http://localhost:3000/api/template/edit/7`\n    \n- { \"title\": \"Lribbonacci\"}\n    \n\n#### **Query Parameters**\n\n- \\[id\\] -> refers to the id of the template of which the user/admin wants to make some edits to (template/edit/\\[id\\])\n    \n\n#### Response\n\nThe response is in JSON format and has the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"id\": {\n      \"type\": \"integer\"\n    },\n    \"ownerId\": {\n      \"type\": \"integer\"\n    },\n    \"title\": {\n      \"type\": \"string\"\n    },\n    \"explanation\": {\n      \"type\": \"string\"\n    },\n    \"codeId\": {\n      \"type\": \"integer\"\n    },\n    \"isForked\": {\n      \"type\": \"boolean\"\n    },\n    \"parentTemplateId\": {\n      \"type\": [\"integer\", \"null\"]\n    },\n    \"createdAt\": {\n      \"type\": \"string\"\n    },\n    \"updatedAt\": {\n      \"type\": \"string\"\n    },\n    \"tags\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```"
+					},
+					"response": []
+				}
+			],
+			"description": "note that only authenticated users/admin can have access to creating, editing, deleting (their own) templates. Visitors can only view and use an already exisitng code template"
+		},
+		{
+			"name": "code",
+			"item": [
+				{
+					"name": "execute code",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"code\": \"def factorial(n): return 1 if n == 0 else n * factorial(n - 1)\\nnum = int(input())\\nprint(factorial(num))\",\r\n  \"language\": \"python\",\r\n  \"stdin\": \"\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/code/execute",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"code",
+								"execute"
+							]
+						},
+						"description": "The endpoint allows you to execute the provided code in the specified programming language. The request should include the code to be executed, the programming language, and the standard input if required.\n\n### Request Body\n\n- `code` (text): The code to be executed.\n    \n- `language` (text): The programming language of the code.\n    \n- `stdin` (text): The standard input for the code execution.\n    \n\n### Response\n\nThe response is a JSON object with the following schema:\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"status\": {\n            \"type\": \"string\"\n        },\n        \"output\": {\n            \"type\": \"string\"\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "comments",
+			"item": [
+				{
+					"name": "create a comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"gross!!!!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/1/comments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"1",
+								"comments"
+							]
+						},
+						"description": "### Create a Comment on a Blog\n\nThis endpoint allows the user to create a new comment on a specific blog. Note that Blog ID is a query parameter as we are passing in the blog id of the blog of which we want to write a comment for.\n\n**Query Parameters**\n\n- blogs\\[id\\] -> refers to the specific blog of which we want to access the comments of (blogs/\\[id\\]/comments)\n    \n\n#### Request Body\n\n- content (text, required): The content of the comment.\n    \n\n#### Response\n\nThe response is a JSON object with the following properties:\n\n- message (string): A message from the server.\n    \n- newComment (object): An object representing the newly created comment with the following properties:\n    \n    - id (number): The unique identifier of the comment.\n        \n    - authorId (number): The unique identifier of the author of the comment.\n        \n    - content (string): The content of the comment.\n        \n    - blogId (number): The unique identifier of the blog on which the comment was made.\n        \n    - upvote (number): The number of upvotes received by the comment.\n        \n    - downvote (number): The number of downvotes received by the comment.\n        \n    - createdAt (string): The timestamp indicating when the comment was created.\n        \n    - hidden (boolean): Indicates whether the comment is hidden or not.\n        \n    - parentId (number): The unique identifier of the parent comment, if the comment is a reply to another comment.\n        \n\n#### Response Schema\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"message\": {\n      \"type\": \"string\"\n    },\n    \"newComment\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"id\": {\n          \"type\": \"number\"\n        },\n        \"authorId\": {\n          \"type\": \"number\"\n        },\n        \"content\": {\n          \"type\": \"string\"\n        },\n        \"blogId\": {\n          \"type\": \"number\"\n        },\n        \"upvote\": {\n          \"type\": \"number\"\n        },\n        \"downvote\": {\n          \"type\": \"number\"\n        },\n        \"createdAt\": {\n          \"type\": \"string\"\n        },\n        \"hidden\": {\n          \"type\": \"boolean\"\n        },\n        \"parentId\": {\n          \"type\": [\"number\", \"null\"]\n        }\n      },\n      \"required\": [\"id\", \"authorId\", \"content\", \"blogId\", \"upvote\", \"downvote\", \"createdAt\", \"hidden\"]\n    }\n  },\n  \"required\": [\"newComment\"]\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "rate a comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"voteAction\": \"upvote\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/1/comments/1/rate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"1",
+								"comments",
+								"1",
+								"rate"
+							]
+						},
+						"description": "### Rate Blog Comment\n\nThis endpoint allows the user to rate a specific comment on a blog.\n\n#### Request Body\n\n- voteAction (string, required): The action to be performed on the comment, e.g., \"upvote\" or \"downvote\".\n    \n\n#### Query Parameters\n\n- blogs\\[id\\] -> refers to the id of the blog of which we want to access the comments too (blogs/\\[id\\])\n    \n- comments\\[id\\] -> refers to the specific comment associated with the blog (blogs/\\[id\\]/comments\\[id\\])\n    \n\n#### Response\n\nThe response will be in JSON format with the following schema:\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"message\": {\n            \"type\": \"string\"\n        },\n        \"votedComment\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"id\": {\n                    \"type\": \"integer\"\n                },\n                \"authorId\": {\n                    \"type\": \"integer\"\n                },\n                \"content\": {\n                    \"type\": \"string\"\n                },\n                \"blogId\": {\n                    \"type\": \"integer\"\n                },\n                \"upvote\": {\n                    \"type\": \"integer\"\n                },\n                \"downvote\": {\n                    \"type\": \"integer\"\n                },\n                \"createdAt\": {\n                    \"type\": \"string\"\n                },\n                \"hidden\": {\n                    \"type\": \"boolean\"\n                },\n                \"parentId\": {\n                    \"type\": [\"integer\", \"null\"]\n                }\n            }\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Create an admin account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"ADMINNNNNNNNNN\",\n    \"lastName\": \"ADMINNNNNN\",\n    \"userName\": \"IM DA ADMIN\",\n    \"password\": \"admin123\",\n    \"role\": \"ADMIN\",\n    \"email\": \"www.hello@wuwu.com\",\n    \"avatar\": \"shshshshs\",\n    \"phoneNumber\": \"6475555555\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						},
+						"description": "The endpoint `POST /api/users/signup` is used to sign up a new user with the provided details. The request should include the user's first name, last name, username, password, role, email, avatar, and phone number in the request body.\n\n### Request Body\n\n- `firstName` (string): The first name of the user.\n    \n- `lastName` (string): The last name of the user.\n    \n- `userName` (string): The username chosen by the user.\n    \n- `password` (string): The password for the user account.\n    \n- `role` (string): The role of the user (e.g., ADMIN, USER, etc.).\n    \n- `email` (string): The email address of the user.\n    \n- `avatar` (string): The avatar URL or image for the user.\n    \n- `phoneNumber` (string): The phone number of the user.\n    \n\n### Response (JSON Schema)\n\nThe response of this request follows the JSON schema below:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"userId\": {\n      \"type\": \"string\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "JWT Token for Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+									"// Save the token as an environment variable",
+									"pm.environment.set(\"accessToken\", jsonData.accessToken);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"IM DA ADMIN\",\n    \"password\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						},
+						"description": "### Login User\n\nThis endpoint allows users to log in by providing their username and password.\n\n#### Request Body\n\n- `userName` (string) - The username of the user.\n    \n- `password` (string) - The password of the user.\n    \n\n#### Response\n\nThe response is a JSON object with the following properties:\n\n- `userId` (string) - The unique identifier of the user.\n    \n- `token` (string) - The authentication token for the user session.\n    \n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"userId\": {\n            \"type\": \"string\"\n        },\n        \"token\": {\n            \"type\": \"string\"\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Flag a comment as an admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"comment mean\",\n    \"commentId\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"report"
+							]
+						},
+						"description": "This endpoint allows you to create a report for a comment by making an HTTP POST request to [http://localhost:3001/api/report](http://localhost:3001/api/report). The request should include a JSON payload in the raw request body type with the keys \"description\" and \"commentId\".\n\n### Request Body\n\n- `description`: (string) A brief description of the report.\n    \n- `commentId`: (number) The ID of the comment being reported.\n    \n\n### Response\n\nUpon a successful execution, the endpoint returns a status code of 200 and a JSON response with the following structure:\n\n``` json\n{\n    \"report\": {\n        \"id\": 0,\n        \"status\": \"\",\n        \"authorId\": 0,\n        \"description\": \"\",\n        \"createdAt\": \"\",\n        \"blogId\": null,\n        \"commentId\": 0\n    }\n}\n\n ```\n\nThe response contains the details of the created report, including the report ID, status, author ID, description, creation timestamp, blog ID (if applicable), and the ID of the reported comment."
+					},
+					"response": []
+				},
+				{
+					"name": "Hiding comment as an Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/1/comments/1/hide",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"1",
+								"comments",
+								"1",
+								"hide"
+							]
+						},
+						"description": "The endpoint allows the user to hide a comment on a specific blog post.\n\n**Query Parameters**\n\n- blogs\\[id\\] -> refers to the specific blog of which we want to access the comments of (blogs/\\[id\\])\n    \n- comments\\[id\\] -> refers to the specific comment of which we want to hide (blogs/\\[id\\]/comments/\\[id\\]/hide)\n    \n\n### Response\n\nThe response of the request is a JSON object with the following schema:\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"message\": {\n            \"type\": \"string\"\n        },\n        \"flaggedComment\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"id\": {\n                    \"type\": \"integer\"\n                },\n                \"authorId\": {\n                    \"type\": \"integer\"\n                },\n                \"content\": {\n                    \"type\": \"string\"\n                },\n                \"blogId\": {\n                    \"type\": \"integer\"\n                },\n                \"upvote\": {\n                    \"type\": \"integer\"\n                },\n                \"downvote\": {\n                    \"type\": \"integer\"\n                },\n                \"createdAt\": {\n                    \"type\": \"string\"\n                },\n                \"hidden\": {\n                    \"type\": \"boolean\"\n                },\n                \"parentId\": {\n                    \"type\": [\"integer\", \"null\"]\n                }\n            }\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Viewing flagged comment as the author only",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blogs/1/comments/4/view-hidden",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogs",
+								"1",
+								"comments",
+								"4",
+								"view-hidden"
+							]
+						},
+						"description": "### Get Hidden Comment\n\nThis endpoint retrieves a hidden comment associated with a specific blog.\n\n#### Request Body\n\nThis request does not require a request body.\n\n**Query Parameters**\n\n- blogs\\[id\\] -> refers to the specific blog of which we want to access the comments of (blogs/\\[id\\])\n    \n- comments\\[id\\] -> refers to the specific comment of which we want to show the author that its hidden (not the comment is only visible to the author) (blogs/\\[id\\]/comments/\\[id\\]/view-hidden)\n    \n\n#### Response\n\n- `message` (string) - A message related to the comment retrieval.\n    \n- `comment` (object)\n    \n    - `id` (number) - The unique identifier of the comment.\n        \n    - `authorId` (number) - The unique identifier of the comment author.\n        \n    - `content` (string) - The content of the comment.\n        \n    - `blogId` (number) - The unique identifier of the associated blog.\n        \n    - `upvote` (number) - The number of upvotes for the comment.\n        \n    - `downvote` (number) - The number of downvotes for the comment.\n        \n    - `createdAt` (string) - The timestamp of the comment creation.\n        \n    - `hidden` (boolean) - Indicates whether the comment is hidden.\n        \n    - `parentId` (number or null) - The unique identifier of the parent comment, if applicable.\n        \n    - `abuseReports` (array) - An array of abuse reports associated with the comment.\n        \n        - `id` (number) - The unique identifier of the abuse report.\n            \n        - `status` (string) - The status of the abuse report.\n            \n        - `authorId` (number) - The unique identifier of the author of the abuse report.\n            \n        - `description` (string) - The description of the abuse report.\n            \n        - `createdAt` (string) - The timestamp of the abuse report creation.\n            \n        - `blogId` (number or null) - The unique identifier of the associated blog, if applicable.\n            \n        - `commentId` (number) - The unique identifier of the associated comment."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Abuse Report",
+			"item": [
+				{
+					"name": "Create Abuse Report",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"This blog contains offensive language\",\r\n    \"blogId\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"report"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "### Report API\n\nThis API endpoint allows users to report offensive content in a blog or a comment.\n\n#### Request Body\n\n- `description` (string, required): The description of the offensive content.\n    \n- `blogId` (number, optional): The ID of the blog being reported.\n    \n- commentId (number, optional): The ID of the comment being reported\n    \n\nAtleast one of blogId or commentId have to be passed\n\n#### Response\n\nThe response is in JSON format and follows the schema below:\n\n``` json\n{\n  \"report\": {\n    \"id\": 0,\n    \"status\": \"\",\n    \"authorId\": 0,\n    \"description\": \"\",\n    \"createdAt\": \"\",\n    \"blogId\": 0,\n    \"commentId\": null\n  }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete an abuse report (ADMIN only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/report/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"report",
+								"delete"
+							]
+						},
+						"description": "### Delete Report\n\nThis endpoint is used to delete an abuse report. Available to ADMIN users only.\n\n#### Request\n\n- Method: DELETE\n    \n- URL: `http://localhost:3000/api/report/delete`\n    \n- Body:\n    \n    - id (number, required): The ID of the report to be deleted.\n        \n\n#### Response\n\nThe response is a JSON object with the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```\n\nThe response contains a status code of 200 and a JSON object with a `message` key."
+					},
+					"response": []
+				},
+				{
+					"name": "view (admin only)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/report/view_admin?page=1&limit=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"report",
+								"view_admin"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "1"
+								}
+							]
+						},
+						"description": "# Report View Admin\n\nThis endpoint makes an HTTP GET request to retrieve a specific page of admin view for blog and comment reports.\n\n## Request\n\n### Query Parameters\n\n- `page` (integer) - The page number to retrieve.\n    \n- `limit` (integer) - The maximum number of items to retrieve per page.\n    \n\n## Response\n\nUpon a successful request, the server responds with a status code of 200 and a JSON object containing the following fields:\n\n### Blogs (array)\n\n- `id` (integer) - The unique identifier of the blog.\n    \n- `authorId` (integer) - The ID of the blog author.\n    \n- `title` (string) - The title of the blog.\n    \n- `description` (string) - The description of the blog.\n    \n- `upvote` (integer) - The number of upvotes for the blog.\n    \n- `downvote` (integer) - The number of downvotes for the blog.\n    \n- `createdAt` (string) - The date and time of blog creation.\n    \n- `updatedAt` (string) - The date and time of blog update.\n    \n- `tags` (string) - The tags associated with the blog.\n    \n- `hidden` (boolean) - Indicates if the blog is hidden.\n    \n- `abuseReports` (array) - An array of abuse reports for the blog, each containing:\n    \n    - `id` (integer) - The unique identifier of the abuse report.\n        \n    - `status` (string) - The status of the abuse report.\n        \n    - `authorId` (integer) - The ID of the author of the abuse report.\n        \n    - `description` (string) - The description of the abuse report.\n        \n    - `createdAt` (string) - The date and time of the abuse report creation.\n        \n    - `blogId` (integer) - The ID of the blog associated with the abuse report.\n        \n    - `commentId` (null) - The ID of the comment associated with the abuse report (null for blog reports).\n        \n\n### Comments (array)\n\n- `id` (integer) - The unique identifier of the comment.\n    \n- `authorId` (integer) - The ID of the comment author.\n    \n- `content` (string) - The content of the comment.\n    \n- `blogId` (integer) - The ID of the blog associated with the comment.\n    \n- `upvote` (integer) - The number of upvotes for the comment.\n    \n- `downvote` (integer) - The number of downvotes for the comment.\n    \n- `createdAt` (string) - The date and time of comment creation.\n    \n- `hidden` (boolean) - Indicates if the comment is hidden.\n    \n- `parentId` (null) - The ID of the parent comment (null for top-level comments).\n    \n- `abuseReports` (array) - An array of abuse reports for the comment, each containing:\n    \n    - `id` (integer) - The unique identifier of the abuse report.\n        \n    - `status` (string) - The status of the abuse report.\n        \n    - `authorId` (integer) - The ID of the author of the abuse report.\n        \n    - `description` (string) - The description of the abuse report.\n        \n    - `createdAt` (string) - The date and time of the abuse report creation.\n        \n    - `blogId` (null) - The ID of the blog associated with the abuse report (null for comment reports).\n        \n    - `commentId` (integer) - The ID of the comment associated with the abuse report.\n        \n\nThis endpoint retrieves a paginated view of the blog posts and comments sorted by number of abuse reports. This feature is only available to admin users.\n\n#### Request\n\n- Method: GET\n    \n- URL: `http://localhost:3000/api/report/view_admin`\n    \n- Query Parameters:\n    \n    - `page` (number) - The page number for paginated results.\n        \n    - `limit` (number) - The maximum number of items to return per page.\n        \n\n#### Response\n\nThe response is in JSON format and follows the schema below:\n\n``` json\n{\n  \"blogs\": [\n    {\n      \"id\": \"number\",\n      \"authorId\": \"number\",\n      \"title\": \"string\",\n      \"description\": \"string\",\n      \"upvote\": \"number\",\n      \"downvote\": \"number\",\n      \"createdAt\": \"string\",\n      \"updatedAt\": \"string\",\n      \"tags\": \"string\",\n      \"hidden\": \"boolean\",\n      \"abuseReports\": [\n        {\n          \"id\": \"number\",\n          \"status\": \"string\",\n          \"authorId\": \"number\",\n          \"description\": \"string\",\n          \"createdAt\": \"string\",\n          \"blogId\": \"number\",\n          \"commentId\": \"number or null\"\n        }\n      ]\n    }\n  ],\n  \"comments\": \"array\"\n}\n\n ```"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
