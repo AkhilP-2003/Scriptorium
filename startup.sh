@@ -44,7 +44,7 @@ echo "Creating admin user..."
 
 NODE_SCRIPT=$(cat << 'EOF'
     const { PrismaClient } = require('@prisma/client');
-    const bcrypt = require('bcryptjs');
+    const bcrypt = require('bcrypt');
     const prisma = new PrismaClient();
 
     async function createAdminUser() {
@@ -111,12 +111,20 @@ fi
 echo "G++ found."
 
 # Check if Python 3.10+ is installed
-PYTHON_VERSION=$(python3 --version 2>&1)
+if ! command -v python3 &> /dev/null; then
+    echo "Error: Python 3 is not installed."
+    exit 1
+fi
+
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
 REQUIRED_PYTHON_VERSION="3.10"
-if [[ $PYTHON_VERSION != *$REQUIRED_PYTHON_VERSION* ]]; then
+
+# Compare versions
+if ! python3 -c "import sys; sys.exit(not (sys.version_info >= (3, 10)))"; then
     echo "Error: Python 3.10+ is required. Current version: $PYTHON_VERSION"
     exit 1
 fi
+
 echo "Python version is $PYTHON_VERSION"
 
 # Check if Java 20+ is installed
