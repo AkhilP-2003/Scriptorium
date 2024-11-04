@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id             Int           @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  userName       String        @unique
+  avatar         String //avatar
+  email          String        @unique
+  phoneNumber    String?       @unique
+  password       String
+  savedTemplates Template[] // One-to-many relationship with templates
+  blogPosts      BlogPost[] // One-to-many relationship with blog posts
+  comments       Comment[] // One-to-many relationship with comments
+  abuseReports   AbuseReport[] // One-to-many relationship with abuse reports
+  role           String        @default("USER") // User or Admin
+}
+
+model Template {
+  id               Int        @id @default(autoincrement())
+  ownerId          Int
+  owner            User       @relation(fields: [ownerId], references: [id])
+  title            String
+  explanation      String
+  // tags        templateTag
+  code             Code?
+  codeId           Int?
+  isForked         Boolean    @default(false)
+  parentTemplateId Int? // optional if not forked. 
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  blogPosts        BlogPost[]
+  tags             String
+}
+
+model Code {
+  id                   Int      @id @default(autoincrement())
+  associatedTemplateId Int      @unique //ONE TO ONE RELATIONSHIP WITH TEMPLATE
+  associatedTemplate   Template @relation(fields: [associatedTemplateId], references: [id])
+  code                 String //The actual code itself
+  language             String
+  input                String? //stdin for the code
+  output               String?
+  error                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model BlogPost {
+  id           Int           @id @default(autoincrement())
+  authorId     Int
+  author       User          @relation(fields: [authorId], references: [id])
+  title        String
+  description  String
+  templates    Template[]
+  comments     Comment[]
+  upvote       Int           @default(0)
+  downvote     Int           @default(0)
+  abuseReports AbuseReport[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  tags         String
+  hidden       Boolean       @default(false) // New flag for hiding
+}
+
+model Comment {
+  id           Int           @id @default(autoincrement())
+  authorId     Int
+  author       User          @relation(fields: [authorId], references: [id])
+  content      String
+  blogId       Int
+  blog         BlogPost      @relation(fields: [blogId], references: [id])
+  upvote       Int           @default(0)
+  downvote     Int           @default(0)
+  abuseReports AbuseReport[]
+  createdAt    DateTime      @default(now())
+  hidden       Boolean       @default(false)
+  parentId     Int? // optional field indicating if the comment is a reply to another comment
+  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies      Comment[]     @relation("CommentReplies")
+}
+
+model AbuseReport {
+  id          Int       @id @default(autoincrement())
+  status      String    @default("OPEN")
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id])
+  description String
+  createdAt   DateTime  @default(now())
+  blogId      Int?
+  blog        BlogPost? @relation(fields: [blogId], references: [id])
+  commentId   Int?      @unique
+  comment     Comment?  @relation(fields: [commentId], references: [id])
+}
