@@ -85,7 +85,7 @@ function executeJavaScriptCode(filePath, res, stdin) {
 
 // Execute Python code with spawn
 function executePythonCode(filePath, res, stdin) {
-    const process = spawn('python', [filePath]);
+    const process = spawn('python3', [filePath]);
 
     process.stdin.write(stdin); // Write stdin input
     process.stdin.end();

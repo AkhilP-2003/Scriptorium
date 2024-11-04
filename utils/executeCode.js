@@ -48,7 +48,7 @@ export async function executeCode(code, language, stdin = "") {
 // Execute Python code
 async function executePythonCode(filePath, stdin) {
     return new Promise((resolve) => {
-        const process = spawn('python', [filePath]);
+        const process = spawn('python3', [filePath]);
 
         process.stdin.write(stdin);
         process.stdin.end();
