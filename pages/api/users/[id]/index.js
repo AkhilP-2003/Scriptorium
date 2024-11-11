@@ -83,7 +83,7 @@ async function handler(req, res) {
 
                 if (lastName) {
                     if (lastName.trim === "") {
-                        return res.status(400).json({error: "please intput a first name"});
+                        return res.status(400).json({error: "please intput a last name"});
                     }
                 }
 

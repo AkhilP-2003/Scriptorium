@@ -7,7 +7,7 @@ async function handler(req, res) {
     if (req.method === "GET") {
         // get all blogposts
         const {tags, description, title, templateTitle } = req.query;
-        if (!tags && !description && !title && !templateTitle) {
+        if (!tags && !description && !title && !templateTitle) { //FIX THE TEMPATLE TITLE SEARCHHHHHH
             const b = await prisma.blogPost.findMany({
                 take: 6,
                 where: {
@@ -35,7 +35,8 @@ async function handler(req, res) {
                 ...(title && { title: { contains: title} }),  // Filter by title (partial match)
                 ...(templateTitle && {
                     templates: {
-                        title: { contains: templateTitle } // filter by template title if provided
+                        some: { title: { contains: templateTitle} },
+                     // filter by template title if provided
                     },
                 }),
             },
