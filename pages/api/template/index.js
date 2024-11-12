@@ -26,7 +26,6 @@ export default async function handler(req, res) {
       // add the title filter to the filter holder
       filterHolder.title = {
         contains: title,
-        mode: "insensitive"
       }
     }
 
@@ -36,7 +35,6 @@ export default async function handler(req, res) {
       // add it to the filter holder
       filterHolder.tags = {
         contains: tags,
-        mode: "insensitive"
       }
     }
 
