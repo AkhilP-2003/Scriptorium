@@ -26,6 +26,7 @@ export default async function handler(req, res) {
       // add the title filter to the filter holder
       filterHolder.title = {
         contains: title,
+        mode: "insensitive"
       }
     }
 
@@ -35,6 +36,7 @@ export default async function handler(req, res) {
       // add it to the filter holder
       filterHolder.tags = {
         contains: tags,
+        // mode: "insensitive"
       }
     }
 
@@ -49,8 +51,8 @@ export default async function handler(req, res) {
 
     // handle the case if we couldnt get the templates for any reason whatsoever
   } catch (error) {
-    console.error("Somethign went wrong in getting the templates")
-    return res.status(500).json( {error: "Somethign went wrong in getting the templates"})
+    console.error("Somethign went wrong in getting the templates", error)
+    return res.status(500).json( {error: "Somethign went wrong in getting the templates", details: error.message})
   }
 
 }
