@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         if (!validator.validate(email)) {
             return res.status(400).json({error: "Please provide a valid email"});
         }
-        let phoneNumberToCheck = phoneNumber && isValidPhoneNumber(phoneNumber) ? phoneNumber : null;
+        let phoneNumberToCheck = phoneNumber !== "" && isValidPhoneNumber(phoneNumber) ? phoneNumber : null;
 
         if (role !== "USER" && role !== "ADMIN") {
             return res.status(400).json({error: "role accepts USER or ADMIN"});
@@ -49,7 +49,7 @@ export default async function handler(req, res) {
 
         const user = await prisma.user.create({
             data: {
-                firstName, lastName, userName, avatar, email, phoneNumber, role, password: await hashPassword(password)
+                firstName, lastName, userName, avatar, email, phoneNumber: phoneNumber || null, role, password: await hashPassword(password)
             },
             select: {
                 id: true, firstName: true, lastName: true, email: true, userName: true, role:true, phoneNumber:true
