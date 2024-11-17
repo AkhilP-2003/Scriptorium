@@ -14,7 +14,7 @@ const AuthInput: React.FC<InputProps> = ({value, title, className, onChange}) =>
 
     return (
         <div className="flex flex-col w-full">
-            <label className="text-sm font-medium text-gray-700 mb-1"> {title} </label>
+            <label className="text-sm font-medium md:font-small m:font-small text-gray-700 mb-1"> {title} </label>
             <input className={`${className}`}
             type="text"
             value={value}

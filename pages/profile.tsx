@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import NavigationBar from "../components/NavigationBar";
 
 
-export default function Home() {
+export default function Profile() {
 
   return (
     <></>

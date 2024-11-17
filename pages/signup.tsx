@@ -4,6 +4,7 @@ import AuthInput from "../components/AuthInput";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import PasswordInput from "@/components/AuthInput/password";
+import NavigationBar from "@/components/NavigationBar";
 
 
 export default function Signup() {
@@ -95,11 +96,12 @@ export default function Signup() {
     }, [submit])
     
     return (
+        <>
         <div className="flex h-screen">
-        
-            <div className="flex flex-col items-center justify-center w-full md:w-1/2 bg-blue-50">
+            
+            <div className="flex flex-col items-center justify-center w-full md:w-1/2 bg-orange-50 shadow-2xl">
                 <h1 className="font-bold lg:text-4xl md:text-3xl sm:text-md text-gray-800 p-3">
-                    Welcome to Scriptorium!
+                    Welcome to <span className="text-orange-600">Scriptorium!</span>
                 </h1>
                 <h2 className="font-bold lg:text-2xl md:text-xl sm:text-sm text-gray-600 p-3">
                     A new code sharing space
@@ -160,9 +162,10 @@ export default function Signup() {
                 </div>
                 <button
                 onClick={handleSubmit}
-                className="bg-blue-500 mt-6 text-white font-bold py-2 px-4 w-full max-w-md rounded-lg hover:bg-blue-600 transition duration-200"
+                className="bg-orange-500 mt-6 text-white font-bold py-2 px-4 w-full max-w-md rounded-lg hover:bg-orange-600 transition duration-200"
                  > Sign Up</button>
             </div>
         </div>
+        </>
     )
 }
