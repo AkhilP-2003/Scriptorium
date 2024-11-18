@@ -6,10 +6,10 @@ export default async function handler(req, res) {
     if (req.method === "POST") {
         var validator = require("email-validator"); // email validator
         // signup logic: create access + refresh token, save user to db using bcrypt
-        const {firstName, lastName, userName, avatar, email, password, phoneNumber, role="USER"} = req.body;
+        const {firstName, lastName, userName, avatar="", email, password, phoneNumber, role="USER"} = req.body;
         // default role us USER
         // validation checks
-        if (!firstName || !lastName || !userName || !password || !email || !avatar) {
+        if (!firstName || !lastName || !userName || !password || !email) {
             // i made phone number a default of empty string, not necessary to input
             return res.status(400).json({error: `Please provide all registration fields`});
         }
