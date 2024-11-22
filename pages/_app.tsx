@@ -28,14 +28,21 @@ export default function App({ Component, pageProps }: AppProps) {
       
   return (
     <>
-    <div className="absolute top-0 left-0 right-0 z-10">
-      <NavigationBar
-        title="scriptorium"
-        links={links}
-        className="!shadow-lg"
-      />
+    <div className="grid grid-rows-[auto_1fr] grid-cols-1 min-h-screen">
+      {/* Navbar spans across full width */}
+      <div className="col-span-full z-10">
+        <NavigationBar
+          title="scriptorium"
+          links={links}
+          className="!shadow-2xl"
+        />
       </div>
-      <Component {...pageProps} />
+
+      {/* Main content section */}
+      <div>
+        <Component {...pageProps} />
+      </div>
+    </div>
     </>
   );
 }

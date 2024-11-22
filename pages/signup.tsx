@@ -89,7 +89,7 @@ export default function Signup() {
 
     useEffect(() => {
         // when these values are changed, run this method.
-    }, [userName, firstName, lastName, avatar, email, password, phoneNumber]);
+    }, [userName, firstName, lastName, email, password, phoneNumber]);
 
     useEffect(()=>  {
         signUp();
@@ -140,12 +140,6 @@ export default function Signup() {
                     title="Phone number (optional)"
                     value={phoneNumber}
                     onChange={handlePhoneChange}
-                    className="border border-gray-300 rounded-lg p-3 w-full max-w-md mb-4"
-                />
-                <AuthInput 
-                    title="avatar"
-                    value={avatar}
-                    onChange={handleAvatarChange}
                     className="border border-gray-300 rounded-lg p-3 w-full max-w-md mb-4"
                 />
                 <PasswordInput
