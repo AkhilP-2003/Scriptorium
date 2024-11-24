@@ -52,7 +52,7 @@ export default async function handler(req, res) {
     // handle the case if we couldnt get the templates for any reason whatsoever
   } catch (error) {
     console.error("Somethign went wrong in getting the templates", error)
-    return res.status(500).json( {error: "Somethign went wrong in getting the templates", details: error.message})
+    return res.status(400).json( {error: "Somethign went wrong in getting the templates", details: error.message})
   }
 
 }

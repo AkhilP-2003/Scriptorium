@@ -61,7 +61,7 @@ const handler = async (req, res) => {
     // handle any errors that may occur
   } catch (error) {
     console.error("Something went wrong in trying to delete your template", error)
-    return res.status(500).json( {error: "Could not delete your template"})
+    return res.status(400).json( {error: "Could not delete your template"})
   }
 
 }

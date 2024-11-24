@@ -42,7 +42,7 @@ const handler = async (req, res) => {
 
   } catch (error) {
     console.error("Error in viewing hidden comment", error);
-    return res.status(500).json({ error: "Something went wrong in viewing the hidden comment" })
+    return res.status(400).json({ error: "Something went wrong in viewing the hidden comment" })
   }
 }
 

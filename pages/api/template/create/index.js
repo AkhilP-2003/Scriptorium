@@ -93,7 +93,7 @@ const handler = async (req, res) => {
   // handle the case where something goes wrong while trying to create a template
   } catch (error) {
     console.error("Something went wrong in creating a new template", error);
-    return res.status(500).json({ error: "Failed to create a new template", details: error.message });
+    return res.status(400).json({ error: "Failed to create a new template", details: error.message });
   }  
 }
 
