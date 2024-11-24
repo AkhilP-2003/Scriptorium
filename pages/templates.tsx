@@ -151,7 +151,7 @@ export default function Templates() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by title or tags"
+            placeholder="Search by title, tags, or explanation"
             className="border p-2 rounded w-1/2"
           />
         </div>
@@ -159,7 +159,8 @@ export default function Templates() {
 
         {/* list of templates */}
         <div id="templates-list" className="grid gap-6 mb-4">
-          {templates.map((template) => (
+
+          {filteredTemplates.map((template) => (
 
             // in our list of templates we render a div for each template
             <div key={template.id} className="border p-4 rounded shadow">
@@ -170,8 +171,7 @@ export default function Templates() {
               <p className="mb-2">{template.explanation}</p>
               <p className="text-sm text-gray-600">Tags: {template.tags}</p>
             </div>
-
-
+            
           ))}
         </div>
 
