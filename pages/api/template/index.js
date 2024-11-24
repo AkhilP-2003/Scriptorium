@@ -49,7 +49,7 @@ export default async function handler(req, res) {
         owner: {
           select: {
             id: true,
-            userName: true, // Select the desired fields for the author
+            userName: true, // get the username
           },
         },
       },
