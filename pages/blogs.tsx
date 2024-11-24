@@ -67,7 +67,31 @@ export default function Blogs() {
 
     const vote = async(e: React.MouseEvent, id: number, voteType:string) => {
         e.stopPropagation();
-        const query = new URLSearchParams({ id: id.toString() }).toString(); // add id as query paramet
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        if (!refreshToken && !accessToken) {
+            router.push('/login');
+            return;
+        }
+        if (!accessToken && refreshToken) {
+            // refresh it. 
+            const update = await fetch('/api/users/refresh', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({refreshToken})
+            });
+            if (update.ok) {
+                const { accessToken: newAccessToken } = await update.json();
+                localStorage.setItem("accessToken", newAccessToken);
+            } else {
+                // If token refresh fails, redirect to login
+                router.push('/login');
+                return;
+            }
+        }
         try {
             
             const response = await fetch(`/api/blogs/${id}/rate`, {
@@ -78,20 +102,9 @@ export default function Blogs() {
                 },
                 body: JSON.stringify({voteType})},);
                 if (response.ok) {
-                    setBlogs(prevBlogs => {
-                        return prevBlogs.map(blog => {
-                            if (blog.id === id) {
-                                // Update upvote or downvote based on voteType
-                                if (voteType === 'upvote') {
-                                    return { ...blog, upvote: blog.upvote + 1 };
-                                } else if (voteType === 'downvote') {
-                                    return { ...blog, downvote: blog.downvote + 1 };
-                                }
-                            }
-                            return blog;
-                        });
-                    });
-                }
+                        getBlogs();
+                    };
+                
         } catch(error) {
             console.log("voting did not work");
         }
@@ -120,16 +133,15 @@ export default function Blogs() {
         setSort(value);
     };
 
-    // Function to sort blogs based on the current `sort` state
-    const sortBlogs = (blogs: Blog[]): Blog[] => {
+    // Dynamically sort blogs before rendering
+    const getSortedBlogs = (): Blog[] => {
         if (sort === "most-upvotes") {
-            return blogs.sort((a, b) => b.upvote - a.upvote);
+            return [...blogs].sort((a, b) => b.upvote - a.upvote);
         } else if (sort === "most-downvotes") {
-            return blogs.sort((a, b) => b.downvote - a.downvote);
+            return [...blogs].sort((a, b) => b.downvote - a.downvote);
         } else {
-            return blogs.sort((a, b) => (b.upvote + b.downvote) - (a.upvote + a.downvote));
+            return [...blogs].sort((a, b) => b.upvote + b.downvote - (a.upvote + a.downvote));
         }
-        return blogs;
     };
 
     useEffect(()=>  {
@@ -137,15 +149,13 @@ export default function Blogs() {
     }, [title, description, tags, templateTitle]);
     useEffect(() => {
         // Sort blogs whenever the sort order or blogs change
-        setBlogs(prevBlogs => sortBlogs([...prevBlogs]));
-    }, [sort, blogs]);
-    
-
+        setBlogs(prevBlogs => getSortedBlogs());
+    }, [sort]);
     
     return (
         <div className="flex flex-col lg:flex-row">
             {/* Left Side - Filter Section */}
-            <div className="lg:w-1/5 w-full bg-gray-100 shadow-xl p-4 lg:h-screen">
+            <div className="lg:w-1/5 w-full bg-gray-200 shadow-xl p-4 lg:h-screen">
                 <FilterSection
                     title={title}
                     description={description}
