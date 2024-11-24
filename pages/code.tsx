@@ -42,7 +42,8 @@ export default function Code() {
         if (response.ok) {
             const result = await response.json();
             alert('Code Executed');
-            console.log(output) //debugging
+            //Add status check
+            console.log(result.output) //debugging
             setOutput(result.output);
             // redirect to login page
             //router.push("/login");
@@ -104,7 +105,7 @@ export default function Code() {
         }}
       >
         <strong>Output:</strong>
-        <pre>{output}</pre> {/* Display output or errors here */}
+        {output} {/* Display output or errors here */}
       </div>
     </div>
   )
