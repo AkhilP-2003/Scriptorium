@@ -50,7 +50,7 @@ const FilterSection: React.FC<Filters> = ({ title, description, tags, templateTi
             <select
                 value={sort || ""}
                 onChange={(e) => handleSortChange(e.target.value)}
-                className={`p-3 border border-gray-500 rounded-lg w-full lg:w-auto ${className}`}
+                className={`p-3 border border-gray-300 rounded-lg w-full lg:w-auto ${className}`}
             >
                 <option value="most-upvotes">Sort by: Most Upvotes</option>
                 <option value="most-downvotes">Sort by: Most Downvotes</option>
