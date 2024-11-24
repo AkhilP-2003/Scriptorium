@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
 
     // artifically create the page and limit for pagination (can make changes to it later) and also extract the filters if provided
-    const { title, tags, page = 1, limit = 10 } = req.query;
+    const { title, tags, explanation, page = 1, limit = 10 } = req.query;
 
     const currentPage = parseInt(page)
     const pageSize = parseInt(limit)
@@ -20,8 +20,12 @@ export default async function handler(req, res) {
     // initialize a dict that we're later gonna update if there are filters that the user wants to go thru via the query
     let filterHolder ={}
 
+    const explanationQuery = explanation ? explanation.toLowerCase() : null;
+    const tagsQuery = tags ? tags.toLowerCase() : null;
+    const titleQuery = title ? title.toLowerCase() : null;
+
     // check if a title(s) filter is provided
-    if (title) {
+    if (titleQuery) {
 
       // add the title filter to the filter holder
       filterHolder.title = {
@@ -31,11 +35,21 @@ export default async function handler(req, res) {
     }
 
     // check if a tag(s) filter was provided
-    if (tags) {
+    if (tagsQuery) {
 
       // add it to the filter holder
       filterHolder.tags = {
         contains: tags,
+        // mode: "insensitive"
+      }
+    }
+
+    // check if an explanation filter was provided
+    if (explanationQuery) {  
+
+      // add it to the filter holder
+      filterHolder.explanation = {  
+        contains: explanation,
         // mode: "insensitive"
       }
     }
