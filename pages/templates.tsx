@@ -9,6 +9,10 @@ type Template = {
   title: string
   explanation: string
   tags: string
+  owner: {
+    id: number
+    userName: string
+  }
 }
 
 export default function Templates() {
@@ -51,13 +55,14 @@ export default function Templates() {
 
         <div id="templates-list" className="grid gap-6 mb-4">
           {templates.map((template) => (
-
+            // In our list of templates we render a div for each template
             <div key={template.id} className="border p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-2">{template.title}</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                {template.title} <span className="text-sm font-normal text-gray-500">by {template.owner.userName}</span>
+              </h2>
               <p className="mb-2">{template.explanation}</p>
               <p className="text-sm text-gray-600">Tags: {template.tags}</p>
             </div>
-
           ))}
         </div>
       </div>

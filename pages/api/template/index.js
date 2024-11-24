@@ -41,11 +41,19 @@ export default async function handler(req, res) {
     }
 
     // run a search and get all the templates based on what filters they provided from the query
-    const templates = await prisma.template.findMany({                            // note findMany handles the edge case where a filter is invalid 
-      where: filterHolder,                                                        // (it returns an empty array meaning no templayes matched the filter)
-      skip: (currentPage - 1) * pageSize,                   // calculate the number of items to skip and which item to actually start from on the page
-      take: pageSize                                        // the number of items to return in a page (the items to get)
-    })
+    const templates = await prisma.template.findMany({
+      where: filterHolder,
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
+      include: {
+        owner: {
+          select: {
+            id: true,
+            userName: true, // Select the desired fields for the author
+          },
+        },
+      },
+    });
     
     return res.status(200).json({templates, currentPage, pageSize})
 
