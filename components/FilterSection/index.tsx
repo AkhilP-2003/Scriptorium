@@ -54,7 +54,7 @@ const FilterSection: React.FC<Filters> = ({ title, description, tags, templateTi
             >
                 <option value="most-upvotes">Sort by: Most Upvotes</option>
                 <option value="most-downvotes">Sort by: Most Downvotes</option>
-                <option value="recent">Sort by: Most Recent</option>
+                <option value="recent">Sort by: Most Controversial</option>
             </select>
             </div>
     );

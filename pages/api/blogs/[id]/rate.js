@@ -8,9 +8,10 @@ async function handler(req, res) {
     if (req.method === "POST") {
 
         return jwtMiddleware(async (req, res) => {
-            const { id } = req.query;
+        const { id } = req.query;
         const { voteType } = req.body;  // voteType can be 'upvote' or 'downvote'
         const { user } = req; 
+
 
         if (!id || !voteType || (voteType !== 'upvote' && voteType !== 'downvote')) {
             return res.status(400).json({ error: "Blog ID and valid vote type are required." });
@@ -44,7 +45,7 @@ async function handler(req, res) {
     
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: "An error occurred while registering the vote." });
+            return res.status(400).json({ error: "An error occurred while registering the vote." });
         }
 
         }, ["USER", "ADMIN"])(req, res);

@@ -19,7 +19,7 @@ export function jwtMiddleware(handler, roles = []) {
             req.user = payload;
 
             if (roles.length > 0 && !roles.includes(req.user.role)) {
-                return res.status(400).json({error: "Invalid authorization"});
+                return res.status(403).json({error: "Invalid authorization"});
             }
             // call handler now that everything is ok. 
             return handler(req, res);

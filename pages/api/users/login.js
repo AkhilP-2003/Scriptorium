@@ -19,8 +19,14 @@ export default async function handler(req, res) {
         }
         // if everything is valid, then generate new refresh + access token
         const accessToken = generateAccessToken({id: existingUser.id, userName: existingUser.userName, email: existingUser.email, role: existingUser.role});
-        const refreshToken = generateRefreshToken({id: existingUser.id, userName: existingUser.userName, email: existingUser.email,role: existingUser.role});
-        
+        const refreshToken = generateRefreshToken({id: existingUser.id, userName: existingUser.userName, email: existingUser.email, role: existingUser.role});
+
+        // Set tokens in cookies
+        // Set HttpOnly cookies
+        // res.setHeader("Set-Cookie", [
+        //     `accessToken=${accessToken}; HttpOnly; Secure; Path=/; Max-Age=3600`,
+        //     `refreshToken=${refreshToken}; HttpOnly; Secure; Path=/; Max-Age=604800`,
+        // ]);
 
         // its going to be encryped so we can show this information.
         return res.status(200).json({

@@ -6,10 +6,13 @@ import {jwtMiddleware} from "@/pages/api/middleware";  // Import the JWT middlew
 async function handler(req, res) {
     if (req.method === "GET") {
         // get all blogposts
-        const {tags, description, title, templateTitle } = req.query;
+        const {tags, description, title, templateTitle, page=1, limit=10 } = req.query;
+        const currentPage = parseInt(page)
+        const pageSize = parseInt(limit)
         if (!tags && !description && !title && !templateTitle) { //FIX THE TEMPATLE TITLE SEARCHHHHHH
             const b = await prisma.blogPost.findMany({
-                take: 6,
+                skip: (currentPage - 1) * pageSize,// calculate the number of items to skip and which item to actually start from on the page
+                take: pageSize,// the number of items to return in a page (the items to get)
                 where: {
                     hidden: false,  // Only show visible blogs
                 },
@@ -27,7 +30,8 @@ async function handler(req, res) {
 
 
         const blogs = await prisma.blogPost.findMany({
-            take: 6,
+            skip: (currentPage - 1) * pageSize,// calculate the number of items to skip and which item to actually start from on the page
+            take: pageSize,// the number of items to return in a page (the items to get)
             where: {
                 hidden: false, // only show blogs that are NOT HIDDEN - NOT FLAGGED
                 ...(tags && { tags: { contains: tags} }),  // Filter by tags if provided
