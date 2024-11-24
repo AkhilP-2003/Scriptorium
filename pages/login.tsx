@@ -4,7 +4,6 @@ import AuthInput from "../components/AuthInput";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import PasswordInput from "@/components/AuthInput/password";
-import NavigationBar from "@/components/NavigationBar";
 
 
 export default function Login() {
@@ -40,13 +39,17 @@ export default function Login() {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify(userData),
+          
             });
             // Check if the request was successful
             if (response.ok) {
-                const { access_token, refresh_token } = await response.json();
-                // Store the tokens
-                localStorage.setItem('access_token', access_token); 
-                document.cookie = `refresh_token=${refresh_token}; HttpOnly; Secure`; // Use cookies for refresh token
+                const { accessToken, refreshToken } = await response.json();
+                // Extract the Authorization header
+
+                    // Store the access token securely
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+
                 alert('Login up successful!');
                 // redirect to login page
                 router.push("/");
@@ -59,6 +62,7 @@ export default function Login() {
         } catch(error) {
             setError({ message: 'Network error, please try again later.' });
             console.error(error);
+            
         }
     }
 
