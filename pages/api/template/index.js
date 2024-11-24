@@ -40,6 +40,10 @@ export default async function handler(req, res) {
       }
     }
 
+    const totalTemplatesCount = await prisma.template.count({
+      where: filterHolder
+    })
+
     // run a search and get all the templates based on what filters they provided from the query
     const templates = await prisma.template.findMany({
       where: filterHolder,
@@ -55,7 +59,7 @@ export default async function handler(req, res) {
       },
     });
     
-    return res.status(200).json({templates, currentPage, pageSize})
+    return res.status(200).json({templates, totalTemplatesCount, currentPage, pageSize})
 
     // handle the case if we couldnt get the templates for any reason whatsoever
   } catch (error) {
