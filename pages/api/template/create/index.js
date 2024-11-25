@@ -81,12 +81,16 @@ const handler = async (req, res) => {
         codeId: newCode.id, // Update the template to reference the created code
         code: { connect: { id: newCode.id } }, // Connect the created Code to the Template
       },
-    })
+      include: {
+        code: true, // Include the associated code in the response
+      },
+    });
+    
 
 
     // return the new template thats been created
     return res.status(201).json({
-      template: newTemplate,
+      template: updatedTemplate,
       message: isForked ? "Template successfully forked from an existing template" : "Your new template is ready"  // the notif that its a forked version
     })
     
