@@ -23,7 +23,8 @@ export default async function handler(req, res) {
               id: true,
               userName: true
             }
-          }
+          },
+          code: true
         }
       })
       
@@ -42,8 +43,18 @@ export default async function handler(req, res) {
             id: template.owner?.id || null,
             userName: template.owner?.userName || "",
           },
-        },
-      });
+          code: template.code
+          ? {
+              id: template.code.id || null,
+              code: template.code.code || "",
+              language: template.code.language || "",
+              input: template.code.input || "",
+              output: template.code.output || "",
+              error: template.code.error || ""
+            }
+          : null
+        }
+      })
     } catch (error) {
       console.error("Error fetching template:", error)
       return res.status(400).json({ error: "Internal Server Error" })

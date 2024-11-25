@@ -3,6 +3,15 @@ import { useRouter } from 'next/router';
 import React from 'react';
 
 // defining the type for the template
+type Code = {
+  id: number
+  code: string
+  language: string
+  input?: string
+  output?: string
+  error?: string
+}
+
 type Template = {
   id: number
   title: string
@@ -12,6 +21,7 @@ type Template = {
     id: number
     userName: string
   }
+  code: Code | null
 }
 
 // define the props that will be passed to the templateDetails component
@@ -30,6 +40,28 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
     return <div>Template not found</div>
   }
 
+  const handleForkTemplate = () => {
+
+    // check if the template has code
+    if (template?.code) {
+
+      // redirect to the playground page with template data
+      router.push({
+        pathname: '/templates/playground',
+        query: {
+          id: template.id.toString(),
+          title: template.title,
+          code: template.code.code,        // pass the actual code string
+          language: template.code.language // pass the language as a string
+        }
+      })
+    } else {
+      console.error('No code found for this template')
+    }
+  }
+  
+  
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">{template.title}</h1>
@@ -38,12 +70,23 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
         <p className="mb-2 text-lg">{template.explanation}</p>
         <p className="text-sm text-gray-600">Tags: {template.tags}</p>
       </div>
+      {template.code && template.code.code}
+
       <button
         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         onClick={() => router.back()}
       >
         Back
       </button>
+
+      {/* forked button */}
+      <button
+        className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        onClick={handleForkTemplate}
+      >
+        Fork & Run
+      </button>
+
     </div>
   )
 }
