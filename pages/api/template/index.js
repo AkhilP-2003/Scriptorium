@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
 
     // artifically create the page and limit for pagination (can make changes to it later) and also extract the filters if provided
-    const { title, tags, explanation, page = 1, limit = 10 } = req.query;
+    const { title, tags, explanation, ownerID, page = 1, limit = 10 } = req.query
 
     const currentPage = parseInt(page)
     const pageSize = parseInt(limit)
@@ -20,9 +20,9 @@ export default async function handler(req, res) {
     // initialize a dict that we're later gonna update if there are filters that the user wants to go thru via the query
     let filterHolder ={}
 
-    const explanationQuery = explanation ? explanation.toLowerCase() : null;
-    const tagsQuery = tags ? tags.toLowerCase() : null;
-    const titleQuery = title ? title.toLowerCase() : null;
+    const explanationQuery = explanation ? explanation.toLowerCase() : null
+    const tagsQuery = tags ? tags.toLowerCase() : null
+    const titleQuery = title ? title.toLowerCase() : null
 
     // check if a title(s) filter is provided
     if (titleQuery) {
@@ -52,6 +52,13 @@ export default async function handler(req, res) {
         contains: explanation,
         // mode: "insensitive"
       }
+    }
+
+    // check if an owner filter was provided
+    if (ownerID) {  
+      
+      // add it to the filter holder
+      filterHolder.ownerId = parseInt(ownerID)
     }
 
     const totalTemplatesCount = await prisma.template.count({

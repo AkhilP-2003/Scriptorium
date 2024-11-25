@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import {jwtDecode} from 'jwt-decode';
 
+// page should show the new template form
 const NewTemplatePage: React.FC = () => {
   const [title, setTitle] = useState('')
   const [explanation, setExplanation] = useState('')
@@ -11,7 +12,8 @@ const NewTemplatePage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const router = useRouter()
 
-  useEffect(() => {
+  // check if the user is authenticated
+  useEffect(() => { 
 
     // check if the user is authenticated
     const accessToken = localStorage.getItem('accessToken')
@@ -23,24 +25,26 @@ const NewTemplatePage: React.FC = () => {
     }
 
     try {
-      // Decode the token to check if it's expired
+
+      // decode the token to check if expired
       const decodedToken: { exp: number } = jwtDecode(accessToken)
       const currentTime = Date.now() / 1000 // Current time in seconds
 
+      // dheck if the token is expired
       if (decodedToken.exp < currentTime) {
-        // Token is expired, redirect to login
+        // token is expired so redirect to login
         router.push('/login')
       }
     } catch (error) {
       console.error('Invalid token:', error)
-      router.push('/login') // Redirect to login if there's an error decoding the token
+      router.push('/login') // redirect to login if thers an error decoding the token
     }
   }, [])
 
   const handleCreateTemplate = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate that the required fields are not empty
+    // validate that the required fields are not empty
     if (!title.trim()) {
       setErrorMessage("Title is required.")
       return;
@@ -71,41 +75,54 @@ const NewTemplatePage: React.FC = () => {
     const templateData = { title, explanation, tags, code, language }
 
     try {
-      // Assuming you have an API endpoint to create a new template
+
+      // check if the user is authenticated
       const accessToken = localStorage.getItem('accessToken')
+
+      // create the template
       const response = await fetch('/api/template/create', {
+
+        // send the template data
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}` // include the access token for authentication
         },
         body: JSON.stringify(templateData)
-      });
 
+      })
+
+      // check if the response is not ok
       if (!response.ok) {
+
+        // display the error message
         const errorData = await response.json()
         console.error('Error response from server:', errorData)
         alert(`Error creating template: ${errorData.error || "Unknown error"}`)
         return
+
       }
 
       // since the template was created w no issues we can redirect to templates list page
       alert('Template created successfully')
       router.push('/templates')
+
     } catch (error) {
+
       console.error('Error creating template:', error)
       alert('Error creating template')
+
     }
   };
 
   return (
     <div className="container mx-auto p-8 bg-white shadow-md rounded-lg">
       <h1 className="text-4xl font-bold mb-6 text-gray-800">
-        Create New Code Template
+        Create a New Code Template
       </h1>
       <form onSubmit={handleCreateTemplate}>
 
-        {/* display validation error message if present */}
+        {/* display validation error message if its therr */}
         {errorMessage && (
           <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
             {errorMessage}
