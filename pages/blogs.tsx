@@ -3,6 +3,23 @@ import FilterSection from "../components/FilterSection";
 import { useState } from "react";
 import BlogCard from "@/components/BlogCard";
 import { useRouter } from "next/router";
+import { jwtDecode } from "jwt-decode";
+
+function isTokenExpired(token: string) {
+  try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Current time in seconds
+      if (decoded.exp) {
+        return decoded.exp < currentTime;
+      } else {
+        console.log("exp is null i think")
+      }
+  } catch (error) {
+      console.error("Invalid token", error);
+      return true; // Treat invalid tokens as expired
+  }
+}
+
 
 // this page should show the blogs.
 
@@ -28,6 +45,7 @@ export default function Blogs() {
     const [sort, setSort] = useState<string>("most-upvotes");
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const router = useRouter();
+
 
     const navigateToBlog = (id: number) => {
         router.push(`/blog/${id}`);
@@ -71,11 +89,11 @@ export default function Blogs() {
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
 
-        if (!refreshToken && !accessToken) {
+        if (!refreshToken || isTokenExpired(refreshToken)) {
             router.push('/login');
             return;
         }
-        if (!accessToken && refreshToken) {
+        if (!accessToken || isTokenExpired(accessToken)) {
             // refresh it. 
             const update = await fetch('/api/users/refresh', {
                 method: 'POST',
@@ -94,7 +112,6 @@ export default function Blogs() {
             }
         }
         try {
-            
             const response = await fetch(`/api/blogs/${id}/rate`, {
                 method: 'POST',
                 headers: {
@@ -153,6 +170,10 @@ export default function Blogs() {
         setBlogs(prevBlogs => getSortedBlogs());
     }, [sort]);
     
+    function handleCreateButton(): void {
+        
+    }
+
     return (
         <div className="flex flex-col lg:flex-row">
             {/* Left Side - Filter Section */}
@@ -174,7 +195,7 @@ export default function Blogs() {
                 <h1 className="text-3xl font-bold">Blogs</h1>
 
                 {/* Create Blog Button */}
-                <button className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
+                <button onClick={() => handleCreateButton()} className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
                 Create Blog
                 </button>
             </div>
