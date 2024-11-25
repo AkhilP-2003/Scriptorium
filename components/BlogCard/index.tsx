@@ -43,13 +43,14 @@ const BlogCard:React.FC<InputProps> = ({id, onClick, handleUpvote, handleDownvot
             <button
                 className="text-orange-500 hover:font-semibold focus:outline-none transition-colors"
                 onClick={(e) => handleUpvote(e, id,"upvote")} title="upvote">
-                <ArrowUpIcon className="h-5 w-5" />
+                {/* <ArrowUpIcon className="h-5 w-5" /> */}
+                <div>👍 </div>
                 
             </button> <span className="!ml-1 text-sm font-semibold">{upvoteNum}</span>
             <button
                 className="text-orange-500 hover:font-semibold focus:outline-none transition-colors"
                 onClick={(e) => handleDownvote(e, id, "upvote")} title="downvote">
-                <ArrowDownIcon className="h-5 w-5" />
+                <div>👎</div>
             </button><span className="!ml-1 text-sm font-semibold">{downvoteNum}</span>
         </div>
         </div>
