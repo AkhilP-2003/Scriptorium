@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import NavigationBar from "../components/NavigationBar";
+import NavigationBar from "../../components/NavigationBar";
 import { useRouter } from "next/router";
-import { title } from "process";
+import TemplateCard from "../../components/TemplateCard";
 
 // defining the type for the templates
 type Template = {
@@ -19,7 +19,7 @@ type Template = {
 
 export default function Templates() {
 
-  // default state of tempaltes is just an empty list of templates
+  // default state of templates is just an empty list of templates
   const [templates, setTemplates] = useState<Template[]>([])
 
   // states for pagination
@@ -29,10 +29,6 @@ export default function Templates() {
 
   // state for search bar nav
   const [searchQuery, setSearchQuery] = useState(""); // search query for filtering templates
-
-  // states for filters
-  //const [titleFilter, setTitleFilter] = useState("")
-  //const [tagFilter, setTagFilter] = useState("")
 
   const router = useRouter() // use the router for updating the query params in our url
 
@@ -53,7 +49,7 @@ export default function Templates() {
   }
 
 
-  // fetch the listt of templates from our api (we wanna do this on mount)
+  // fetch the list of templates from our api (we wanna do this on mount)
   const fetchTemplates = async (page: number) => {
     try {
       const response = await fetch(`/api/template?page=${page}&limit=${pageSize}`)
@@ -63,7 +59,7 @@ export default function Templates() {
         throw new Error("Failed to fetch templates")
       }
 
-      // parse teh json data from our response
+      // parse the json data from our response
       const data = await response.json()
 
       // update our templates state to be whatever the data is that we fetched
@@ -71,7 +67,6 @@ export default function Templates() {
 
       // set the total number of pages
       setTotalTemplatesCount(data.totalTemplatesCount)
-
 
     } catch (error) {
 
@@ -81,12 +76,12 @@ export default function Templates() {
   }
 
 
-  // we acc fetch the templates when the page loads/changes
+  // we actually fetch the templates when the page loads/changes
   useEffect(() => {
     fetchTemplates(currentPage)
   }, [currentPage])
 
-  // set intial states based on query params in our url
+  // set initial states based on query params in our url
   useEffect(() => {
     const { page, search } = router.query
 
@@ -113,7 +108,7 @@ export default function Templates() {
   // using the memo hook to compute the filtered templates based on the search query 
   const filteredTemplates = useMemo(() => {
 
-    // we only filter wwhent eh search query changes
+    // we only filter when the search query changes
     return templates.filter((template) => {
 
       return (
@@ -144,7 +139,7 @@ export default function Templates() {
   // navigate to a detailed view of template when template is clicked
   const handleTemplateClick = (templateId: number) => {
 
-    // navigate to the specific template page accoridng do the id
+    // navigate to the specific template page according to the id
     router.push(`/templates/${templateId}`);
     return
   }
@@ -165,31 +160,16 @@ export default function Templates() {
           />
         </div>
 
-
         {/* list of templates */}
         <div id="templates-list" className="grid gap-6 mb-4">
           {filteredTemplates.map((template) => (
-
-            // create this div elm for each template
-            <div
+            <TemplateCard
               key={template.id}
-              className="border p-4 rounded shadow cursor-pointer hover:bg-gray-100"
-              onClick={() => handleTemplateClick(template.id)}  // navigate to the detailed page
-            >
-              <h2 className="text-xl font-semibold mb-2 flex justify-between items-center">
-                {template.title}
-                <span className="text-sm font-normal text-gray-500">
-                  Author: {template.owner.userName}
-                </span>
-              </h2>
-              <p className="mb-2">{template.explanation}</p>
-              <p className="text-sm text-gray-600">Tags: {template.tags}</p>
-            </div>
-
-            
+              template={template}
+              onClick={() => handleTemplateClick(template.id)}
+            />
           ))}
         </div>
-
 
         {/* pagination buttons */}
         <div className="flex justify-center space-x-4">
@@ -214,8 +194,6 @@ export default function Templates() {
             Next
           </button>
         </div>
-
-
       </div>
     </>
   )
