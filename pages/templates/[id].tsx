@@ -1,4 +1,3 @@
-import { on } from 'events';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -55,7 +54,10 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
           id: template.id.toString(),
           title: template.title,
           code: template.code.code,        // pass the actual code string
-          language: template.code.language // pass the language as a string
+          language: template.code.language, // pass the language as a string
+          input: template.code.input || '', // pass the input as a string
+          output: template.code.output || '', // pass the output as a string
+          error: template.code.error || '' // pass the error as a string
         }
       })
     } else {
