@@ -69,7 +69,7 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">{template.title}</h1>
+      <h1 className="text-3xl font-bold mb-4">Currently Viewing Code Template: {template.title}</h1>
       <p className="text-gray-600 mb-4">Author: {template.owner.userName}</p>
       <div className="border p-4 rounded shadow">
         <p className="mb-2 text-lg">{template.explanation}</p>

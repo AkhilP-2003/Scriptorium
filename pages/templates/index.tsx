@@ -144,10 +144,38 @@ export default function Templates() {
     return
   }
 
+
+  // navigate to the create template page
+  const handleCreateTemplate = () => {
+
+    const accessToken = localStorage.getItem('accessToken') // check if the user is logged in
+
+    if (!accessToken) {
+
+      // if no access token is found then we redirect to the login/signup page
+      router.push('/login')
+      return
+    }
+
+    // if logged in then we cud navigate to the "Create New Template" page
+    router.push(`/templates/new`)
+  }
+
+
   return (
     <>
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-4 text-center">Code Templates</h1>
+
+        {/* create new template button */}
+        <div className="flex justify-end mb-4">
+          <a
+            onClick={handleCreateTemplate}
+            className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-all cursor-pointer"
+          >
+            Create New Template
+          </a>
+        </div>
 
         {/* search bar */}
         <div className="mb-6 flex justify-center">
