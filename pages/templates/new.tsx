@@ -1,46 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
-interface TemplateFormProps {
-  onSubmit: (data: {
-    title: string
-    explanation: string
-    tags: string
-    code: string
-  }) => void;
-  initialData?: {
-    title: string
-    explanation: string
-    tags: string
-    code: string
-  };
-}
-
-const TemplateForm: React.FC<TemplateFormProps> = ({ onSubmit, initialData }) => {
-  const [title, setTitle] = useState(initialData?.title || '')
-  const [explanation, setExplanation] = useState(initialData?.explanation || '')
-  const [tags, setTags] = useState(initialData?.tags || '')
-  const [code, setCode] = useState(initialData?.code || '')
+const NewTemplatePage: React.FC = () => {
+  const [title, setTitle] = useState('')
+  const [explanation, setExplanation] = useState('')
+  const [tags, setTags] = useState('')
+  const [language, setLanguage] = useState('')
+  const [code, setCode] = useState('')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    // Check if the user is authenticated
-    const accessToken = localStorage.getItem('accessToken');
+
+    // check if the user is authenticated
+    const accessToken = localStorage.getItem('accessToken')
 
     if (!accessToken) {
-      // No access token, redirect to login page
+      // no access token, redirect to login page
       router.push('/login')
-      return;
+      return
     }
 
     try {
-      // decode the token to check if it's expired
+      // Decode the token to check if it's expired
       const decodedToken: { exp: number } = jwtDecode(accessToken)
       const currentTime = Date.now() / 1000 // Current time in seconds
 
       if (decodedToken.exp < currentTime) {
-        // token is expired, redirect to login
+        // Token is expired, redirect to login
         router.push('/login')
       }
     } catch (error) {
@@ -49,17 +37,82 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ onSubmit, initialData }) =>
     }
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({ title, explanation, tags, code })
-  }
+  const handleCreateTemplate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Validate that the required fields are not empty
+    if (!title.trim()) {
+      setErrorMessage("Title is required.")
+      return;
+    }
+
+    if (!explanation.trim()) {
+      setErrorMessage("Explanation is required.")
+      return;
+    }
+
+    if (!tags.trim()) {
+      setErrorMessage("Tags are required.")
+      return;
+    }
+
+    if (!code.trim()) {
+      setErrorMessage("Code is required.")
+      return;
+    }
+
+    if (!language.trim()) {
+      setErrorMessage("Language is required.")
+      return;
+    }    
+
+    setErrorMessage(null); // Clear any previous error messages
+
+    const templateData = { title, explanation, tags, code, language }
+
+    try {
+      // Assuming you have an API endpoint to create a new template
+      const accessToken = localStorage.getItem('accessToken')
+      const response = await fetch('/api/template/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}` // include the access token for authentication
+        },
+        body: JSON.stringify(templateData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Error response from server:', errorData)
+        alert(`Error creating template: ${errorData.error || "Unknown error"}`)
+        return
+      }
+
+      // since the template was created w no issues we can redirect to templates list page
+      alert('Template created successfully')
+      router.push('/templates')
+    } catch (error) {
+      console.error('Error creating template:', error)
+      alert('Error creating template')
+    }
+  };
 
   return (
     <div className="container mx-auto p-8 bg-white shadow-md rounded-lg">
       <h1 className="text-4xl font-bold mb-6 text-gray-800">
-        {initialData ? 'Edit Template' : 'Create New Template'}
+        Create New Code Template
       </h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleCreateTemplate}>
+
+        {/* display validation error message if present */}
+        {errorMessage && (
+          <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* form title field */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2 text-gray-700">Title</label>
           <input
@@ -71,6 +124,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ onSubmit, initialData }) =>
           />
         </div>
 
+        {/* form explanation field */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2 text-gray-700">Explanation</label>
           <textarea
@@ -82,6 +136,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ onSubmit, initialData }) =>
           ></textarea>
         </div>
 
+        {/* form tags field */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2 text-gray-700">Tags</label>
           <input
@@ -93,6 +148,19 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ onSubmit, initialData }) =>
           />
         </div>
 
+        {/* form language field */}
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2 text-gray-700">Language</label>
+          <input
+            type="text"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+            placeholder="Enter language (e.g., JavaScript, Python)"
+          />
+        </div>
+
+        {/* form code field */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2 text-gray-700">Code</label>
           <textarea
@@ -104,12 +172,13 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ onSubmit, initialData }) =>
           ></textarea>
         </div>
 
+        {/* form submit and cancel buttons */}
         <div className="flex items-center gap-4">
           <button
             type="submit"
             className="px-8 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-all duration-300"
           >
-            {initialData ? 'Save Changes' : 'Create Template'}
+            Create Template
           </button>
           <button
             type="button"
@@ -124,4 +193,4 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ onSubmit, initialData }) =>
   )
 }
 
-export default TemplateForm;
+export default NewTemplatePage
