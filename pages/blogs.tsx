@@ -31,6 +31,7 @@ export default function Blogs() {
 
     const navigateToBlog = (id: number) => {
         router.push(`/blog/${id}`);
+        return;
       };
 
     const getBlogs = async () => {
