@@ -140,6 +140,15 @@ export default function Templates() {
     }
   }
 
+
+  // navigate to a detailed view of template when template is clicked
+  const handleTemplateClick = (templateId: number) => {
+
+    // navigate to the specific template page accoridng do the id
+    router.push(`/templates/${templateId}`);
+    return
+  }
+
   return (
     <>
       <div className="container mx-auto p-4">
@@ -159,18 +168,24 @@ export default function Templates() {
 
         {/* list of templates */}
         <div id="templates-list" className="grid gap-6 mb-4">
-
           {filteredTemplates.map((template) => (
 
-            // in our list of templates we render a div for each template
-            <div key={template.id} className="border p-4 rounded shadow">
+            // create this div elm for each template
+            <div
+              key={template.id}
+              className="border p-4 rounded shadow cursor-pointer hover:bg-gray-100"
+              onClick={() => handleTemplateClick(template.id)}  // navigate to the detailed page
+            >
               <h2 className="text-xl font-semibold mb-2 flex justify-between items-center">
                 {template.title}
-                <span className="text-sm font-normal text-gray-500">Author: {template.owner.userName}</span>
+                <span className="text-sm font-normal text-gray-500">
+                  Author: {template.owner.userName}
+                </span>
               </h2>
               <p className="mb-2">{template.explanation}</p>
               <p className="text-sm text-gray-600">Tags: {template.tags}</p>
             </div>
+
             
           ))}
         </div>
