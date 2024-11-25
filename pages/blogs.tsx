@@ -4,6 +4,7 @@ import { useState } from "react";
 import BlogCard from "@/components/BlogCard";
 import { useRouter } from "next/router";
 import { jwtDecode } from "jwt-decode";
+import { constants } from "buffer";
 
 function isTokenExpired(token: string) {
   try {
@@ -165,13 +166,14 @@ export default function Blogs() {
     useEffect(()=>  {
         getBlogs();
     }, [title, description, tags, templateTitle]);
+    
     useEffect(() => {
         // Sort blogs whenever the sort order or blogs change
         setBlogs(prevBlogs => getSortedBlogs());
     }, [sort]);
     
-    function handleCreateButton(): void {
-        
+    const handleCreateButton = () => {
+        router.push(`/blog/create`);
     }
 
     return (

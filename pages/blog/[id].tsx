@@ -225,7 +225,7 @@ export default function CurrentBlogPage() {
 
   const handleEdit = (blogId: number) => {
     // handle edit features for author.
-    router.push(`blog/edit/${blogId}`);
+    router.push(`edit/${blogId}`);
     return;
   }
 
@@ -271,7 +271,6 @@ export default function CurrentBlogPage() {
                   Delete
                 </button>
               }
-              
             id={blog.id}
             title={blog.title}
             description={blog.description}
