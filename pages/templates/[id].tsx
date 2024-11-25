@@ -1,6 +1,9 @@
+import { on } from 'events';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import React from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 // defining the type for the template
 type Code = {
@@ -70,7 +73,16 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
         <p className="mb-2 text-lg">{template.explanation}</p>
         <p className="text-sm text-gray-600">Tags: {template.tags}</p>
       </div>
-      {template.code && template.code.code}
+      {/* code - using react-syntax-highlighter library */}
+      {template.code && (
+        <div className="border p-6 rounded shadow mb-6 bg-gray-100">
+          <h3 className="text-2xl font-semibold mb-4">Code:</h3>
+          <SyntaxHighlighter language={template.code.language} style={oneDark}>
+            {template.code.code}
+          </SyntaxHighlighter>
+          <p className="text-sm text-gray-600 mt-4">Language: {template.code.language}</p>
+        </div>
+      )}
 
       <button
         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
