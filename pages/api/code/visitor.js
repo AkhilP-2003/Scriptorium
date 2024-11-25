@@ -1,6 +1,7 @@
 // pages/api/code/visitor.js
 
-import executeCode from "../../../execute"; // Assuming execute.js is in the same directory
+// import executeCode from "../../../execute"; // Assuming execute.js is in the same directory
+import executeCode from "../../../utils/executeCode";
 
 export default async function handler(req, res) {
     console.log(res);
