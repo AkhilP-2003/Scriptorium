@@ -120,6 +120,11 @@ interface Comment {
 
         <div className="mt-8">
         <h2 className="text-2xl font-semibold">Comments</h2>
+        
+        <div>
+        <input placeholder="Add a comment..." className="mt-3 mb-3 rounded text-gray-800 p-3 border border-gray-1 w-full"></input>
+        </div>
+
         <ul className="mt-4">
             {topLevelComments.map((comment) => (
             <NestedComment
@@ -132,45 +137,6 @@ interface Comment {
             ))}
         </ul>
         </div>
-
-  
-        
-        {/* <div className="mt-8">
-          <h2 className="text-2xl font-semibold">Comments</h2>
-          <ul className="mt-4">
-            {comments.map((comment) => (
-              <li key={comment.id} className="border rounded-lg p-4 mb-4 bg-white shadow-sm">
-                <div className="flex justify-start items-center mr-3">
-                  {comment.author.avatar && (
-                    <img
-                      src={comment.author.avatar}
-                      alt="Comment Author Avatar"
-                      className="w-6 h-6 rounded-full mr-2"
-                    />
-                  )}
-                  <span className="text-gray-700 font-semibold mr-3 ">{comment.author.userName}</span>
-                  <span className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
-                </div>
-                <p className="text-gray-600 mt-2">{comment.content}</p>
-                <div className="mt-2 text-sm text-gray-500 flex items-center space-x-4">
-                  <span>👍 {comment.upvote}</span>
-                  <span>👎 {comment.downvote}</span>
-                </div>
-
-                {comment.replies && comment.replies.length > 0 && (
-                  <ul className="mt-4 pl-6 border-l-2 border-gray-200">
-                    {comment.replies.map((reply) => (
-                      <li key={reply.id} className="mb-2">
-                        <span className="text-gray-700 font-semibold">{reply.author.userName}:</span>
-                        <p className="text-gray-600">{reply.content}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div> */}
       </div>
     );
   };
