@@ -25,7 +25,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({ comment, allComments, han
   const childComments = allComments.filter((c) => c.parentId === comment.id);
 
   return (
-    <li className="border rounded-lg p-4 mb-4 bg-white shadow-sm hover:shadow-md" >
+    <li className="border rounded-lg p-4 mb-3 bg-white shadow-sm hover:shadow-md" >
         <div className="flex justify-between items-center ">
         {/* Left side: Avatar and Username */}
         <div className="flex items-center">
@@ -52,10 +52,10 @@ const NestedComment: React.FC<NestedCommentProps> = ({ comment, allComments, han
       <div className="mt-1 text-sm text-gray-500 flex items-center justify-end space-x-4">
 
       <button onClick={() => handleCommentUpvote(comment.id, "upvote")} className="!ml-1 text-sm font-semibold">
-            👍<span>{comment.upvote}</span>
+            👍<span className="!ml-1 mr-2 text-sm text-green-600 font-semibold">{comment.upvote}</span>
           </button>
           <button onClick={() => handleCommentDownvote(comment.id,"downvote")} className="!ml-1 text-sm font-semibold">
-            👎<span>{comment.downvote} </span>
+            👎<span className="!ml-1 text-sm text-red-600 font-semibold">{comment.downvote} </span>
           </button>
 
       </div>

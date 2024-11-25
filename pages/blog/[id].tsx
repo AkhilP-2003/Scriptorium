@@ -124,7 +124,8 @@ export default function CurrentBlogPage() {
             },
             body: JSON.stringify({voteAction})},);
             if (response.ok) {
-                    getBlog();
+                    //getOrderedComments;
+    
                 };
             
     } catch(error) {
@@ -162,7 +163,7 @@ export default function CurrentBlogPage() {
           comments={blog.comments} 
           author={{
             userName: blog.author.userName,
-            avatar: undefined
+            avatar: blog.author.avatar
           }}/>
       ))
       ) : (

@@ -169,8 +169,17 @@ export default function Blogs() {
                 />
             </div>
             <div className="lg:w-4/5 w-full p-5 bg-white shadow-xl">
-                <h1 className="text-3xl font-bold mb-4">Blogs</h1>
-                <p>Here are the blog posts sorted by {sort}.</p>
+            <div className="ml-4 mr-4 mt-4 flex items-center justify-between mb-4">
+                {/* Blog Title */}
+                <h1 className="text-3xl font-bold">Blogs</h1>
+
+                {/* Create Blog Button */}
+                <button className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
+                Create Blog
+                </button>
+            </div>
+            <p className="ml-4">Here are the blog posts sorted by {sort}.</p>
+
                 
                 {blogs.length > 0 ? (
                 blogs.map((blog) => (
