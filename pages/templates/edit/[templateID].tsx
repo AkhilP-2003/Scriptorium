@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { jwtDecode } from 'jwt-decode';
+import Editor from '@monaco-editor/react';
 
 const EditTemplatePage: React.FC = () => {
   const [templateData, setTemplateData] = useState({
@@ -149,6 +150,14 @@ const EditTemplatePage: React.FC = () => {
     return <div>Loading template details...</div>;
   }
 
+  const handleEditorChange = (value: string | undefined) => {
+    setTemplateData({ ...templateData, code: value || '' });
+  };
+
+  if (isLoading) {
+    return <div>Loading template details...</div>;
+  }
+
   return (
 
     <div className="container mx-auto p-8 bg-white shadow-md rounded-lg">
@@ -201,25 +210,40 @@ const EditTemplatePage: React.FC = () => {
         {/* Language field */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2 text-gray-700">Language</label>
-          <input
-            type="text"
+          <select
             value={templateData.language}
-            onChange={(e) => setTemplateData({ ...templateData, language: e.target.value })}
+            onChange={(e) => setTemplateData({ ...templateData, language: e.target.value as Language })}
             className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
-            placeholder="Enter language (e.g., JavaScript, Python)"
-          />
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="java">Java</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="python">Python</option>
+            <option value="r">R</option>
+            <option value="go">Go</option>
+            <option value="php">PHP</option>
+            <option value="ruby">Ruby</option>
+            <option value="perl">Perl</option>
+          </select>
         </div>
 
         {/* Code field */}
         <div className="mb-6">
           <label className="block text-xl font-semibold mb-2 text-gray-700">Code</label>
-          <textarea
+          <Editor
+            height="40vh"
+            language={templateData.language}
             value={templateData.code}
-            onChange={(e) => setTemplateData({ ...templateData, code: e.target.value })}
-            className="w-full p-4 border border-gray-300 rounded-lg bg-gray-900 text-white font-mono text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
-            rows={15}
-            placeholder="Enter your code here"
-          ></textarea>
+            onChange={handleEditorChange}
+            theme="vs-dark"
+            options={{
+              minimap: { enabled: false },
+              fontSize: 16,
+              scrollBeyondLastLine: false,
+              readOnly: false,
+            }}
+          />
         </div>
 
         {/* Submit and cancel buttons */}
