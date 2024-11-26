@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { jwtDecode } from 'jwt-decode';
 
 // defining the type for the template
 type Code = {
@@ -26,6 +27,14 @@ type Template = {
   code: Code | null
 }
 
+type JwtPayload = {
+  id: number
+  userName: string
+  email: string
+  role: string
+  exp?: number
+}
+
 // define the props that will be passed to the templateDetails component
 type TemplateDetailsProps = {
   template: Template | null;
@@ -43,6 +52,59 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
   }
 
   const handleForkTemplate = () => {
+
+    // check if the user is logged in
+    const accessToken = localStorage.getItem('accessToken')
+
+    // if the user is not logged in then redirect to the login/signup page
+    if (!accessToken) {
+      console.error('No access token found')
+      router.push('/login')
+      return
+    }
+
+    try {
+
+      // decode the token
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+      const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+
+      // check if the token is expired
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+        // if the token is expired thenredirect to login
+        console.warn("Token expired. Redirecting to login.")
+        router.push("/login")
+        return
+      }
+
+      // if we reach here then the user is authenticated and they can fork 
+
+
+      // check if the template has code
+      if (template?.code) {
+
+        // redirect to the playground page with template data
+        router.push({
+          pathname: '/templates/new',
+          query: {
+            title: `Forked from: ${template.title}`,
+            explanation: template.explanation,
+            tags: template.tags,
+            code: template.code.code,
+            language: template.code.language,
+            parentTemplateId: template.id, // to indicate that it's a fork
+          },
+        }) 
+
+      } else {
+        console.error('No code found for this template')
+      }
+
+    } catch (error) {
+      console.error('Error decoding token:', error)
+      router.push('/login')
+    }
+
 
     // check if the template has code
     if (template?.code) {

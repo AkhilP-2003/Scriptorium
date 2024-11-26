@@ -133,8 +133,37 @@ export default function MyTemplates() {
   // handle template editing
   const handleEditTemplate = (templateId: number) => {
 
-    // navigate to the template edit page
-    router.push(`/templates/edit/${templateId}`)
+    // check if the user is logged in
+    const accessToken = localStorage.getItem("accessToken")
+
+    // if the user is not logged in then redirect to the login/signup page
+    if (!accessToken) {
+      router.push("/login")
+      return
+    }
+
+    try {
+
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+      const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+
+      // check if the token is expired
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+        // if the token is expired thenredirect to login
+        console.warn("Token expired. Redirecting to login.")
+        router.push("/login")
+        return
+      }
+
+      // navigate to the edit template page
+      router.push(`/templates/edit/${templateId}`)
+
+    } catch (error) {
+
+      // if there is an error decoding the token then redirect to the login/signup page
+      console.error("Error decoding token:", error)
+      router.push("/login")
+    }
 
   }
 
@@ -146,7 +175,8 @@ export default function MyTemplates() {
 
     // if no then return
     if (!confirmDelete) {
-      return}
+      return 
+    }
       
 
     try {
@@ -162,6 +192,17 @@ export default function MyTemplates() {
         return
       }
 
+      // decode the token
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+
+      // check if the token is expired
+      const currentTime = Date.now() / 1000 // Current time in seconds
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+
+        // if the token is expired then we redirect to the login/signup page
+        router.push("/login")
+        return
+      }
 
       // delete the template
       const response = await fetch(`/api/template/delete/${templateId}`, {
@@ -207,17 +248,25 @@ export default function MyTemplates() {
     )
   }, [templates, searchQuery])
 
+
+  const handleViewAllTemplates = () => {
+
+    // navigate to the templates page
+    router.push("/templates")
+  }
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4 text-center">My Code Templates</h1>
 
       {/* view all templates button */}
       <div className="flex justify-end mb-4">
-        <Link href="/templates" passHref>
-          <button className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-all cursor-pointer">
-            View All Templates
-          </button>
-        </Link>
+        <button
+          onClick={handleViewAllTemplates}
+          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-all cursor-pointer"
+        >
+          View All Templates
+        </button>
       </div>
 
       {/* search bar */}

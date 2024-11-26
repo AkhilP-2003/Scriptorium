@@ -3,7 +3,6 @@ import NavigationBar from "../../components/NavigationBar";
 import { useRouter } from "next/router";
 import TemplateCard from "../../components/TemplateCard";
 import {jwtDecode} from "jwt-decode";
-import Link from "next/link";
 
 // defining the type for the templates
 type Template = {
@@ -250,8 +249,6 @@ export default function Templates() {
         router.push("/login")
         return
       }
-
-
 
     } catch (error) {
 
