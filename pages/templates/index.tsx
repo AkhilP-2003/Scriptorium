@@ -237,44 +237,81 @@ export default function Templates() {
       return
     }
 
+    try {
+
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+      const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+
+      // check if the token is expired 
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+
+        // if the token is expired thenredirect to login
+        console.warn("Token expired. Redirecting to login.")
+        router.push("/login")
+        return
+      }
+
+
+
+    } catch (error) {
+
+      // if there is an error decoding the token then redirect to the login/signup page
+      console.error("Error decoding token:", error)
+      router.push("/login")
+      return
+    }
+
     // if logged in then we cud navigate to the "Create New Template" page
     router.push(`/templates/new`)
   }
 
-  // navigate to the my templates page
-  const handleMyTemplates = () => {
+// navigate to the my templates page
+const handleMyTemplates = () => {
 
-    // check if the user is logged in
-    const accessToken = localStorage.getItem("accessToken")
+  // check if the user is logged in
+  const accessToken = localStorage.getItem("accessToken")
 
-    // if not logged in then redirect to the login page
-    if (!accessToken) {
+  // ff the user is not logged in then redirect to the login/signup page
+  if (!accessToken) {
+    router.push("/login")
+    return;
+  }
+
+  try {
+
+    // decode the token and cast it to the JwtPayload type
+    const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+    const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+
+    // check if the token is expired
+    if (decodedToken.exp && decodedToken.exp < currentTime) {
+
+      // if the token is expired thenredirect to login
+      console.warn("Token expired. Redirecting to login.")
       router.push("/login")
       return
     }
-  
-    try {
 
-      // decode the token and cast it to the JwtPayload type
-      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
-      const userId = decodedToken.id
-      
-      // set the isViewingMyTemplates state to true since we are viewing the userss templates
-      setIsViewingMyTemplates(true)
+    // set the state to true since we are viewing the user's templates
+    setIsViewingMyTemplates(true)
 
-      // redirect to the templates page with the ownerId as a query parameter
-      router.push({
-        pathname: router.pathname,
-        query: {
-          page: 1,
-          ownerId: userId
-        }
-      })
-    } catch (error) {
-      console.error("Failed to decode token:", error)
-      router.push("/login")
-    }
+    // redirect to the templates page with the ownerId as a query parameter
+    router.push({
+      pathname: "/templates/myTemplates",
+      query: {
+        page: 1,
+        ownerId: decodedToken.id
+      }
+    })
+
+  } catch (error) {
+
+    // if the token cannot be decoded then redirect to login
+    console.error("Failed to decode token:", error)
+    router.push("/login")
   }
+}
+
 
   // navigate to the all templates page
   const handleAllTemplates = () => {
@@ -336,14 +373,17 @@ export default function Templates() {
           All Templates
         </button>
 
-        <Link
-          href="/templates/myTemplates"
+        <button
+          onClick={handleMyTemplates}
           className={`ml-4 px-6 py-3 font-semibold rounded-lg transition-all cursor-pointer ${
-            isViewingMyTemplates ? "bg-green-700 text-white" : "bg-green-500 text-white hover:bg-green-600"
+            isViewingMyTemplates
+              ? "bg-green-700 text-white"
+              : "bg-green-500 text-white hover:bg-green-600"
           }`}
         >
           My Templates
-        </Link>
+        </button>
+
       </div>
 
 
