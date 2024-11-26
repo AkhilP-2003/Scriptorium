@@ -245,7 +245,7 @@ const BlogEdit: React.FC = () => {
                 {selectedTemplates.includes(template.id) ? (
                   <button
                     className="bg-red-100 font-semibold text-red-600 p-2 m-1 rounded-md"
-                    onClick={() => (template.id, "remove")}
+                    onClick={() => handleTemplateChange(template.id, "remove")}
                   >
                     Remove
                   </button>
