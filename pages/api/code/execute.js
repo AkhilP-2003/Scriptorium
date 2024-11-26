@@ -92,7 +92,7 @@ function executeCodeInDocker(filePath, stdin, language, res) {
 
     // Prepare the Docker command
     console.log(TEMP_DIR)
-    let dockerCommand = 'docker run -i --rm -v "' + TEMP_DIR + ':/app"';
+    let dockerCommand = 'docker run -i --rm --memory="128m" -v "' + TEMP_DIR + ':/app"';
 
     // Choose the appropriate Docker image based on the language
     switch (language) {
@@ -153,10 +153,23 @@ function executeCodeInDocker(filePath, stdin, language, res) {
         error += data.toString();
     });
 
+
+    const timeout = setTimeout(() => {
+        process.kill();
+        res.status(408).json({ status: "error", output: "Execution timed out after 15 seconds" });
+    }, 15000); // 15 seconds timeout
+
     process.on('close', (code) => {
 
+        clearTimeout(timeout);
+        console.log(`Process exited with code: ${code}`);
         cleanup(filePath);
         if (code !== 0) {
+
+            if (code === 137) {
+                return res.status(200).json({ status: "error", output: "Memory limit exceeded" });
+            }
+
             return res.status(200).json({ status: "error", output: error });
         }
         return res.status(200).json({ status: "success", output: output });
