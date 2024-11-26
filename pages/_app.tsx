@@ -32,7 +32,7 @@ export default function App({ Component, pageProps }: AppProps) {
       {/* Navbar spans across full width */}
       <div className="col-span-full z-10">
         <NavigationBar
-          title="scriptorium"
+          title="Scriptorium"
           links={links}
           className="!shadow-2xl"
         />

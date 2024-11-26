@@ -75,7 +75,7 @@ const handler = async (req, res) => {
     // handle the case wherre theres an error in trying to edit the template
   } catch(error){
     console.error("Something went wrong while trying to edit the template", error)
-    return res.status(500).json({error: "Error, couldn't edit the template", details: error.message})
+    return res.status(400).json({error: "Error, couldn't edit the template", details: error.message})
   }
 
 

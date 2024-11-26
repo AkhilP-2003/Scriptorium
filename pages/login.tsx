@@ -49,7 +49,6 @@ export default function Login() {
                     // Store the access token securely
                 localStorage.setItem('accessToken', accessToken);
                 localStorage.setItem('refreshToken', refreshToken);
-
                 alert('Login up successful!');
                 // redirect to login page
                 router.push("/");
