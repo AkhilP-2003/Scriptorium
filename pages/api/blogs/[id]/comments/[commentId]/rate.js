@@ -74,7 +74,7 @@ const handler = async (req, res) => {
     } catch (error) {
 
       console.error("Error, couldn't rate the comment", error)
-      return res.status(500).json({ error: "Something went wrong is ratign the comment"})
+      return res.status(400).json({ error: "Something went wrong is ratign the comment"})
 
     }
 

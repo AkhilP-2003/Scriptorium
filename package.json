@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@monaco-editor/react": "^4.6.0",
     "@prisma/client": "^5.21.1",
     "bcrypt": "^5.1.1",
     "email-validator": "^2.0.4",
@@ -21,6 +22,7 @@
     "react-cookie": "^7.2.2",
     "react-dom": "^18",
     "react-fontawesome": "^1.7.1",
+    "react-syntax-highlighter": "^15.6.1",
     "swagger-jsdoc": "^6.2.8",
     "uuid": "^11.0.2"
   },
@@ -28,6 +30,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "postcss": "^8",
     "prisma": "^5.21.1",
     "tailwindcss": "^3.4.1",

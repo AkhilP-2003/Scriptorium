@@ -81,19 +81,23 @@ const handler = async (req, res) => {
         codeId: newCode.id, // Update the template to reference the created code
         code: { connect: { id: newCode.id } }, // Connect the created Code to the Template
       },
-    })
+      include: {
+        code: true, // Include the associated code in the response
+      },
+    });
+    
 
 
     // return the new template thats been created
     return res.status(201).json({
-      template: newTemplate,
+      template: updatedTemplate,
       message: isForked ? "Template successfully forked from an existing template" : "Your new template is ready"  // the notif that its a forked version
     })
     
   // handle the case where something goes wrong while trying to create a template
   } catch (error) {
     console.error("Something went wrong in creating a new template", error);
-    return res.status(500).json({ error: "Failed to create a new template", details: error.message });
+    return res.status(400).json({ error: "Failed to create a new template", details: error.message });
   }  
 }
 
