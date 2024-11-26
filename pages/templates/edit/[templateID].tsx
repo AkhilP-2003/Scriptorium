@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { jwtDecode } from 'jwt-decode';
 import Editor from '@monaco-editor/react';
+type Language = 'javascript' | 'java' | 'c' | 'cpp' | 'python' | 'r' | 'go' | 'php' | 'ruby' | 'perl';
+
 
 const EditTemplatePage: React.FC = () => {
   const [templateData, setTemplateData] = useState({
