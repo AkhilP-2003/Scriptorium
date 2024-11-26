@@ -8,107 +8,153 @@ const EditTemplatePage: React.FC = () => {
     explanation: '',
     tags: '',
     language: '',
-    code: '',
-  });
+    code: ''
+  })
+  
+  
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { templateID } = router.query;
 
-  // Fetch the existing template details when the page loads
+  // fetch the existing template details when the page loads
   useEffect(() => {
-    if (!templateID) return;
 
+    // check if templateID exists
+    if (!templateID) return
+
+    // fetch the template
     const fetchTemplate = async () => {
-      try {
-        const response = await fetch(`/api/template/${templateID}`);
+
+      try { 
+
+        // fetch the template via the endpoint
+        const response = await fetch(`/api/template/${templateID}`)
+
+        // check if the response is not ok
         if (!response.ok) {
-          throw new Error('Failed to fetch template data');
+          throw new Error('Failed to fetch template data')
         }
+
+        // parse the json data
         const data = await response.json();
 
-        console.log('Template data:', data); // Log template data to confirm the structure
+        // console.log('Template data:', data); 
 
-        // Assuming the response contains a `template` object like { template: {...} }
+        // set the template data by checking if the data exists and is not null
         if (data && data.template) {
+
+          // set the template data
           setTemplateData({
-            title: data.template.title,
-            explanation: data.template.explanation,
-            tags: data.template.tags,
-            language: data.template.code?.language || '', // Extract nested code language if available
-            code: data.template.code?.code || '', // Extract nested code if available
-          });
+            title: data.template.title,             // set the title
+            explanation: data.template.explanation, // set the explanation
+            tags: data.template.tags,               // set the tags   
+            language: data.template.code?.language || '', // set the language
+            code: data.template.code?.code || '' // set the code
+          })
+
         }
-        setIsLoading(false); // Data fetched, stop loading
+
+        // set the loading state to false
+        setIsLoading(false) // Data fetched, stop loading
+        
       } catch (error) {
         console.error('Error fetching template:', error);
-        setErrorMessage('Failed to load template details. Please try again.');
-        setIsLoading(false); // Stop loading in case of an error too
+
+        // set the error message
+        setErrorMessage('Failed to load template details. Please try again.')
+
+        // stop loading
+        setIsLoading(false)
       }
-    };
-
-    console.log('Template ID:', templateID);
-    fetchTemplate();
-  }, [templateID]);
-
-  // Handle form submission to edit the template
-  const handleEditTemplate = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const { title, explanation, tags, code, language } = templateData;
-
-    // Validate fields
-    if (!title.trim() || !explanation.trim() || !tags.trim() || !code.trim() || !language.trim()) {
-      setErrorMessage('All fields are required.');
-      return;
     }
 
-    setErrorMessage(null); // Clear any previous error messages
+    // console.log('Template ID:', templateID)
 
-    const updatedTemplateData = { title, explanation, tags, code, language };
+    // fetch the template
+    fetchTemplate()
+
+  }, [templateID]) // run the effect when the templateID changes
+
+  // handle form submission to edit the template
+  const handleEditTemplate = async (e: React.FormEvent) => {
+
+    // prevent the form from submitting
+    e.preventDefault()
+
+    // get the form data
+    const { title, explanation, tags, code, language } = templateData
+
+    // check if all fields are filled/valid etc
+    if (!title.trim() || !explanation.trim() || !tags.trim() || !code.trim() || !language.trim()) {
+
+      // set the error message
+      setErrorMessage('All fields are required.')
+      return
+    }
+
+    // clear the error message
+    setErrorMessage(null)
+
+    // create the updated template data
+    const updatedTemplateData = { title, explanation, tags, code, language }
 
     try {
-      const accessToken = localStorage.getItem('accessToken');
+
+      // check if the user is authenticated
+      const accessToken = localStorage.getItem('accessToken')
       if (!accessToken) {
-        router.push('/login');
-        return;
+        router.push('/login')
+        return
       }
 
-      // Send PUT request to update the template
+      // send PUT request to update the template
       const response = await fetch(`/api/template/edit/${templateID}`, {
+
+        // send the updated template data
         method: 'PUT',
+
+        // add the authorization header
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`
         },
-        body: JSON.stringify(updatedTemplateData),
-      });
+      
+        body: JSON.stringify(updatedTemplateData) // turn the updated template data into a json string
 
+      })
+
+      // check if the response is not ok
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error response from server:', errorData);
-        alert(`Error updating template: ${errorData.error || 'Unknown error'}`);
-        return;
+
+        // get the error data
+        const errorData = await response.json()
+        console.error('Error response from server:', errorData)
+        alert(`Error updating template: ${errorData.error || 'Unknown error'}`)
+        return
+
       }
 
-      // Redirect to the templates list after successful update
-      alert('Template updated successfully');
-      router.push('/templates');
+      // redirect to the usres templates list after updating
+      alert('Template updated successfully')
+      router.push('/templates/myTemplates')
     } catch (error) {
-      console.error('Error updating template:', error);
-      alert('Error updating template');
+      console.error('Error updating template:', error)
+      alert('Error updating template')
     }
   };
 
-  // Render loading message or the form based on loading state
+  // render loading message/form based on loading state
   if (isLoading) {
     return <div>Loading template details...</div>;
   }
 
   return (
+
     <div className="container mx-auto p-8 bg-white shadow-md rounded-lg">
       <h1 className="text-4xl font-bold mb-6 text-gray-800">Edit Code Template</h1>
       <form onSubmit={handleEditTemplate}>
+
         {/* Display validation error message if there is one */}
         {errorMessage && (
           <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
@@ -192,9 +238,10 @@ const EditTemplatePage: React.FC = () => {
             Cancel
           </button>
         </div>
+        
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default EditTemplatePage;
+export default EditTemplatePage
