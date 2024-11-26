@@ -55,6 +55,11 @@ export default function handler(req, res) {
             fs.writeFileSync(fileName, code);
             executeCodeInDocker(fileName, stdin, 'javascript', res);
             break;
+        case 'r':
+            fileName = path.join(TEMP_DIR, `${jobId}.r`);
+            fs.writeFileSync(fileName, code);
+            executeCodeInDocker(fileName, stdin, 'r', res);
+            break;
         default:
             return res.status(400).json({ status: "error", output: "Unsupported language" });
     }
@@ -85,6 +90,9 @@ function executeCodeInDocker(filePath, stdin, language, res) {
             break;
         case 'javascript':
             dockerCommand += ' node /app/' + fileName;
+            break;
+        case 'r':
+            dockerCommand += ' r-runner /app/' + fileName;
             break;
         default:
             return res.status(400).json({ status: 'error', output: 'Unsupported language' });
