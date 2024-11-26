@@ -1,133 +1,101 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import TemplateCard from "../../components/TemplateCard";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import Link from "next/link";
 
-// define the type for the templates
 type Template = {
-  id: number
-  title: string
-  explanation: string
-  tags: string
+  id: number;
+  title: string;
+  explanation: string;
+  tags: string;
   owner: {
-    id: number
-    userName: string
-  }
-}
+    id: number;
+    userName: string;
+  };
+};
 
-// define the type for the JWT payload
 type JwtPayload = {
-  id: number
-  userName: string
-  email: string
-  role: string
-  exp?: number
+  id: number;
+  userName: string;
+  email: string;
+  role: string;
+  exp?: number;
 };
 
 export default function MyTemplates() {
-
-  // default state of templates is just an empty list of templates
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [currentPage, setCurrentPage] = useState(1); // current page number
-  const [totalTemplatesCount, setTotalTemplatesCount] = useState(0); // total num of templates
-  const [searchQuery, setSearchQuery] = useState("") // search query for filtering templates
-  const pageSize = 8
-  const router = useRouter()
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalTemplatesCount, setTotalTemplatesCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const pageSize = 8;
+  const router = useRouter();
+  const [userId, setUserId] = useState<number | null>(null);
 
-  // fetch templates created by the logged-in user
+  // Fetch templates created by the logged-in user
   const fetchUserTemplates = async (page: number, userId: number) => {
     try {
-
-      // fetch the templates
-      const response = await fetch(`/api/template?page=${page}&limit=${pageSize}&ownerID=${userId}`)
-
-      // check if the http response is not ok
+      const response = await fetch(`/api/template?page=${page}&limit=${pageSize}&ownerID=${userId}`);
       if (!response.ok) {
-        throw new Error("Failed to fetch user templates")
+        throw new Error("Failed to fetch user templates");
       }
-
-      // parse the json data from our response
-      const data = await response.json()
-
-      // update our templates state to be whatever the data is that we fetched
-      setTemplates(data.templates)
-
-      // set the total number of pages
-      setTotalTemplatesCount(data.totalTemplatesCount)
-
+      const data = await response.json();
+      setTemplates(data.templates);
+      setTotalTemplatesCount(data.totalTemplatesCount);
     } catch (error) {
-
-      // if the fetch fails then throw an error
-      console.error("Error fetching user templates:", error)
+      console.error("Error fetching user templates:", error);
     }
-  }
+  };
 
-  // get the logged-in userID and fetch their templates on mount or when currentPage changes
   useEffect(() => {
-
-    // check if the user is logged in
-    const accessToken = localStorage.getItem("accessToken")
-
-    // if not logged in then redirect to the login page
+    const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-      router.push("/login")
-      return
+      router.push("/login");
+      return;
     }
 
     try {
-
-      // decode the token
-      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
-
-      // fetch the templates
-      fetchUserTemplates(currentPage, decodedToken.id)
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken);
+      setUserId(decodedToken.id);
+      fetchUserTemplates(currentPage, decodedToken.id);
     } catch (error) {
-
-      // if the decode fails then redirect to the login page
-      console.error("Failed to decode token:", error)
-      router.push("/login")
+      console.error("Failed to decode token:", error);
+      router.push("/login");
     }
-  }, [currentPage])
+  }, [currentPage]);
 
-  // handle search query change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
-    // update the search query
-    setSearchQuery(e.target.value)
-  }
-
-  // handle next and previous page buttons
   const handleNextPage = () => {
     if (currentPage < Math.ceil(totalTemplatesCount / pageSize)) {
-      setCurrentPage((prevPage) => prevPage + 1)
+      setCurrentPage((prevPage) => prevPage + 1);
     }
-  }
+  };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1)
+      setCurrentPage((prevPage) => prevPage - 1);
     }
   };
 
-  // navigate to a detailed view of template when template is clicked
   const handleTemplateClick = (templateId: number) => {
-    router.push(`/templates/${templateId}`)
+    router.push(`/templates/${templateId}`);
   };
 
-  // using useMemo to filter templates based on the search query
+  const handleEditTemplate = (templateId: number) => {
+    router.push(`/templates/edit/${templateId}`);
+  };
+
   const filteredTemplates = useMemo(() => {
-
-    // we only filter when the search query changes
-    return templates.filter((template) => 
-
-      // check if the template title, tags, or explanation matches w the search query
-      template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.tags.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.explanation.toLowerCase().includes(searchQuery.toLowerCase())
-
-    )
-  }, [templates, searchQuery])
+    return templates.filter(
+      (template) =>
+        template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.tags.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.explanation.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [templates, searchQuery]);
 
   return (
     <div className="container mx-auto p-4">
@@ -156,11 +124,17 @@ export default function MyTemplates() {
       {/* list of templates */}
       <div id="templates-list" className="grid gap-6 mb-4">
         {filteredTemplates.map((template) => (
-          <TemplateCard
-            key={template.id}
-            template={template}
-            onClick={() => handleTemplateClick(template.id)}
-          />
+          <div key={template.id} className="relative">
+            <TemplateCard template={template} onClick={() => handleTemplateClick(template.id)} />
+            {userId === template.owner.id && (
+              <button
+                onClick={() => handleEditTemplate(template.id)}
+                className="absolute bottom-4 right-4 bg-yellow-500 text-white px-4 py-1 rounded-lg hover:bg-yellow-600 "
+              >
+                Edit
+              </button>
+            )}
+          </div>
         ))}
       </div>
 
