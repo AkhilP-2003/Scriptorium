@@ -81,6 +81,7 @@ const CodeEditor: React.FC = () => {
           <option value="cpp">C++</option>
           <option value="python">Python</option>
           <option value="r">R</option>
+          <option value="go">Go</option>
         </select>
       </div>
 

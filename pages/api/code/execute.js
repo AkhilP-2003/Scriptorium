@@ -60,6 +60,11 @@ export default function handler(req, res) {
             fs.writeFileSync(fileName, code);
             executeCodeInDocker(fileName, stdin, 'r', res);
             break;
+        case 'go':
+            fileName = path.join(TEMP_DIR, `${jobId}.go`);
+            fs.writeFileSync(fileName, code);
+            executeCodeInDocker(fileName, stdin, 'go', res);
+            break;
         default:
             return res.status(400).json({ status: "error", output: "Unsupported language" });
     }
@@ -93,6 +98,9 @@ function executeCodeInDocker(filePath, stdin, language, res) {
             break;
         case 'r':
             dockerCommand += ' r-runner /app/' + fileName;
+            break;
+        case 'go':
+            dockerCommand += ' go-runner /app/' + fileName;
             break;
         default:
             return res.status(400).json({ status: 'error', output: 'Unsupported language' });
