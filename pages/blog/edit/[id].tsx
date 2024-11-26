@@ -25,6 +25,10 @@ interface Template {
     title: string;
 }
 
+interface JwtPayload {
+    id: string;
+  }
+
 interface Blog {
     id: number;
     description: string; // Define the expected structure of your blog data
@@ -46,6 +50,7 @@ const BlogEdit: React.FC = () => {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [selectedTemplates, setSelectedTemplates] = useState<number[]>([]);
     const [removedTemplates, setRemovedTemplates] = useState<number[]>([]);
+    const [isAuthor, setIsAuthor] = useState(false);
     const [formData, setFormData] = useState({
       title: "",
       description: "",
@@ -90,11 +95,13 @@ const BlogEdit: React.FC = () => {
                 if (!getTemplates.ok) {
                     throw new Error(`Error: ${getTemplates.status} ${getTemplates.statusText}`);
                 }
-                const processedTemplates = templates.map((template: { id: number, title: string})=> ({
-                    id: template.id,
-                    title: template.title
-                }));
-                setTemplates(processedTemplates);
+                const data = await getTemplates.json();
+                setTemplates(data.templates); 
+                // const processedTemplates = templates.map((template: { id: number, title: string})=> ({
+                //     id: template.id,
+                //     title: template.title
+                // }));
+                // setTemplates(processedTemplates);
 
             } catch(error) {
                 console.log("error getting all templates");
@@ -104,6 +111,21 @@ const BlogEdit: React.FC = () => {
     useEffect(() => {
         getBlogandTemplate();
     }, [id]);
+
+    useEffect(() => {
+        if (blogData) {
+          const accessToken = localStorage.getItem("accessToken");
+          if (accessToken) {
+            try {
+              const decoded = jwtDecode(accessToken) as JwtPayload;
+              const userId = decoded.id;
+              setIsAuthor(userId === blogData.author.id); // Compare user ID with blog author's ID
+            } catch (error) {
+              console.error("Error decoding token", error);
+            }
+          }
+        }
+      }, [blogData]);
   
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
@@ -121,31 +143,63 @@ const BlogEdit: React.FC = () => {
     };
   
     const handleSubmit = async () => {
-      try {
-
-        const editData = await fetch(`/api/blog/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorizatiom': `Bearer ${localStorage.getItem('accessToken')}`,
-            },
-            body: JSON.stringify({title: formData.title, description:formData.description, tags:formData.tags, templateIdsToAdd: selectedTemplates,templateIdsToRemove: removedTemplates })
-        });
-        if (editData.ok) {
-            router.push(`/blog/${id}`); // Redirect to the blog details page
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+        
+        if (isAuthor === false) {
+            alert('You do not have permission to edit this blog');
+            router.push(`/blog/${id}`);
         }
-      } catch (error) {
-        console.error("Failed to update the blog:", error);
-      }
+
+        if (!refreshToken || isTokenExpired(refreshToken)) {
+            router.push('/login');
+            return;
+        }
+        if (!accessToken || isTokenExpired(accessToken)) {
+            // refresh it. 
+            const update = await fetch('/api/users/refresh', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({refreshToken})
+            });
+            if (update.ok) {
+                const { accessToken: newAccessToken } = await update.json();
+                localStorage.setItem("accessToken", newAccessToken);
+            } else {
+                // If token refresh fails, redirect to login
+                router.push('/login');
+                return;
+            }
+        }
+
+        try {
+
+            const editData = await fetch(`/api/blogs/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+                body: JSON.stringify({title: formData.title, description:formData.description, tags:formData.tags, templateIdsToAdd: selectedTemplates,templateIdsToRemove: removedTemplates })
+            });
+            if (editData.ok) {
+                router.push(`../${id}`); // Redirect to the blog details page
+                
+            }
+        } catch (error) {
+            console.error("Failed to update the blog:", error);
+        }
     };
   
     if (!blogData) return <div>Loading...</div>;
   
     return (
-      <div className="p-4 max-w-2xl mx-auto bg-white rounded shadow">
-        <h1 className="text-xl font-bold mb-4">Edit Blog</h1>
+      <div className="p-4 max-w-2xl mx-auto bg-gray-50 rounded shadow-xl">
+        <h1 className="font-bold text-2xl mb-4">Edit Blog</h1>
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2" htmlFor="title">
+          <label className="block text-gray-700 font-bold text-lg md:text-lg sm:text-md mb-2" htmlFor="title">
             Title
           </label>
           <input
@@ -158,7 +212,7 @@ const BlogEdit: React.FC = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2" htmlFor="description">
+          <label className="block text-gray-700 font-bold text-lg md:text-lg sm:text-md mb-2" htmlFor="description">
             Description
           </label>
           <textarea
@@ -170,7 +224,7 @@ const BlogEdit: React.FC = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2" htmlFor="tags">
+          <label className="block text-gray-700 font-bold mb-2 text-lg md:text-lg sm:text-md" htmlFor="tags">
             Tags
           </label>
           <input
@@ -183,21 +237,21 @@ const BlogEdit: React.FC = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Templates</label>
+          <label className="block text-gray-700 font-bold mb-2 text-lg md:text-lg sm:text-md">Templates</label>
           <ul>
             {templates && templates.map((template: Template) => (
               <li key={template.id} className="flex items-center justify-between">
                 <span>{template.title}</span>
                 {selectedTemplates.includes(template.id) ? (
                   <button
-                    className="text-red-500"
+                    className="bg-red-100 font-semibold text-red-600 p-2 m-1 rounded-md"
                     onClick={() => handleTemplateChange(template.id, "remove")}
                   >
                     Remove
                   </button>
                 ) : (
                   <button
-                    className="text-blue-500"
+                    className="bg-green-100 font-semibold text-green-600 p-2 m-1 rounded-md"
                     onClick={() => handleTemplateChange(template.id, "add")}
                   >
                     Add
@@ -208,7 +262,7 @@ const BlogEdit: React.FC = () => {
           </ul>
         </div>
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
           onClick={handleSubmit}
         >
           Save Changes
