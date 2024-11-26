@@ -1,163 +1,200 @@
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { jwtDecode } from 'jwt-decode';
 
-type Template = {
-  id: number;
-  title: string;
-  explanation: string;
-  tags: string;
-  code?: {
-    id: number;
-    code: string;
-    language: string;
-    input: string;
-    output: string;
-    error: string;
-  };
-};
-
-export default function EditTemplate() {
-  const router = useRouter();
-  const { templateId } = router.query;
-
-  const [template, setTemplate] = useState<Template | null>(null);
+const EditTemplatePage: React.FC = () => {
+  const [templateData, setTemplateData] = useState({
+    title: '',
+    explanation: '',
+    tags: '',
+    language: '',
+    code: '',
+  });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { templateID } = router.query;
 
-  // UseEffect to wait for router and templateId
+  // Fetch the existing template details when the page loads
   useEffect(() => {
-    if (!router.isReady) {
-      console.log("Router is not ready yet.");
-      return;
-    }
-    if (!templateId) {
-      console.log("TemplateId is still undefined.");
+    if (!templateID) return;
+
+    const fetchTemplate = async () => {
+      try {
+        const response = await fetch(`/api/template/${templateID}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch template data');
+        }
+        const data = await response.json();
+
+        console.log('Template data:', data); // Log template data to confirm the structure
+
+        // Assuming the response contains a `template` object like { template: {...} }
+        if (data && data.template) {
+          setTemplateData({
+            title: data.template.title,
+            explanation: data.template.explanation,
+            tags: data.template.tags,
+            language: data.template.code?.language || '', // Extract nested code language if available
+            code: data.template.code?.code || '', // Extract nested code if available
+          });
+        }
+        setIsLoading(false); // Data fetched, stop loading
+      } catch (error) {
+        console.error('Error fetching template:', error);
+        setErrorMessage('Failed to load template details. Please try again.');
+        setIsLoading(false); // Stop loading in case of an error too
+      }
+    };
+
+    console.log('Template ID:', templateID);
+    fetchTemplate();
+  }, [templateID]);
+
+  // Handle form submission to edit the template
+  const handleEditTemplate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { title, explanation, tags, code, language } = templateData;
+
+    // Validate fields
+    if (!title.trim() || !explanation.trim() || !tags.trim() || !code.trim() || !language.trim()) {
+      setErrorMessage('All fields are required.');
       return;
     }
 
-    console.log("Router is ready and Template ID found:", templateId);
-    fetchTemplateData(templateId as string);
-  }, [router.isReady, templateId]);
+    setErrorMessage(null); // Clear any previous error messages
 
-  const fetchTemplateData = async (id: string) => {
+    const updatedTemplateData = { title, explanation, tags, code, language };
+
     try {
-      setIsLoading(true);
-      setError(null); // Clear previous errors
-
-      const response = await fetch(`/api/template/${id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch template data");
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        router.push('/login');
+        return;
       }
 
-      const data = await response.json();
-      console.log("Fetched template data:", data);
-      setTemplate(data.template); // Use the correct key from the API response
-
-    } catch (error: any) {
-      console.error("Error fetching template:", error);
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setTemplate((prevTemplate) => (prevTemplate ? { ...prevTemplate, [name]: value } : prevTemplate));
-  };
-
-  const handleSave = async () => {
-    if (!template) {
-      console.error("No template data available for saving.");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/template/edit/${template.id}`, {
-        method: "PUT",
+      // Send PUT request to update the template
+      const response = await fetch(`/api/template/edit/${templateID}`, {
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(template),
+        body: JSON.stringify(updatedTemplateData),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save the template");
+        const errorData = await response.json();
+        console.error('Error response from server:', errorData);
+        alert(`Error updating template: ${errorData.error || 'Unknown error'}`);
+        return;
       }
 
-      console.log("Template successfully updated");
-      router.push("/templates/myTemplates");
-
-    } catch (error: any) {
-      console.error("Error saving template:", error);
-      setError("Failed to save the template. Please try again.");
-    } finally {
-      setIsLoading(false);
+      // Redirect to the templates list after successful update
+      alert('Template updated successfully');
+      router.push('/templates');
+    } catch (error) {
+      console.error('Error updating template:', error);
+      alert('Error updating template');
     }
   };
 
-  // Render states for Loading, Error, or Form.
+  // Render loading message or the form based on loading state
   if (isLoading) {
     return <div>Loading template details...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!template) {
-    return <div>No template data available.</div>;
-  }
-
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4 text-center">Edit Template</h1>
+    <div className="container mx-auto p-8 bg-white shadow-md rounded-lg">
+      <h1 className="text-4xl font-bold mb-6 text-gray-800">Edit Code Template</h1>
+      <form onSubmit={handleEditTemplate}>
+        {/* Display validation error message if there is one */}
+        {errorMessage && (
+          <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
+            {errorMessage}
+          </div>
+        )}
 
-      <form className="max-w-xl mx-auto">
-        <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Title</label>
+        {/* Title field */}
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2 text-gray-700">Title</label>
           <input
             type="text"
-            name="title"
-            value={template.title}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            value={templateData.title}
+            onChange={(e) => setTemplateData({ ...templateData, title: e.target.value })}
+            className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+            placeholder="Enter template title"
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Explanation</label>
+
+        {/* Explanation field */}
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2 text-gray-700">Explanation</label>
           <textarea
-            name="explanation"
-            value={template.explanation}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-          />
+            value={templateData.explanation}
+            onChange={(e) => setTemplateData({ ...templateData, explanation: e.target.value })}
+            className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+            rows={5}
+            placeholder="Enter a detailed explanation"
+          ></textarea>
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Tags</label>
+
+        {/* Tags field */}
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2 text-gray-700">Tags</label>
           <input
             type="text"
-            name="tags"
-            value={template.tags}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            value={templateData.tags}
+            onChange={(e) => setTemplateData({ ...templateData, tags: e.target.value })}
+            className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+            placeholder="Enter tags separated by commas"
           />
         </div>
-        {/* Add other fields such as code if applicable */}
-        <div className="flex justify-end">
+
+        {/* Language field */}
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2 text-gray-700">Language</label>
+          <input
+            type="text"
+            value={templateData.language}
+            onChange={(e) => setTemplateData({ ...templateData, language: e.target.value })}
+            className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+            placeholder="Enter language (e.g., JavaScript, Python)"
+          />
+        </div>
+
+        {/* Code field */}
+        <div className="mb-6">
+          <label className="block text-xl font-semibold mb-2 text-gray-700">Code</label>
+          <textarea
+            value={templateData.code}
+            onChange={(e) => setTemplateData({ ...templateData, code: e.target.value })}
+            className="w-full p-4 border border-gray-300 rounded-lg bg-gray-900 text-white font-mono text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+            rows={15}
+            placeholder="Enter your code here"
+          ></textarea>
+        </div>
+
+        {/* Submit and cancel buttons */}
+        <div className="flex items-center gap-4">
+          <button
+            type="submit"
+            className="px-8 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-all duration-300"
+          >
+            Save Changes
+          </button>
           <button
             type="button"
-            onClick={handleSave}
-            className={`px-6 py-2 rounded-lg ${
-              isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
-            disabled={isLoading}
+            className="px-8 py-3 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition-all duration-300"
+            onClick={() => router.back()}
           >
-            {isLoading ? "Saving..." : "Save Changes"}
+            Cancel
           </button>
         </div>
       </form>
     </div>
   );
-}
+};
+
+export default EditTemplatePage;
