@@ -4,6 +4,7 @@ import { spawn } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 
 const TEMP_DIR = path.join(process.cwd(), 'temp'); // Temporary directory for files
+var className = ""
 
 // Ensure the temp directory exists
 if (!fs.existsSync(TEMP_DIR)) {
@@ -17,12 +18,13 @@ export default function handler(req, res) {
 
     const { code, language, stdin = "" } = req.body;
 
-    if (!code || !language){
+    if (!code || !language) {
         return res.status(400).json({ message: 'Code and language are required' });
     }
+
     // Handle Java class naming if necessary
     const classNameMatch = code.match(/class\s+(\w+)/);
-    const className = classNameMatch ? classNameMatch[1] : `Class_${uuidv4()}`;
+    className = classNameMatch ? classNameMatch[1] : `Class_${uuidv4()}`;
     const jobId = uuidv4(); // Unique identifier for each execution job
     let fileName;
 
@@ -31,208 +33,90 @@ export default function handler(req, res) {
         case 'python':
             fileName = path.join(TEMP_DIR, `${jobId}.py`);
             fs.writeFileSync(fileName, code);
-            executePythonCode(fileName, res, stdin);
+            executeCodeInDocker(fileName, stdin, 'python', res);
             break;
         case 'java':
             fileName = path.join(TEMP_DIR, `${className}.java`);
             fs.writeFileSync(fileName, code);
-            executeJavaCode(fileName, res, stdin);
+            executeCodeInDocker(fileName, stdin, 'java', res);
             break;
         case 'c':
             fileName = path.join(TEMP_DIR, `${jobId}.c`);
             fs.writeFileSync(fileName, code);
-            executeCCode(fileName, res, stdin);
+            executeCodeInDocker(fileName, stdin, 'c', res);
             break;
         case 'cpp':
             fileName = path.join(TEMP_DIR, `${jobId}.cpp`);
             fs.writeFileSync(fileName, code);
-            executeCppCode(fileName, res, stdin);
+            executeCodeInDocker(fileName, stdin, 'cpp', res);
             break;
         case 'javascript':
             fileName = path.join(TEMP_DIR, `${jobId}.js`);
             fs.writeFileSync(fileName, code);
-            executeJavaScriptCode(fileName, res, stdin);
+            executeCodeInDocker(fileName, stdin, 'javascript', res);
             break;
         default:
             return res.status(400).json({ status: "error", output: "Unsupported language" });
     }
 }
 
-function executeJavaScriptCode(filePath, res, stdin) {
-    const process = spawn('node', [filePath]);
+// Function to execute code inside Docker container
+function executeCodeInDocker(filePath, stdin, language, res) {
+    // Get the code file name
+    const fileName = path.basename(filePath);
 
-    process.stdin.write(stdin); // Write stdin input
-    process.stdin.end();
+    // Prepare the Docker command
+    console.log(TEMP_DIR)
+    let dockerCommand = 'docker run -i --rm -v "' + TEMP_DIR + ':/app"';
 
-    let output = '';
-    process.stdout.on('data', (data) => {
-        output += data.toString();
-    });
-
-    let error = '';
-    process.stderr.on('data', (data) => {
-        error += data.toString();
-    });
-
-    process.on('close', (code) => {
-        cleanup(filePath);
-        if (code !== 0) {
-            return res.status(200).json({ status: "error", output: error });
-        }
-        return res.status(200).json({ status: "success", output: output });
-    });
-}
-
-// Execute Python code with spawn
-function executePythonCode(filePath, res, stdin) {
-    const process = spawn('python3', [filePath]);
-
-    process.stdin.write(stdin); // Write stdin input
-    process.stdin.end();
-
-    let output = '';
-    process.stdout.on('data', (data) => {
-        output += data.toString();
-    });
-
-    let error = '';
-    process.stderr.on('data', (data) => {
-        error += data.toString();
-    });
-
-    process.on('close', (code) => {
-        cleanup(filePath);
-        if (code !== 0) {
-            return res.status(200).json({ status: "error", output: error });
-        }
-        return res.status(200).json({ status: "success", output: output });
-    });
-}
-
-// Execute Java code with spawn
-function executeJavaCode(filePath, res, stdin) {
-    const className = path.basename(filePath, '.java');
-    const compile = spawn('javac', [filePath]);
-
-    let error = '';
-    compile.stderr.on('data', (data) => {
-        error += data.toString();
-    });
-
-    compile.on('close', (code) => {
-        if (code !== 0) {
-            cleanup(filePath);
-            return res.status(200).json({ status: "error", output: error });
-        }
-
-        const run = spawn('java', [className], { cwd: TEMP_DIR });
-        run.stdin.write(stdin);
-        run.stdin.end();
-
-        let output = '';
-        run.stdout.on('data', (data) => {
-            output += data.toString();
-        });
-
-        run.stderr.on('data', (data) => {
-            error += data.toString();
-        });
-
-        run.on('close', (code) => {
-            cleanup(filePath);
-            cleanup(path.join(TEMP_DIR, `${className}.class`));
-            if (code !== 0) {
-                return res.status(200).json({ status: "error", output: error });
-            }
-            return res.status(200).json({ status: "success", output: output });
-        });
-    });
-}
-
-// Execute C code with spawn
-function executeCCode(filePath, res, stdin) {
-    const outputFile = path.join(TEMP_DIR, `${path.basename(filePath, '.c')}.out`);
-    console.log(outputFile)
-    const compile = spawn('gcc', [filePath, '-o', outputFile]);
-
-    let error = '';
-    compile.stderr.on('data', (data) => {
-        error += data.toString();
-    });
-
-    compile.on('close', (code) => {
-        if (code !== 0) {
-            cleanup(filePath);
-            return res.status(200).json({ status: "error", output: error });
-        }
-
-        const run = spawn(outputFile);
-        run.stdin.write(stdin);
-        run.stdin.end();
-
-        let output = '';
-        run.stdout.on('data', (data) => {
-            output += data.toString();
-        });
-
-        run.stderr.on('data', (data) => {
-            error += data.toString();
-        });
-
-        run.on('close', (code) => {
-            cleanup(filePath);
-            cleanup(outputFile);
-            if (code !== 0) {
-                return res.status(200).json({ status: "error", output: error });
-            }
-            return res.status(200).json({ status: "success", output: output });
-        });
-    });
-}
-
-// Execute C++ code with spawn
-function executeCppCode(filePath, res, stdin) {
-    const outputFile = path.join(TEMP_DIR, `${path.basename(filePath, '.cpp')}.out`);
-    const compile = spawn('g++', [filePath, '-o', outputFile]);
-
-    let error = '';
-    compile.stderr.on('data', (data) => {
-        error += data.toString();
-    });
-
-    compile.on('close', (code) => {
-        if (code !== 0) {
-            cleanup(filePath);
-            return res.status(200).json({ status: "error", output: error });
-        }
-
-        const run = spawn(outputFile);
-        run.stdin.write(stdin);
-        run.stdin.end();
-
-        let output = '';
-        run.stdout.on('data', (data) => {
-            output += data.toString();
-        });
-
-        run.stderr.on('data', (data) => {
-            error += data.toString();
-        });
-
-        run.on('close', (code) => {
-            cleanup(filePath);
-            cleanup(outputFile);
-            if (code !== 0) {
-                return res.status(200).json({ status: "error", output: error });
-            }
-            return res.status(200).json({ status: "success", output: output });
-        });
-    });
-}
-
-// Cleanup temporary files
-function cleanup(filePath) {
-    if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+    // Choose the appropriate Docker image based on the language
+    switch (language) {
+        case 'python':
+            dockerCommand += ' python-runner /app/' + fileName;
+            break;
+        case 'java':
+            dockerCommand += ' java-runner ' + className;
+            break;
+        case 'c':
+            dockerCommand += ' c-runner /app/' + fileName;
+            break;
+        case 'cpp':
+            dockerCommand += ' cpp-runner /app/' + fileName;
+            break;
+        case 'javascript':
+            dockerCommand += ' node /app/' + fileName;
+            break;
+        default:
+            return res.status(400).json({ status: 'error', output: 'Unsupported language' });
     }
+
+    // Execute the command
+    console.log(dockerCommand)
+    const process = spawn(dockerCommand, { shell: true,
+        stdio: ['pipe']
+    });
+
+    // Write stdin if provided
+    if (stdin) {
+        process.stdin.write(stdin);
+        process.stdin.end();
+    }
+
+    let output = '';
+    let error = '';
+
+    process.stdout.on('data', (data) => {
+        output += data.toString();
+    });
+
+    process.stderr.on('data', (data) => {
+        error += data.toString();
+    });
+
+    process.on('close', (code) => {
+        if (code !== 0) {
+            return res.status(200).json({ status: "error", output: error });
+        }
+        return res.status(200).json({ status: "success", output: output });
+    });
 }

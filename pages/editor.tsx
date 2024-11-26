@@ -1,131 +1,183 @@
-// App.jsx
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-import Editor from '@monaco-editor/react'; // Import Monaco Editor component
-import { useRouter } from "next/router";
+import Editor from '@monaco-editor/react'; // Monaco editor for code editing
+import { useRouter } from 'next/router';
 
-export default function codeEditor() {
-  const [code, setCode] = useState(`console.log("Hello, World!");`);
+// Define the possible languages for the select dropdown
+type Language = 'javascript' | 'java' | 'c' | 'cpp' | 'python';
 
-  const [output, setOutput] = useState('');
+interface CodeData {
+  code: string;
+  language: Language;
+  stdin: string;
+}
+
+const CodeEditor: React.FC = () => {
+  const [code, setCode] = useState<string>('console.log("Hello, World!");');
+  const [output, setOutput] = useState<string>('');
+  const [stdin, setStdin] = useState<string>(''); // Stdin input
+  const [error, setError] = useState<string>('');
+  const [language, setLanguage] = useState<Language>('javascript');
   const router = useRouter();
 
-  const [error, setError] = useState(''); //TODO
-  const [stdin, setStdin] = useState('') //TODO
-  //Syntax highlighting only working for JS - change
-  const [language, setLanguage] = useState('javascript')
-
-  // Handle editor change event
-  const handleEditorChange = (value: string | undefined) => {
-    setCode(value || ""); // Update state with new code
+  const handleEditorChange = (value: string | undefined): void => {
+    setCode(value || '');
   };
 
-  const handleLanguageChange = (value: string) => {
-    setLanguage(value);
+  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    setLanguage(event.target.value as Language);
   };
 
-  const handleRun = async() => {
-      const button = document.querySelector('#run-button') as HTMLButtonElement;
-      if (button){
-        button.style.backgroundColor = 'orange';
-      }
-      
-      const codeData = {
-        'code': code,
-        'language': language,
-        'stdin': ''
-
-    };
-    try {
-        const response = await fetch('/api/code/execute', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(codeData),
-        });
-        // Check if the request was successful
-        if (response.ok) {
-            const result = await response.json();
-            alert('Code Executed');
-            //Add status check
-            console.log(result.output) //debugging
-            setOutput(result.output);
-            // redirect to login page
-            //router.push("/login");
-
-        } else {
-            let error = await response.json();
-            // Handle error (e.g., show an error message)
-            //setError({ message: error.message}); 
-        }
-
-    } catch(error) {
-        //setError({ message: 'Network error, please try again later.' });
-        console.error(error);
+  const handleRun = async (): Promise<void> => {
+    const button = document.querySelector('#run-button') as HTMLElement;
+    if (button) {
+      button.style.backgroundColor = 'orange';
     }
-      
+
+    const codeData: CodeData = {
+      code,
+      language,
+      stdin,
+    };
+
+    try {
+      const response = await fetch('/api/code/execute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(codeData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setOutput(result.output);
+      } else {
+        const errorResponse = await response.json();
+        setError(errorResponse.message || 'An error occurred.');
+      }
+    } catch (err) {
+      setError('Network error, please try again later.');
+      console.error(err);
+    }
   };
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header style={{ padding: '10px', backgroundColor: '#333', color: '#fff', textAlign: 'center' }}>
+    <div style={styles.container}>
+      <header style={styles.header}>
         <h1>Code Editor</h1>
       </header>
-      <button 
-      id = "run-button"
-      onClick = {handleRun}
-      style={{
-        padding: '10px 20px', 
-        backgroundColor: '#007bff', 
-        color: '#fff', 
-        border: 'none', 
-        borderRadius: '5px', 
-        cursor: 'pointer'
-      }}
-      >
-        Run Code
-      </button>
-      <select
-      value = {language}
-      onChange={(e) => handleLanguageChange(e.target.value)}
-      //className
-      >
-        <option value="javascript">Javascript</option>
-        <option value="java">Java</option>
-        <option value="c">C</option>
-        <option value="cpp">C++</option>
-        <option value="python">Python</option>
-      </select>
+      <div style={styles.controls}>
+        <button id="run-button" onClick={handleRun} style={styles.runButton}>
+          Run Code
+        </button>
+        <select
+          value={language}
+          onChange={handleLanguageChange}
+          style={styles.languageSelect}
+        >
+          <option value="javascript">JavaScript</option>
+          <option value="java">Java</option>
+          <option value="c">C</option>
+          <option value="cpp">C++</option>
+          <option value="python">Python</option>
+        </select>
+      </div>
+
       <Editor
-        height="90vh"
-        language={language}// Set the language to currently selected language
-        value={code} // Controlled editor, bind value to React state
-        onChange={handleEditorChange} // Handle code changes
-        theme="vs-dark" // Set dark theme
+        height="50vh"
+        language={language}
+        value={code}
+        onChange={handleEditorChange}
+        theme="vs-dark"
         options={{
-          minimap: { enabled: false }, // Disable minimap
-          fontSize: 14, // Set font size
-          scrollBeyondLastLine: false, // Disable scroll beyond the last line
+          minimap: { enabled: false },
+          fontSize: 14,
+          scrollBeyondLastLine: false,
         }}
       />
-      <div
-        style={{
-          padding: '10px',
-          marginTop: '10px',
-          backgroundColor: '#f5f5f5',
-          border: '1px solid #ccc',
-          borderRadius: '5px',
-          minHeight: '100px', // Ensure there is a minimum height for output area
-          whiteSpace: 'pre-wrap', // Preserve formatting of code or output
-          overflowY: 'auto', // Allow scrolling if content overflows
-        }}
-      >
+
+      <textarea
+        placeholder="Enter input for stdin..."
+        value={stdin}
+        onChange={(e) => setStdin(e.target.value)}
+        style={styles.stdinInput}
+      />
+
+      <div style={styles.outputBox}>
         <strong>Output:</strong>
-        {output} {/* Display output or errors here */}
+        <div>{output}</div>
+        {error && <div style={styles.error}>{error}</div>}
       </div>
     </div>
-  )
-}
+  );
+};
 
+// Inline styling objects for improved UI
+const styles = {
+  container: {
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '10px',
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    padding: '10px',
+    backgroundColor: '#333',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  controls: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '20px',
+  },
+  runButton: {
+    padding: '10px 20px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+  },
+  runButtonHover: {
+    backgroundColor: '#0056b3',
+  },
+  languageSelect: {
+    padding: '10px',
+    fontSize: '14px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+  },
+  stdinInput: {
+    width: '100%',
+    padding: '10px',
+    marginTop: '10px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    minHeight: '80px',
+    fontFamily: 'monospace',
+    fontSize: '14px',
+    resize: 'vertical',
+  },
+  outputBox: {
+    padding: '10px',
+    marginTop: '20px',
+    backgroundColor: '#fff',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    minHeight: '100px',
+    whiteSpace: 'pre-wrap',
+    overflowY: 'auto',
+    fontFamily: 'monospace',
+    fontSize: '14px',
+    transition: 'opacity 0.5s ease-in-out',
+  },
+  error: {
+    color: 'red',
+    marginTop: '10px',
+  },
+};
 
+export default CodeEditor;
