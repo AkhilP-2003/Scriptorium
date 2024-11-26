@@ -42,6 +42,8 @@ interface Comment {
     onTemplateClick: (value: number) => void;
     handleCommentUpvote:(id:number, voteType: string) => void;
     handleCommentDownvote: (id:number, voteType: string) => void;
+    deleteButton?: React.ReactNode;
+    editButton?: React.ReactNode;
   }
 
   const BlogDetail: React.FC<BlogDetailProps> = ({
@@ -58,7 +60,9 @@ interface Comment {
     handleDownvote,
     onTemplateClick,
     handleCommentUpvote,
-    handleCommentDownvote
+    handleCommentDownvote,
+    deleteButton,
+    editButton
 
   }) => {
 
@@ -68,7 +72,13 @@ interface Comment {
     return (
       <div className="p-6 bg-gray-100 shadow-xl rounded-lg max-w-4xl mx-auto">
         {/* Blog Header */}
+        <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
+        <div>{editButton && <button className="bg-blue-100 mr-3 mt-3 mb-3 font-semibold text-blue-800 p-2 rounded-lg">{editButton}</button>}
+          {deleteButton && <button className="bg-red-100 mr-3 mt-3 mb-3 font-semibold text-red-800 p-2 rounded-lg">{deleteButton}</button>}
+        
+        </div>
+        </div>
         <div className="flex items-center mt-2 text-sm text-gray-700">
           {author.avatar && (
             <img
