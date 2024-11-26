@@ -70,6 +70,11 @@ export default function handler(req, res) {
             fs.writeFileSync(fileName, code);
             executeCodeInDocker(fileName, stdin, 'php', res);
             break;
+        case 'ruby':
+            fileName = path.join(TEMP_DIR, `${jobId}.rb`);
+            fs.writeFileSync(fileName, code);
+            executeCodeInDocker(fileName, stdin, 'ruby', res);
+            break;
         default:
             return res.status(400).json({ status: "error", output: "Unsupported language" });
     }
@@ -109,6 +114,9 @@ function executeCodeInDocker(filePath, stdin, language, res) {
             break;
         case 'php':
             dockerCommand += ' php-runner /app/' + fileName;
+            break;
+        case 'ruby':
+            dockerCommand += ' ruby-runner /app/' + fileName;
             break;
         default:
             return res.status(400).json({ status: 'error', output: 'Unsupported language' });

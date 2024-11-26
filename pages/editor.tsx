@@ -83,6 +83,7 @@ const CodeEditor: React.FC = () => {
           <option value="r">R</option>
           <option value="go">Go</option>
           <option value="php">PHP</option>
+          <option value="ruby">Ruby</option>
         </select>
       </div>
 
