@@ -75,6 +75,11 @@ export default function handler(req, res) {
             fs.writeFileSync(fileName, code);
             executeCodeInDocker(fileName, stdin, 'ruby', res);
             break;
+        case 'perl':
+            fileName = path.join(TEMP_DIR, `${jobId}.pl`);
+            fs.writeFileSync(fileName, code);
+            executeCodeInDocker(fileName, stdin, 'perl', res);
+            break;
         default:
             return res.status(400).json({ status: "error", output: "Unsupported language" });
     }
@@ -118,6 +123,9 @@ function executeCodeInDocker(filePath, stdin, language, res) {
         case 'ruby':
             dockerCommand += ' ruby-runner /app/' + fileName;
             break;
+        case 'perl':
+            dockerCommand += ' perl-runner /app/' + fileName;
+            break;
         default:
             return res.status(400).json({ status: 'error', output: 'Unsupported language' });
     }
@@ -146,9 +154,24 @@ function executeCodeInDocker(filePath, stdin, language, res) {
     });
 
     process.on('close', (code) => {
+
+        cleanup(filePath);
         if (code !== 0) {
             return res.status(200).json({ status: "error", output: error });
         }
         return res.status(200).json({ status: "success", output: output });
     });
+}
+
+function cleanup(filePath) {
+    try {
+        const fileName = path.basename(filePath);
+        const filePathToDelete = path.join(TEMP_DIR, fileName);
+
+        if (fs.existsSync(filePathToDelete)) {
+            fs.unlinkSync(filePathToDelete);  // Delete the file
+        }
+    } catch (error) {
+        console.error('Error during cleanup:', error);
+    }
 }

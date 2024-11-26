@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react'; // Monaco editor for code editing
 import { useRouter } from 'next/router';
 
 // Define the possible languages for the select dropdown
-type Language = 'javascript' | 'java' | 'c' | 'cpp' | 'python';
+type Language = 'javascript' | 'java' | 'c' | 'cpp' | 'python' | 'r' | 'go' | 'php' | 'ruby' | 'perl';
 
 interface CodeData {
   code: string;
@@ -84,6 +84,7 @@ const CodeEditor: React.FC = () => {
           <option value="go">Go</option>
           <option value="php">PHP</option>
           <option value="ruby">Ruby</option>
+          <option value="perl">Perl</option>
         </select>
       </div>
 
