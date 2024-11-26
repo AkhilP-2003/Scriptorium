@@ -11,7 +11,7 @@ interface InputProps {
 const NavigationBar: React.FC<InputProps> = ({links, title, className}) => {
 
     return (
-        <nav className={`flex items-center justify-between p-4 bg-orange-500 text-white !shadow-2xl ${className}`}>
+        <nav className={`flex items-center justify-between p-4 bg-nav-color text-white !shadow-2xl ${className}`}>
             {/* Logo */}
             <div className="flex items-center space-x-2">
                 <Image 

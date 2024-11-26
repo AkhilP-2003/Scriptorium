@@ -66,7 +66,7 @@ const handler = async (req, res) => {
       //handle any errors
     } catch (error) {
       console.error("Error in hiding the flagged comment", error)
-      return res.status(500).json({ error: "Somethign went wrong in hiding the flagged comment"})
+      return res.status(400).json({ error: "Somethign went wrong in hiding the flagged comment"})
     }
 
     // if we reach this point its not a put request
