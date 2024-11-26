@@ -28,7 +28,7 @@ export default function Playground() {
   const handleRunCode = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/code/execute', {
+      const response = await fetch('/api/code/visitor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
