@@ -1,11 +1,131 @@
-import Image from "next/image";
-import localFont from "next/font/local";
-import NavigationBar from "../components/NavigationBar";
+// App.jsx
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import Editor from '@monaco-editor/react'; // Import Monaco Editor component
+import { useRouter } from "next/router";
 
+export default function codeEditor() {
+  const [code, setCode] = useState(`console.log("Hello, World!");`);
 
-export default function Editor() {
+  const [output, setOutput] = useState('');
+  const router = useRouter();
+
+  const [error, setError] = useState(''); //TODO
+  const [stdin, setStdin] = useState('') //TODO
+  //Syntax highlighting only working for JS - change
+  const [language, setLanguage] = useState('javascript')
+
+  // Handle editor change event
+  const handleEditorChange = (value: string | undefined) => {
+    setCode(value || ""); // Update state with new code
+  };
+
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+  };
+
+  const handleRun = async() => {
+      const button = document.querySelector('#run-button') as HTMLButtonElement;
+      if (button){
+        button.style.backgroundColor = 'orange';
+      }
+      
+      const codeData = {
+        'code': code,
+        'language': language,
+        'stdin': ''
+
+    };
+    try {
+        const response = await fetch('/api/code/execute', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(codeData),
+        });
+        // Check if the request was successful
+        if (response.ok) {
+            const result = await response.json();
+            alert('Code Executed');
+            //Add status check
+            console.log(result.output) //debugging
+            setOutput(result.output);
+            // redirect to login page
+            //router.push("/login");
+
+        } else {
+            let error = await response.json();
+            // Handle error (e.g., show an error message)
+            //setError({ message: error.message}); 
+        }
+
+    } catch(error) {
+        //setError({ message: 'Network error, please try again later.' });
+        console.error(error);
+    }
+      
+  };
 
   return (
-    <></>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <header style={{ padding: '10px', backgroundColor: '#333', color: '#fff', textAlign: 'center' }}>
+        <h1>Code Editor</h1>
+      </header>
+      <button 
+      id = "run-button"
+      onClick = {handleRun}
+      style={{
+        padding: '10px 20px', 
+        backgroundColor: '#007bff', 
+        color: '#fff', 
+        border: 'none', 
+        borderRadius: '5px', 
+        cursor: 'pointer'
+      }}
+      >
+        Run Code
+      </button>
+      <select
+      value = {language}
+      onChange={(e) => handleLanguageChange(e.target.value)}
+      //className
+      >
+        <option value="javascript">Javascript</option>
+        <option value="java">Java</option>
+        <option value="c">C</option>
+        <option value="cpp">C++</option>
+        <option value="python">Python</option>
+      </select>
+      <Editor
+        height="90vh"
+        language={language}// Set the language to currently selected language
+        value={code} // Controlled editor, bind value to React state
+        onChange={handleEditorChange} // Handle code changes
+        theme="vs-dark" // Set dark theme
+        options={{
+          minimap: { enabled: false }, // Disable minimap
+          fontSize: 14, // Set font size
+          scrollBeyondLastLine: false, // Disable scroll beyond the last line
+        }}
+      />
+      <div
+        style={{
+          padding: '10px',
+          marginTop: '10px',
+          backgroundColor: '#f5f5f5',
+          border: '1px solid #ccc',
+          borderRadius: '5px',
+          minHeight: '100px', // Ensure there is a minimum height for output area
+          whiteSpace: 'pre-wrap', // Preserve formatting of code or output
+          overflowY: 'auto', // Allow scrolling if content overflows
+        }}
+      >
+        <strong>Output:</strong>
+        {output} {/* Display output or errors here */}
+      </div>
+    </div>
   )
-} 
+}
+
+
