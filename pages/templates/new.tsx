@@ -12,6 +12,9 @@ const NewTemplatePage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const router = useRouter()
 
+  // get the template data from the query params
+  const {title: initialTitle, explanation: initialExplanation, tags: initialTags, code: initialCode, language: initialLanguage, parentTemplateId} = router.query
+
   // check if the user is authenticated
   useEffect(() => { 
 
@@ -28,7 +31,7 @@ const NewTemplatePage: React.FC = () => {
 
       // decode the token to check if expired
       const decodedToken: { exp: number } = jwtDecode(accessToken)
-      const currentTime = Date.now() / 1000 // Current time in seconds
+      const currentTime = Date.now() / 1000 // current time in seconds
 
       // dheck if the token is expired
       if (decodedToken.exp < currentTime) {
@@ -47,32 +50,32 @@ const NewTemplatePage: React.FC = () => {
     // validate that the required fields are not empty
     if (!title.trim()) {
       setErrorMessage("Title is required.")
-      return;
+      return
     }
 
     if (!explanation.trim()) {
       setErrorMessage("Explanation is required.")
-      return;
+      return
     }
 
     if (!tags.trim()) {
       setErrorMessage("Tags are required.")
-      return;
+      return
     }
 
     if (!code.trim()) {
       setErrorMessage("Code is required.")
-      return;
+      return
     }
 
     if (!language.trim()) {
       setErrorMessage("Language is required.")
-      return;
+      return
     }    
 
     setErrorMessage(null); // Clear any previous error messages
 
-    const templateData = { title, explanation, tags, code, language }
+    const templateData = { title, explanation, tags, code, language, parentTemplateId: parentTemplateId ? parseInt(parentTemplateId.toString()) : undefined }
 
     try {
 

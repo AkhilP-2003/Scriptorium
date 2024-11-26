@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Editor from '@monaco-editor/react'; // Monaco editor for code editing
 import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import { init } from 'next/dist/compiled/webpack/webpack';
 
 // Define the possible languages for the select dropdown
 type Language = 'javascript' | 'java' | 'c' | 'cpp' | 'python' | 'r' | 'go' | 'php' | 'ruby' | 'perl';
@@ -17,7 +19,30 @@ const CodeEditor: React.FC = () => {
   const [stdin, setStdin] = useState<string>(''); // Stdin input
   const [error, setError] = useState<string>('');
   const [language, setLanguage] = useState<Language>('javascript');
-  const router = useRouter();
+  const router = useRouter(); 
+
+  // get the code and lang from the query
+  const { code: initialCode, language: initialLanguage } = router.query;
+
+  // making a use effect for initialziing the editors content if the query contains code + lang
+  useEffect(() => {
+
+    // if the code and lang are present
+    if (initialCode) {
+
+      setCode(initialCode?.toString() || '')
+
+    }
+
+    // if the lang is present
+    if (initialLanguage) {
+
+      // set the language
+      setLanguage(initialLanguage?.toString() as Language)
+    }
+
+
+  }, [initialCode, initialLanguage]) // we only wanna change the editor content if the query params change
 
   const handleEditorChange = (value: string | undefined): void => {
     setCode(value || '');

@@ -49,20 +49,39 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
 
       // redirect to the playground page with template data
       router.push({
-        pathname: '/templates/playground',
+        pathname: '/templates/new',
         query: {
-          id: template.id.toString(),
-          title: template.title,
-          code: template.code.code,        // pass the actual code string
-          language: template.code.language, // pass the language as a string
-          input: template.code.input || '', // pass the input as a string
-          output: template.code.output || '', // pass the output as a string
-          error: template.code.error || '' // pass the error as a string
-        }
+          title: `Forked from: ${template.title}`,
+          explanation: template.explanation,
+          tags: template.tags,
+          code: template.code.code,
+          language: template.code.language,
+          parentTemplateId: template.id, // to indicate that it's a fork
+        },
       })
+
     } else {
       console.error('No code found for this template')
     }
+  }
+
+  const handleRunTemplate = () => {
+
+    if (template?.code) {
+
+
+      router.push({
+        pathname: '/editor',
+        query: {
+          code: template.code.code,
+          language: template.code.language
+        }
+      })
+
+    } else {
+      console.error('No code found for this template')
+    }
+
   }
   
   
@@ -75,6 +94,7 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
         <p className="mb-2 text-lg">{template.explanation}</p>
         <p className="text-sm text-gray-600">Tags: {template.tags}</p>
       </div>
+
       {/* code - using react-syntax-highlighter library */}
       {template.code && (
         <div className="border p-6 rounded shadow mb-6 bg-gray-100">
@@ -96,9 +116,16 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
       {/* forked button */}
       <button
         className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        onClick={handleForkTemplate}
+        onClick={handleRunTemplate}
       >
-        Fork & Run
+        Run
+      </button>
+
+      <button
+        className="mt-4 ml-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+        onClick={() => handleForkTemplate()}
+      >
+        Fork & Modify
       </button>
 
     </div>

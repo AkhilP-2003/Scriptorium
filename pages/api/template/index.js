@@ -74,11 +74,11 @@ export default async function handler(req, res) {
         owner: {
           select: {
             id: true,
-            userName: true, // get the username
-          },
-        },
-      },
-    });
+            userName: true // get the username
+          }
+        }
+      }
+    })
     
     return res.status(200).json({templates, totalTemplatesCount, currentPage, pageSize})
 
