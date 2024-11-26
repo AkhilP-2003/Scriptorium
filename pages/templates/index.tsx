@@ -3,6 +3,7 @@ import NavigationBar from "../../components/NavigationBar";
 import { useRouter } from "next/router";
 import TemplateCard from "../../components/TemplateCard";
 import {jwtDecode} from "jwt-decode";
+import Link from "next/link";
 
 // defining the type for the templates
 type Template = {
@@ -324,27 +325,25 @@ export default function Templates() {
           Create New Template
         </a>
 
-        <a
+        <button
           onClick={handleAllTemplates}
           className={`ml-4 px-6 py-3 font-semibold rounded-lg transition-all cursor-pointer ${
             isViewingMyTemplates
               ? "bg-yellow-500 text-white hover:bg-yellow-600"
-              : "bg-yellow-700 text-white" // Darker background if selected
+              : "bg-yellow-700 text-white"
           }`}
         >
           All Templates
-        </a>
+        </button>
 
-        <a
-          onClick={handleMyTemplates}
+        <Link
+          href="/templates/myTemplates"
           className={`ml-4 px-6 py-3 font-semibold rounded-lg transition-all cursor-pointer ${
-            isViewingMyTemplates
-              ? "bg-green-700 text-white" // Darker background if selected
-              : "bg-green-500 text-white hover:bg-green-600"
+            isViewingMyTemplates ? "bg-green-700 text-white" : "bg-green-500 text-white hover:bg-green-600"
           }`}
         >
           My Templates
-        </a>
+        </Link>
       </div>
 
 
