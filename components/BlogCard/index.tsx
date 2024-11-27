@@ -13,10 +13,11 @@ interface InputProps {
     handleDownvote: (e: React.MouseEvent, id:number, voteType: string) => void;
     upvoteNum:number;
     downvoteNum:number;
+    handleReport: (e: React.MouseEvent, id: number) => void;
 }
 
 
-const BlogCard:React.FC<InputProps> = ({id, onClick, handleUpvote, handleDownvote, upvoteNum, downvoteNum, className, templateTitles, title, tags, username}) => {
+const BlogCard:React.FC<InputProps> = ({id, onClick, handleUpvote, handleDownvote, handleReport, upvoteNum, downvoteNum, className, templateTitles, title, tags, username}) => {
 
     return (
 
@@ -52,6 +53,14 @@ const BlogCard:React.FC<InputProps> = ({id, onClick, handleUpvote, handleDownvot
                 onClick={(e) => handleDownvote(e, id, "upvote")} title="downvote">
                 <div>👎</div>
             </button><span className="!ml-1 text-sm text-red-600 font-semibold">{downvoteNum}</span>
+            {/* Flag icon for reporting */}
+            <button
+            className="text-red-500 hover:font-semibold focus:outline-none transition-colors"
+            onClick={(e) => handleReport(e, id)} // Report action
+            title="Report"
+            >
+            <div>🚩</div>
+            </button>
         </div>
         </div>
 

@@ -39,6 +39,7 @@ interface Comment {
     comments: Comment[];
     handleUpvote:(e: React.MouseEvent, id:number, voteType: string) => void;
     handleDownvote: (e: React.MouseEvent, id:number, voteType: string) => void;
+    handleReport: (e: React.MouseEvent, id: number) => void;
     onTemplateClick: (value: number) => void;
     handleCommentUpvote:(id:number, voteType: string) => void;
     handleCommentDownvote: (id:number, voteType: string) => void;
@@ -58,6 +59,7 @@ interface Comment {
     comments,
     handleUpvote,
     handleDownvote,
+    handleReport,
     onTemplateClick,
     handleCommentUpvote,
     handleCommentDownvote,
@@ -107,6 +109,13 @@ interface Comment {
           </button>
           <button onClick={(e) => handleDownvote(e, id,"downvote")} className="text-red-600 hover:font-semibold focus:outline-none">
             👎<span> Downvote: {downvote} </span>
+          </button>
+          <button
+          className="text-red-500 hover:font-semibold focus:outline-none transition-colors"
+          onClick={(e) => handleReport(e, id)} // Report action
+          title="Report"
+          >
+          <div>🚩</div>
           </button>
         </div>
   

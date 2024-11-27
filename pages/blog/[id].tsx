@@ -110,6 +110,40 @@ export default function CurrentBlogPage() {
     }
   }
 
+  const report = async(e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        router.push("/login");
+    } else {
+      try {
+
+        // decode the token and cast it to the JwtPayload type
+        const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+        const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+    
+        // check if the token is expired
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+    
+          // if the token is expired thenredirect to login;
+          console.warn("Token expired. Redirecting to login.")
+          router.push("/login");
+          return
+        }} catch(error) {
+          console.log("something went wrong saving.");
+        }
+    }
+    try {
+       router.push({
+        pathname: '/report',
+        query: {blogId: id},
+       })
+    } catch(error) {
+        console.log("Error with reporting");
+    }
+
+}
   const commentVote = async(blogId:number, id: number, voteAction:string) => {
     const accessToken = localStorage.getItem('accessToken');
 
@@ -231,6 +265,7 @@ export default function CurrentBlogPage() {
             handleDownvote={(e) => vote(e, blog.id, 'downvote')}
             handleCommentUpvote={(commentId) => commentVote(blog.id, commentId, 'upvote')} // For comments
             handleCommentDownvote={(commentId) => commentVote(blog.id, commentId, 'downvote')} // For comments
+            handleReport={(e) => report(e, blog.id)}
             onTemplateClick={handleTemplateClick}
             downvote={blog.downvote}
             tags={blog.tags}
