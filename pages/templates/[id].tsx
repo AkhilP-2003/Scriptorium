@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { jwtDecode } from 'jwt-decode';
 
 // defining the type for the template
 type Code = {
@@ -26,6 +27,14 @@ type Template = {
   code: Code | null
 }
 
+type JwtPayload = {
+  id: number
+  userName: string
+  email: string
+  role: string
+  exp?: number
+}
+
 // define the props that will be passed to the templateDetails component
 type TemplateDetailsProps = {
   template: Template | null;
@@ -44,25 +53,97 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
 
   const handleForkTemplate = () => {
 
+    // check if the user is logged in
+    const accessToken = localStorage.getItem('accessToken')
+
+    // if the user is not logged in then redirect to the login/signup page
+    if (!accessToken) {
+      console.error('No access token found')
+      router.push('/login')
+      return
+    }
+
+    try {
+
+      // decode the token
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+      const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+
+      // check if the token is expired
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+        // if the token is expired thenredirect to login
+        console.warn("Token expired. Redirecting to login.")
+        router.push("/login")
+        return
+      }
+
+      // if we reach here then the user is authenticated and they can fork 
+
+
+      // check if the template has code
+      if (template?.code) {
+
+        // redirect to the playground page with template data
+        router.push({
+          pathname: '/templates/new',
+          query: {
+            title: `Forked from: ${template.title}`,
+            explanation: template.explanation,
+            tags: template.tags,
+            code: template.code.code,
+            language: template.code.language,
+            parentTemplateId: template.id, // to indicate that it's a fork
+          },
+        }) 
+
+      } else {
+        console.error('No code found for this template')
+      }
+
+    } catch (error) {
+      console.error('Error decoding token:', error)
+      router.push('/login')
+    }
+
+
     // check if the template has code
     if (template?.code) {
 
       // redirect to the playground page with template data
       router.push({
-        pathname: '/templates/playground',
+        pathname: '/templates/new',
         query: {
-          id: template.id.toString(),
-          title: template.title,
-          code: template.code.code,        // pass the actual code string
-          language: template.code.language, // pass the language as a string
-          input: template.code.input || '', // pass the input as a string
-          output: template.code.output || '', // pass the output as a string
-          error: template.code.error || '' // pass the error as a string
-        }
+          title: `Forked from: ${template.title}`,
+          explanation: template.explanation,
+          tags: template.tags,
+          code: template.code.code,
+          language: template.code.language,
+          parentTemplateId: template.id, // to indicate that it's a fork
+        },
       })
+
     } else {
       console.error('No code found for this template')
     }
+  }
+
+  const handleRunTemplate = () => {
+
+    if (template?.code) {
+
+
+      router.push({
+        pathname: '/editor',
+        query: {
+          code: template.code.code,
+          language: template.code.language
+        }
+      })
+
+    } else {
+      console.error('No code found for this template')
+    }
+
   }
   
   
@@ -75,6 +156,7 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
         <p className="mb-2 text-lg">{template.explanation}</p>
         <p className="text-sm text-gray-600">Tags: {template.tags}</p>
       </div>
+
       {/* code - using react-syntax-highlighter library */}
       {template.code && (
         <div className="border p-6 rounded shadow mb-6 bg-gray-100">
@@ -96,9 +178,16 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
       {/* forked button */}
       <button
         className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        onClick={handleForkTemplate}
+        onClick={handleRunTemplate}
       >
-        Fork & Run
+        Run
+      </button>
+
+      <button
+        className="mt-4 ml-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+        onClick={() => handleForkTemplate()}
+      >
+        Fork & Modify
       </button>
 
     </div>
