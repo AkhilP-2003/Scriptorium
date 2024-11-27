@@ -99,14 +99,35 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   }, [router]);
 
   const handleAddComment = () => {
-    if (!isUserAuthenticated) {
+    const accessToken = localStorage.getItem('accessToken');
+    
+    if (!accessToken) {
       // Redirect to login if not authenticated
       router.push('/login');
-    } else {
-      // Toggle the comment input visibility
+      return;
+    }
+  
+    try {
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken);
+      const currentTime = Math.floor(Date.now() / 1000); // current time in seconds
+  
+      // Check if the token is expired
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+        console.warn("Token expired. Redirecting to login.");
+        router.push("/login");
+        return;
+      }
+  
+      // If the token is valid, toggle the comment input visibility
       setIsAddingComment((prev) => !prev);
+  
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      // If there's an error decoding the token, redirect to login
+      router.push('/login');
     }
   };
+  
 
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) {
