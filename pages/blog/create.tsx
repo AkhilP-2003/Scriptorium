@@ -5,29 +5,20 @@ import { useState, useEffect, SetStateAction } from "react";
 import BlogDetail from "@/components/BlogDetail";
 import { jwtDecode } from "jwt-decode";
 
-function isTokenExpired(token: string) {
-  try {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000; // Current time in seconds
-      if (decoded.exp) {
-        return decoded.exp < currentTime;
-      } else {
-        console.log("exp is null i think")
-      }
-  } catch (error) {
-      console.error("Invalid token", error);
-      return true; // Treat invalid tokens as expired
-  }
-}
+
+type JwtPayload = {
+  id: number;
+  userName: string;
+  email: string;
+  role: string;
+  exp?: number; // Optional expiration time
+};
 
 interface Template {
     id: number;
     title: string;
 }
 
-interface JwtPayload {
-    id: string;
-  }
 
 interface Blog {
     id: number;
@@ -47,6 +38,7 @@ const BlogEdit: React.FC = () => {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [selectedTemplates, setSelectedTemplates] = useState<number[]>([]);
     const [removedTemplates, setRemovedTemplates] = useState<number[]>([]);
+    const [sError, setError] = useState<{ message: string } | null>(null);
     const [formData, setFormData] = useState({
       title: "",
       description: "",
@@ -93,34 +85,31 @@ const BlogEdit: React.FC = () => {
   
     const handleSubmit = async () => {
         const accessToken = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
 
-        if (!refreshToken || isTokenExpired(refreshToken)) {
-            router.push('/login');
-            return;
-        }
-        if (!accessToken || isTokenExpired(accessToken)) {
-            // refresh it. 
-            const update = await fetch('/api/users/refresh', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({refreshToken})
-            });
-            if (update.ok) {
-                const { accessToken: newAccessToken } = await update.json();
-                localStorage.setItem("accessToken", newAccessToken);
-            } else {
-                // If token refresh fails, redirect to login
-                router.push('/login');
-                return;
+        if (!accessToken) {
+            router.push("/login");
+        } else {
+          try {
+
+            // decode the token and cast it to the JwtPayload type
+            const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+            const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+        
+            // check if the token is expired
+            if (decodedToken.exp && decodedToken.exp < currentTime) {
+        
+              // if the token is expired thenredirect to login
+              console.warn("Token expired. Redirecting to login.")
+              router.push("/login")
+              return
+            }} catch(error) {
+              console.log("something went wrong saving.")
             }
         }
 
         try {
 
-            const editData = await fetch(`/api/blogs/`, {
+            const editData = await fetch(`/api/blogs`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -128,9 +117,11 @@ const BlogEdit: React.FC = () => {
                 },
                 body: JSON.stringify({title: formData.title, description:formData.description, tags:formData.tags, templateIds: selectedTemplates})
             });
+            const res = await editData.json();
             if (editData.ok) {
-                const res = await editData.json();
                 router.push(`../blog/${res.id}`); // Redirect to the blog details page
+            }else {
+              setError({ message: res.error });
             }
         } catch (error) {
             console.error("Failed to update the blog:", error);
@@ -178,6 +169,9 @@ const BlogEdit: React.FC = () => {
             className="w-full px-3 py-2 border rounded"
           />
         </div>
+        {sError && <p className="text-red-600 font-semibold bg-red-100 rounded-md mr-2 mt-2 mb-2 p-2">
+          {sError.message}
+        </p>}
         <div className="mb-4">
           <label className="block text-gray-700 font-bold mb-2 text-lg md:text-lg sm:text-md">Templates</label>
           <ul>
@@ -204,10 +198,10 @@ const BlogEdit: React.FC = () => {
           </ul>
         </div>
         <button
-          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
+          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-800 transition"
           onClick={handleSubmit}
         >
-          Save Changes
+          Save
         </button>
       </div>
     );

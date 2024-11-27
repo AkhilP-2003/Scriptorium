@@ -32,9 +32,13 @@ interface Blog {
   templates: [];
   comments: [];
 }
-interface JwtPayload {
-  id: string;
-}
+type JwtPayload = {
+  id: number;
+  userName: string;
+  email: string;
+  role: string;
+  exp?: number; // Optional expiration time
+};
 
 export default function CurrentBlogPage() {
 
@@ -82,28 +86,25 @@ export default function CurrentBlogPage() {
 
   const vote = async(e: React.MouseEvent, id: number, voteType:string) => {
     const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
 
-    if (!refreshToken || isTokenExpired(refreshToken)) {
-        router.push('/login');
-        return;
-    }
-    if (!accessToken || isTokenExpired(accessToken)) {
-        // refresh it. 
-        const update = await fetch('/api/users/refresh', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({refreshToken})
-        });
-        if (update.ok) {
-            const { accessToken: newAccessToken } = await update.json();
-            localStorage.setItem("accessToken", newAccessToken);
-        } else {
-            // If token refresh fails, redirect to login
-            router.push('/login');
-            return;
+    if (!accessToken) {
+      router.push("/login");
+    } else {
+      try {
+
+        // decode the token and cast it to the JwtPayload type
+        const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+        const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+    
+        // check if the token is expired
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+    
+          // if the token is expired thenredirect to login
+          console.warn("Token expired. Redirecting to login.")
+          router.push("/login")
+          return
+        }} catch(error) {
+          console.log("something went wrong saving.")
         }
     }
     try {
@@ -126,27 +127,25 @@ export default function CurrentBlogPage() {
 
   const commentVote = async(blogId:number, id: number, voteAction:string) => {
     const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
 
-    if (!refreshToken || isTokenExpired(refreshToken)) {
-        router.push('/login');
-    }
-    if (!accessToken || isTokenExpired(accessToken)) {
-        // refresh it. 
-        const update = await fetch('/api/users/refresh', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({refreshToken})
-        });
-        if (update.ok) {
-            const { accessToken: newAccessToken } = await update.json();
-            localStorage.setItem("accessToken", newAccessToken);
-        } else {
-            // If token refresh fails, redirect to login
-            router.push('/login');
-            return;
+    if (!accessToken) {
+      router.push("/login");
+    } else {
+      try {
+
+        // decode the token and cast it to the JwtPayload type
+        const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+        const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+    
+        // check if the token is expired
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+    
+          // if the token is expired thenredirect to login
+          console.warn("Token expired. Redirecting to login.")
+          router.push("/login")
+          return
+        }} catch(error) {
+          console.log("something went wrong saving.")
         }
     }
     try {
@@ -181,28 +180,29 @@ export default function CurrentBlogPage() {
 
   const handleDelete = async (blogId: number) => {
     const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
-
-    if (!refreshToken || isTokenExpired(refreshToken)) {
-        router.push('/login');
-        return;
+    if (isAuthor === false) {
+      alert("You do not have permission to delete this blog");
+      router.push('/blogs');
+      return;
     }
-    if (!accessToken || isTokenExpired(accessToken)) {
-        // refresh it. 
-        const update = await fetch('/api/users/refresh', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({refreshToken})
-        });
-        if (update.ok) {
-            const { accessToken: newAccessToken } = await update.json();
-            localStorage.setItem("accessToken", newAccessToken);
-        } else {
-            // If token refresh fails, redirect to login
-            router.push('/login');
-            return;
+    if (!accessToken) {
+      router.push("/login");
+    } else {
+      try {
+
+        // decode the token and cast it to the JwtPayload type
+        const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+        const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+    
+        // check if the token is expired
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+    
+          // if the token is expired thenredirect to login
+          console.warn("Token expired. Redirecting to login.")
+          router.push("/login")
+          return
+        }} catch(error) {
+          console.log("something went wrong saving.")
         }
     }
 
@@ -225,6 +225,11 @@ export default function CurrentBlogPage() {
 
   const handleEdit = (blogId: number) => {
     // handle edit features for author.
+    if (isAuthor === false) {
+      alert("You do not have permission to edit this blog");
+      router.push('/blogs');
+      return;
+    }
     router.push(`edit/${blogId}`);
     return;
   }
