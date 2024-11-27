@@ -25,9 +25,13 @@ interface Template {
     title: string;
 }
 
-interface JwtPayload {
-    id: string;
-  }
+type JwtPayload = {
+  id: number;
+  userName: string;
+  email: string;
+  role: string;
+  exp?: number; // Optional expiration time
+};
 
 interface Blog {
     id: number;
@@ -50,6 +54,7 @@ const BlogEdit: React.FC = () => {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [selectedTemplates, setSelectedTemplates] = useState<number[]>([]);
     const [removedTemplates, setRemovedTemplates] = useState<number[]>([]);
+    const [sError, setError] = useState<{ message: string } | null>(null);
     const [isAuthor, setIsAuthor] = useState(false);
     const [formData, setFormData] = useState({
       title: "",
@@ -144,33 +149,30 @@ const BlogEdit: React.FC = () => {
   
     const handleSubmit = async () => {
         const accessToken = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
         
         if (isAuthor === false) {
             alert('You do not have permission to edit this blog');
             router.push(`/blog/${id}`);
         }
 
-        if (!refreshToken || isTokenExpired(refreshToken)) {
-            router.push('/login');
-            return;
-        }
-        if (!accessToken || isTokenExpired(accessToken)) {
-            // refresh it. 
-            const update = await fetch('/api/users/refresh', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({refreshToken})
-            });
-            if (update.ok) {
-                const { accessToken: newAccessToken } = await update.json();
-                localStorage.setItem("accessToken", newAccessToken);
-            } else {
-                // If token refresh fails, redirect to login
-                router.push('/login');
-                return;
+        if (!accessToken) {
+          router.push("/login");
+        } else {
+          try {
+    
+            // decode the token and cast it to the JwtPayload type
+            const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+            const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+        
+            // check if the token is expired
+            if (decodedToken.exp && decodedToken.exp < currentTime) {
+        
+              // if the token is expired thenredirect to login
+              console.warn("Token expired. Redirecting to login.")
+              router.push("/login")
+              return
+            }} catch(error) {
+              console.log("something went wrong saving.")
             }
         }
 
@@ -184,9 +186,11 @@ const BlogEdit: React.FC = () => {
                 },
                 body: JSON.stringify({title: formData.title, description:formData.description, tags:formData.tags, templateIdsToAdd: selectedTemplates,templateIdsToRemove: removedTemplates })
             });
+            const res = await editData.json();
             if (editData.ok) {
                 router.push(`../${id}`); // Redirect to the blog details page
-                
+            } else {
+              setError({ message: res.error });
             }
         } catch (error) {
             console.error("Failed to update the blog:", error);
@@ -236,6 +240,9 @@ const BlogEdit: React.FC = () => {
             className="w-full px-3 py-2 border rounded"
           />
         </div>
+        {sError && <p className="text-red-600 font-semibold bg-red-100 rounded-md mr-2 mt-2 mb-2 p-2">
+          {sError.message}
+        </p>}
         <div className="mb-4">
           <label className="block text-gray-700 font-bold mb-2 text-lg md:text-lg sm:text-md">Templates</label>
           <ul>
@@ -245,7 +252,7 @@ const BlogEdit: React.FC = () => {
                 {selectedTemplates.includes(template.id) ? (
                   <button
                     className="bg-red-100 font-semibold text-red-600 p-2 m-1 rounded-md"
-                    onClick={() => (template.id, "remove")}
+                    onClick={() => handleTemplateChange(template.id, "remove")}
                   >
                     Remove
                   </button>
@@ -262,7 +269,7 @@ const BlogEdit: React.FC = () => {
           </ul>
         </div>
         <button
-          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
+          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-800 transition"
           onClick={handleSubmit}
         >
           Save Changes

@@ -15,15 +15,18 @@ async function handler(req, res) {
                     authorId: currId,
                     hidden: true,
                 }, 
+                orderBy: {
+                    upvote: 'desc',  // Order by the most upvotes
+                },
+                include: {
+                    author: true,
+                    templates: true,  // Include the related templates
+                }
 
             });
 
-            if (!existingBlog) {
-                return res.status(200).json({error: "No hidden blogs for you"});
-            }
-            // If no hidden blogs found, return a relevant message
-            if (existingBlog.length === 0) {
-                return res.status(200).json({message: "No hidden blogs for you!"});
+            if (!existingBlog || existingBlog.length === 0) {
+                return res.status(200).json([]);
             }
 
             return res.status(200).json(existingBlog);
