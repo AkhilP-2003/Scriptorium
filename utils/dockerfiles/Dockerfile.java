@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy the Java code to the working directory
 
 COPY javarunner.sh /usr/local/bin/javarunner
+RUN sed -i 's/\r$//' /usr/local/bin/javarunner
 RUN chmod +x /usr/local/bin/javarunner
 
 # Set the entry point to a custom script to compile and run the Java code
