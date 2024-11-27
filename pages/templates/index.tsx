@@ -351,15 +351,15 @@ const handleMyTemplates = () => {
         <h1 className="text-3xl font-bold mb-4 text-center">Code Templates</h1>
 
         {/* create new template button */}
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end mb-4 mt-4">
         <a
           onClick={handleCreateTemplate}
-          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-all cursor-pointer"
+          className=" px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-all cursor-pointer"
         >
           Create New Template
         </a>
 
-        <button
+        {/* <button
           onClick={handleAllTemplates}
           className={`ml-4 px-6 py-3 font-semibold rounded-lg transition-all cursor-pointer ${
             isViewingMyTemplates
@@ -368,7 +368,7 @@ const handleMyTemplates = () => {
           }`}
         >
           All Templates
-        </button>
+        </button> */}
 
         <button
           onClick={handleMyTemplates}
