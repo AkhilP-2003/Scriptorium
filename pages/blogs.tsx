@@ -269,6 +269,7 @@ export default function Blogs() {
 
         if (!accessToken) {
             router.push("/login");
+            return;
         } else {
           try {
 
