@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Editor from '@monaco-editor/react'; // Monaco editor for code editing
 import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import { init } from 'next/dist/compiled/webpack/webpack';
 
 // Define the possible languages for the select dropdown
 type Language = 'javascript' | 'java' | 'c' | 'cpp' | 'python' | 'r' | 'go' | 'php' | 'ruby' | 'perl';
@@ -17,7 +19,31 @@ const CodeEditor: React.FC = () => {
   const [stdin, setStdin] = useState<string>(''); // Stdin input
   const [error, setError] = useState<string>('');
   const [language, setLanguage] = useState<Language>('javascript');
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false); // State to track loading
+  const router = useRouter(); 
+
+  // get the code and lang from the query
+  const { code: initialCode, language: initialLanguage } = router.query;
+
+  // making a use effect for initialziing the editors content if the query contains code + lang
+  useEffect(() => {
+
+    // if the code and lang are present
+    if (initialCode) {
+
+      setCode(initialCode?.toString() || '')
+
+    }
+
+    // if the lang is present
+    if (initialLanguage) {
+
+      // set the language
+      setLanguage(initialLanguage?.toString() as Language)
+    }
+
+
+  }, [initialCode, initialLanguage]) // we only wanna change the editor content if the query params change
 
   const handleEditorChange = (value: string | undefined): void => {
     setCode(value || '');
@@ -28,6 +54,11 @@ const CodeEditor: React.FC = () => {
   };
 
   const handleRun = async (): Promise<void> => {
+    // Reset output and error at the start of the run
+    setOutput('');
+    setError('');
+    setIsLoading(true); // Set loading to true when the run starts
+
     const button = document.querySelector('#run-button') as HTMLElement;
     if (button) {
       button.style.backgroundColor = 'orange';
@@ -53,11 +84,13 @@ const CodeEditor: React.FC = () => {
         setOutput(result.output);
       } else {
         const errorResponse = await response.json();
-        setError(errorResponse.message || 'An error occurred.');
+        setError(errorResponse.output || 'An error occurred.');
       }
     } catch (err) {
       setError('Network error, please try again later.');
       console.error(err);
+    } finally {
+      setIsLoading(false); // Set loading to false once the request is done
     }
   };
 
@@ -67,13 +100,14 @@ const CodeEditor: React.FC = () => {
         <h1>Code Editor</h1>
       </header>
       <div style={styles.controls}>
-        <button id="run-button" onClick={handleRun} style={styles.runButton}>
-          Run Code
+        <button id="run-button" onClick={handleRun} style={styles.runButton} disabled={isLoading}>
+          {isLoading ? 'Running...' : 'Run Code'}
         </button>
         <select
           value={language}
           onChange={handleLanguageChange}
           style={styles.languageSelect}
+          disabled={isLoading}
         >
           <option value="javascript">JavaScript</option>
           <option value="java">Java</option>
@@ -106,6 +140,7 @@ const CodeEditor: React.FC = () => {
         value={stdin}
         onChange={(e) => setStdin(e.target.value)}
         style={styles.stdinInput}
+        disabled={isLoading}
       />
 
       <div style={styles.outputBox}>
@@ -146,9 +181,6 @@ const styles = {
     cursor: 'pointer',
     transition: 'background-color 0.3s ease',
   },
-  runButtonHover: {
-    backgroundColor: '#0056b3',
-  },
   languageSelect: {
     padding: '10px',
     fontSize: '14px',
@@ -177,7 +209,6 @@ const styles = {
     overflowY: 'auto',
     fontFamily: 'monospace',
     fontSize: '14px',
-    transition: 'opacity 0.5s ease-in-out',
   },
   error: {
     color: 'red',

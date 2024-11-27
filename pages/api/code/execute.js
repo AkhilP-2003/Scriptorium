@@ -146,17 +146,33 @@ function executeCodeInDocker(filePath, stdin, language, res) {
     let error = '';
 
     process.stdout.on('data', (data) => {
+        if (output.length + data.length > 1024 * 1024) { // Limit to 1MB
+            if (process.connected){
+                process.kill();
+            }
+            cleanup(filePath);
+            return res.status(413).json({ status: "error", output: "Output exceeded 1MB limit." });
+        }
         output += data.toString();
     });
-
+    
     process.stderr.on('data', (data) => {
+        if (error.length + data.length > 1024 * 1024) { // Limit to 1MB
+            if (process.connected){
+                process.kill();
+            }
+            cleanup(filePath);
+            return res.status(413).json({ status: "error", output: "Error output exceeded 1MB limit." });
+            
+        }
         error += data.toString();
     });
 
-
     const timeout = setTimeout(() => {
-        process.kill();
-        res.status(408).json({ status: "error", output: "Execution timed out after 15 seconds" });
+        if (process.connected){
+            process.kill();
+        }
+        return res.status(408).json({ status: "error", output: "Execution timed out after 15 seconds" });
     }, 15000); // 15 seconds timeout
 
     process.on('close', (code) => {
