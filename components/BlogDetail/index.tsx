@@ -161,6 +161,46 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
     }
   };
 
+  // Handle reply submission
+  const handleReplySubmit = async (parentId: number, content: string) => {
+    try {
+      const response = await fetch(`/api/blogs/${id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({
+          content: content,
+          parentId: parentId, // Send parentId to create a reply
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to submit reply');
+      }
+      
+  
+      const responseData = await response.json();
+
+      const newCommentWithAuthor = {
+        ...responseData.newComment,
+        author: {
+          userName: responseData.newComment.author?.userName || 'here is your comment/reply!', 
+          avatar: responseData.newComment.author?.avatar
+        }
+      };
+
+      setCommentsState((prevComments) => [
+        ...prevComments,
+        responseData.newComment, // Add the new comment (reply) to the state
+      ]);
+    } catch (error) {
+      console.error('Error submitting reply:', error);
+    }
+  };
+  
+
   const topLevelComments = commentsState.filter((comment) => !comment.parentId);
 
   return (
@@ -269,9 +309,10 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
             <NestedComment
               key={comment.id}
               comment={comment}
-              allComments={commentsState} // Pass commentsState here
+              allComments={commentsState}
               handleCommentUpvote={handleCommentUpvote}
               handleCommentDownvote={handleCommentDownvote}
+              handleReplySubmit={handleReplySubmit} // Pass handleReplySubmit here
             />
           ))}
         </ul>
