@@ -7,12 +7,15 @@ export default async function reportContent(req, res){
     }
 
     return jwtMiddleware(async (req, res) => {
-        const {description, blogId, commentId} = req.body;
+        const {blogId, commentId} = req.query;
+        const {description} = req.body;
         const {user} = req;
 
-        if (!user) {
-            return res.status(403).json({ error: "User is not authenticated." });
-        }
+
+        console.log(blogId)
+        // if (!user) {
+        //     return res.status(403).json({ error: "User is not authenticated." });
+        // }
 
         //request should only contain one of the options
         if (blogId && commentId){
@@ -29,12 +32,11 @@ export default async function reportContent(req, res){
             data: {
                 authorId: user.id,
                 description: description,
-                blogId: blogId ? blogId : null, //prisma relation should automically map blogId to blog, check if it works
-                commentId: commentId ? commentId :null
+                blogId: blogId ? Number(blogId) : null, //prisma relation should automically map blogId to blog, check if it works
+                commentId: commentId ? Number(commentId) :null
 
             }
         });
-
         return res.status(200).json({report});
     } catch (error){
         console.error(error);
