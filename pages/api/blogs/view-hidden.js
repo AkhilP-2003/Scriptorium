@@ -28,10 +28,6 @@ async function handler(req, res) {
             if (!existingBlog || existingBlog.length === 0) {
                 return res.status(200).json([]);
             }
-            // If no hidden blogs found, return a relevant message
-            if (existingBlog.length === 0) {
-                return res.status(200).json({message: "No hidden blogs for you!"});
-            }
 
             return res.status(200).json(existingBlog);
 

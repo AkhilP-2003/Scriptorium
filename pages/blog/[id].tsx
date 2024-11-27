@@ -5,22 +5,6 @@ import { useState, useEffect } from "react";
 import BlogDetail from "@/components/BlogDetail";
 import { jwtDecode } from "jwt-decode";
 
-function isTokenExpired(token: string) {
-  try {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000; // Current time in seconds
-      if (decoded.exp) {
-        return decoded.exp < currentTime;
-      } else {
-        console.log("exp is null i think")
-      }
-  } catch (error) {
-      console.error("Invalid token", error);
-      return true; // Treat invalid tokens as expired
-  }
-}
-
-
 interface Blog {
   id: number;
   description: string; // Define the expected structure of your blog data
@@ -29,6 +13,7 @@ interface Blog {
   upvote: number;
   downvote:number;
   tags: string;
+  hidden: boolean;
   templates: [];
   comments: [];
 }
@@ -225,7 +210,7 @@ export default function CurrentBlogPage() {
 
   const handleEdit = (blogId: number) => {
     // handle edit features for author.
-    if (isAuthor === false) {
+    if (isAuthor === false || blog?.hidden) {
       alert("You do not have permission to edit this blog");
       router.push('/blogs');
       return;

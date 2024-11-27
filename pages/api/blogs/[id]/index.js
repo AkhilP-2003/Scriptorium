@@ -18,7 +18,6 @@ async function handler(req, res) {
         const blog = await prisma.blogPost.findUnique({
             where: {
                 ...(id && { id: currId }),  // Filter by ID
-                hidden: false, // don't report the hidden ones.
             },
             include: {
                 author: true,  // Include author information in the result

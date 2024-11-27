@@ -38,7 +38,9 @@ export default function Blogs() {
     const [templateTitle, setTemplateTitle] = useState("");
     const [sort, setSort] = useState<string>("most-upvotes");
     const [blogs, setBlogs] = useState<Blog[]>([]);
-    const [isAuthor, setIsAuthor] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isLastPage, setIsLastPage] = useState(false); // To disable "Next" on the last page
+    const pageSize = 10; // Define the number of blogs per page
     const [showMyBlogs, setShowMyBlogs] = useState(false);
     const router = useRouter();
 
@@ -48,9 +50,9 @@ export default function Blogs() {
         return;
       };
 
-    const getBlogs = async () => {
+    const getBlogs = async (page:number) => {
         try {
-            const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}`, {
+            const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}&page=${page}&limit=${pageSize}`, {
                 method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',
@@ -73,6 +75,8 @@ export default function Blogs() {
             }));
     
             setBlogs(processedBlogs); // Update state with the processed blogs
+            setCurrentPage(page);
+            setIsLastPage(processedBlogs.length < pageSize);
 
         } catch(error) {
             console.error("Failed to fetch blogs:", error);
@@ -80,7 +84,7 @@ export default function Blogs() {
         
     }
 
-    const getMyBlogs = async () => {
+    const getMyBlogs = async (page: number) => {
         const accessToken = localStorage.getItem("accessToken");
         if (!accessToken) {
             console.warn("User not authenticated. Redirecting to login.");
@@ -104,7 +108,7 @@ export default function Blogs() {
             const userId = decodedToken.id;
         
         try {
-            const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}`, {
+            const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}&page=${page}&limit=${pageSize}`, {
                 method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',
@@ -129,11 +133,12 @@ export default function Blogs() {
 
             const myBlogs = processedBlogs.filter((blog: Blog) => blog.isUserBlog);
             setBlogs(myBlogs);
+            setCurrentPage(page);
+            setIsLastPage(myBlogs.length < pageSize);
 
         } catch(error) {
             console.error("Failed to fetch blogs:", error);
         }
-        
     }
 
     const vote = async(e: React.MouseEvent, id: number, voteType:string) => {
@@ -169,7 +174,7 @@ export default function Blogs() {
                 },
                 body: JSON.stringify({voteType})},);
                 if (response.ok) {
-                        getBlogs();
+                        getBlogs(currentPage);
                     };
                 
         } catch(error) {
@@ -211,13 +216,48 @@ export default function Blogs() {
         }
     };
 
+    const handleRegularNextPage = () => {
+        if (!isLastPage) {
+          getBlogs(currentPage + 1);
+        }
+      };
+      
+      const handleRegularPreviousPage = () => {
+        if (currentPage > 1) {
+            getBlogs(currentPage - 1);
+        }
+      };
+
+      const handleMyNextPage = () => {
+        if (!isLastPage) {
+          getMyBlogs(currentPage + 1);
+        }
+      };
+      
+      const handleMyPreviousPage = () => {
+        if (currentPage > 1) {
+            getMyBlogs(currentPage - 1);
+        }
+      };
+      
+
     useEffect(()=>  {
+
         if (!showMyBlogs) {
-            getBlogs();
+            getBlogs(currentPage);
         } else {
-            getMyBlogs();
+            getMyBlogs(currentPage);
         }
     }, [title, description, tags, templateTitle]);
+
+    // useEffect(() => {
+    //     if (!showMyBlogs) {
+    //         getBlogs(1); // Load the first page by default
+    //     } else {
+    //         getMyBlogs(1);
+    //     }
+    //   }, []);
+      
     
     useEffect(() => {
         // Sort blogs whenever the sort order or blogs change
@@ -251,7 +291,7 @@ export default function Blogs() {
         return;
     }
 
-    const handleMyBlogs = async () => {
+    const handleMyBlogs = async (page:number) => {
         const accessToken = localStorage.getItem("accessToken");
       
         if (!accessToken) {
@@ -277,7 +317,7 @@ export default function Blogs() {
           const userId = decodedToken.id;
       
           // Fetch blogs created by the user
-          const response = await fetch(`/api/blogs`, {
+          const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}&page=${page}&limit=${pageSize}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -324,6 +364,9 @@ export default function Blogs() {
             upvote: blog.upvote,
             downvote: blog.downvote,
           }));
+          
+          setCurrentPage(page);
+          setIsLastPage(processedBlogs.length + processedHiddenBlogs.length < pageSize);
       
           setShowMyBlogs(true);
           setBlogs(
@@ -331,6 +374,7 @@ export default function Blogs() {
               (blog: Blog) => blog.isUserBlog
             )
           );
+          
 
         } catch (error) {
           console.error("Error fetching user's blogs:", error);
@@ -340,7 +384,7 @@ export default function Blogs() {
       };
 
       const handleShowAllBlogs = async () => {
-        getBlogs();
+        getBlogs(1);
         setShowMyBlogs(false);
       }
 
@@ -369,7 +413,7 @@ export default function Blogs() {
                 Create Blog
                 </button>
                 <button
-                onClick={() => handleMyBlogs()}
+                onClick={() => handleMyBlogs(1)}
                 className={`ml-4 px-6 bg-green-500 text-white py-3 hover:bg-green-700 font-semibold rounded-lg transition-all cursor-pointer`}
                 >My Blogs</button>
                 {/* Show All Blogs Button */}
@@ -403,7 +447,27 @@ export default function Blogs() {
                 ))
                 ) : (
                 <p className="mt-4 text-red-600 font-semibold ml-4">No blogs found. Try adjusting the filters.</p>
+                
                 )}
+                {!showMyBlogs && <div className="pagination flex flex-row items-center justify-center">
+                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700"onClick={handleRegularPreviousPage} disabled={currentPage === 1}>
+                        Previous
+                    </button>
+                    <span>Page {currentPage}</span>
+                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleRegularNextPage} disabled={isLastPage}>
+                        Next
+                    </button>
+                    </div>}
+
+                    {showMyBlogs && <div className="pagination flex flex-row items-center justify-center">
+                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleMyPreviousPage} disabled={currentPage === 1}>
+                        Previous
+                    </button>
+                    <span>Page {currentPage}</span>
+                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleMyNextPage} disabled={isLastPage}>
+                        Next
+                    </button>
+                    </div>}
             </div>
         </div>
     );
