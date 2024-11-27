@@ -29,14 +29,14 @@ const NestedComment: React.FC<NestedCommentProps> = ({ comment, allComments, han
         <div className="flex justify-between items-center ">
         {/* Left side: Avatar and Username */}
         <div className="flex items-center">
-        {comment.author.avatar && (
+        {comment.author?.avatar && (
             <img
             src={comment.author.avatar}
             alt="Author Avatar"
             className="w-6 h-6 rounded-full mr-2"
             />
         )}
-        <span className="text-gray-700 font-semibold">{comment.author.userName}</span>
+        <span className="text-gray-700 font-semibold">{comment.author?.userName}</span>
         </div>
 
         {/* Right side: Date */}

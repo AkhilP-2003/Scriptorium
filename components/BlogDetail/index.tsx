@@ -23,6 +23,7 @@ interface Comment {
   downvote: number;
   createdAt: string;
   replies: Comment[];
+  hidden?: boolean;
 }
 
 interface Template {
@@ -78,10 +79,10 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   const [userId, setUserId] = useState<number | null>(null);
   const [isAddingComment, setIsAddingComment] = useState(false); // State for toggling comment input
   const [newComment, setNewComment] = useState(''); // State for holding the comment content
+  const [commentsState, setCommentsState] = useState<Comment[]>(comments); // Track comments in state
   const router = useRouter();
 
   useEffect(() => {
-    // Check if the user is authenticated by verifying the access token
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
       router.push('/login');
@@ -102,7 +103,6 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
     const accessToken = localStorage.getItem('accessToken');
     
     if (!accessToken) {
-      // Redirect to login if not authenticated
       router.push('/login');
       return;
     }
@@ -111,36 +111,31 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
       const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken);
       const currentTime = Math.floor(Date.now() / 1000); // current time in seconds
   
-      // Check if the token is expired
       if (decodedToken.exp && decodedToken.exp < currentTime) {
         console.warn("Token expired. Redirecting to login.");
         router.push("/login");
         return;
       }
   
-      // If the token is valid, toggle the comment input visibility
       setIsAddingComment((prev) => !prev);
   
     } catch (error) {
       console.error("Error decoding token:", error);
-      // If there's an error decoding the token, redirect to login
       router.push('/login');
     }
   };
-  
 
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) {
-      return; // Don't submit if the comment is empty
+      return;
     }
 
     try {
-      // Send the new comment to the backend using fetch
       const response = await fetch(`/api/blogs/${id}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Pass the token in the Authorization header
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify({
           content: newComment,
@@ -152,11 +147,13 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
         throw new Error('Failed to add comment');
       }
 
-      // Handle the successful comment submission, for example, updating the comments list
       const responseData = await response.json();
-      console.log('Comment added successfully:', responseData);
 
-      // Clear the input and hide the comment form
+      setCommentsState((prevComments) => [
+        ...prevComments,
+        responseData.newComment, // Assuming the backend returns the newly created comment
+      ]);
+
       setNewComment('');
       setIsAddingComment(false);
     } catch (error) {
@@ -164,7 +161,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
     }
   };
 
-  const topLevelComments = comments.filter((comment) => !comment.parentId);
+  const topLevelComments = commentsState.filter((comment) => !comment.parentId);
 
   return (
     <div className="p-6 bg-gray-100 shadow-xl rounded-lg max-w-4xl mx-auto">
@@ -184,6 +181,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
           )}
         </div>
       </div>
+
       <div className="flex items-center mt-2 text-sm text-gray-700">
         {author.avatar && (
           <img
@@ -196,6 +194,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
           Author: {author.firstName} {author.lastName || author.userName}
         </span>
       </div>
+
       <div className="mt-4 text-gray-600">
         <p>{description}</p>
       </div>
@@ -207,16 +206,10 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
 
       {/* Upvote/Downvote Section */}
       <div className="mt-4 flex items-center space-x-4">
-        <button
-          onClick={(e) => handleUpvote(e, id, 'upvote')}
-          className="text-green-600 hover:font-semibold focus:outline-none"
-        >
+        <button onClick={(e) => handleUpvote(e, id, 'upvote')} className="text-green-600 hover:font-semibold focus:outline-none">
           👍<span>Upvote: {upvote}</span>
         </button>
-        <button
-          onClick={(e) => handleDownvote(e, id, 'downvote')}
-          className="text-red-600 hover:font-semibold focus:outline-none"
-        >
+        <button onClick={(e) => handleDownvote(e, id, 'downvote')} className="text-red-600 hover:font-semibold focus:outline-none">
           👎<span> Downvote: {downvote} </span>
         </button>
       </div>
@@ -253,7 +246,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
           </button>
         </div>
 
-        {/* Comment Input (appears when isAddingComment is true) */}
+        {/* Comment Input */}
         {isAddingComment && (
           <div>
             <textarea
@@ -276,9 +269,9 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
             <NestedComment
               key={comment.id}
               comment={comment}
-              allComments={comments} // Pass all comments here
-              handleCommentUpvote={handleCommentUpvote} // Correctly pass the handler
-              handleCommentDownvote={handleCommentDownvote} // Correctly pass the handler
+              allComments={commentsState} // Pass commentsState here
+              handleCommentUpvote={handleCommentUpvote}
+              handleCommentDownvote={handleCommentDownvote}
             />
           ))}
         </ul>
