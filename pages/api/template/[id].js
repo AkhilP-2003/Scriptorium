@@ -24,7 +24,18 @@ export default async function handler(req, res) {
               userName: true
             }
           },
-          code: true
+          code: true,
+          blogPosts: {
+            select: {
+              id: true,
+              title: true,
+              author: {
+                select: {
+                  userName: true
+                }
+              },
+            }
+          }
         }
       })
       
@@ -53,6 +64,9 @@ export default async function handler(req, res) {
               error: template.code.error || ""
             }
           : null,
+          blogPosts: template.blogPosts || [],
+          parentTemplateId: template.parentTemplateId || null,
+          parentOwnerName: template.parentOwnerName || null
         }
       })
     } catch (error) {

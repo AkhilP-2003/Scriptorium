@@ -19,6 +19,9 @@ const NewTemplate: React.FC = () => {
   const [templateCode, setTemplateCode] = useState<string>((code as string) || '');
   const [templateLanguage, setTemplateLanguage] = useState<Language>((language as Language) || 'javascript');
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+
   // Effect to set values from the query after navigation completes
   useEffect(() => {
     if (!router.isReady) return; // Wait until router is fully ready
@@ -54,6 +57,12 @@ const NewTemplate: React.FC = () => {
   };
 
   const handleSaveTemplate = async () => {
+
+    if (!templateTitle || !templateCode || !templateLanguage || !templateExplanation) {
+      alert('Please fill in all required fields: title, code, language, and explanation.');
+      return
+    }
+
     // Combine the original tags and forked tag if available
     const allTags = forkedFromTag ? [forkedFromTag, ...originalTags, ...templateTags] : [...originalTags, ...templateTags];
     
