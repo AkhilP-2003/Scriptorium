@@ -6,23 +6,15 @@ import { useRouter } from "next/router";
 import { jwtDecode } from "jwt-decode";
 import { constants } from "buffer";
 
-function isTokenExpired(token: string) {
-  try {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000; // Current time in seconds
-      if (decoded.exp) {
-        return decoded.exp < currentTime;
-      } else {
-        console.log("exp is null i think")
-      }
-  } catch (error) {
-      console.error("Invalid token", error);
-      return true; // Treat invalid tokens as expired
-  }
-}
+type JwtPayload = {
+    id: number;
+    userName: string;
+    email: string;
+    role: string;
+    exp?: number; // Optional expiration time
+  };
 
 
-// this page should show the blogs.
 
 interface Blog {
     title: string;
@@ -34,6 +26,7 @@ interface Blog {
     onClick: (value: string) => void;
     upvote: number;
     downvote:number;
+    isUserBlog: boolean;
 }
   
 
@@ -45,6 +38,10 @@ export default function Blogs() {
     const [templateTitle, setTemplateTitle] = useState("");
     const [sort, setSort] = useState<string>("most-upvotes");
     const [blogs, setBlogs] = useState<Blog[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isLastPage, setIsLastPage] = useState(false); // To disable "Next" on the last page
+    const pageSize = 10; // Define the number of blogs per page
+    const [showMyBlogs, setShowMyBlogs] = useState(false);
     const router = useRouter();
 
 
@@ -53,9 +50,9 @@ export default function Blogs() {
         return;
       };
 
-    const getBlogs = async () => {
+    const getBlogs = async (page:number) => {
         try {
-            const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}`, {
+            const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}&page=${page}&limit=${pageSize}`, {
                 method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',
@@ -78,6 +75,8 @@ export default function Blogs() {
             }));
     
             setBlogs(processedBlogs); // Update state with the processed blogs
+            setCurrentPage(page);
+            setIsLastPage(processedBlogs.length < pageSize);
 
         } catch(error) {
             console.error("Failed to fetch blogs:", error);
@@ -85,31 +84,85 @@ export default function Blogs() {
         
     }
 
+    const getMyBlogs = async (page: number) => {
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+            console.warn("User not authenticated. Redirecting to login.");
+            setShowMyBlogs(false);
+            setBlogs([]); // Clear blogs if unauthenticated
+            return;
+          }
+        
+            // Decode token and retrieve user ID
+            const decodedToken = jwtDecode<JwtPayload>(accessToken);
+            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+        
+            // Check if token is expired
+            if (decodedToken.exp && decodedToken.exp < currentTime) {
+                console.warn("Token expired. Redirecting to login.");
+                setShowMyBlogs(false);
+                router.push("/login");
+                return;
+            }
+        
+            const userId = decodedToken.id;
+        
+        try {
+            const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}&page=${page}&limit=${pageSize}`, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                }});
+    
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} ${response.statusText}`);
+            }
+            const blogs = await response.json();
+            // Process and update state with blogs
+            const processedBlogs = blogs.map((blog: { upvote: any, downvote: any, id: any; title: any; author: any; description: any; tags: any; templates: any[]; username: any; }) => ({
+                id: blog.id,
+                title: blog.title,
+                description: blog.description,
+                tags: blog.tags,
+                templateTitles: blog.templates.map(template => template.title).join(", "), // Join template titles into a string
+                username: blog.author.userName,
+                isUserBlog: blog.author.id === userId,
+                upvote: blog.upvote,
+                downvote: blog.downvote
+            }));
+
+            const myBlogs = processedBlogs.filter((blog: Blog) => blog.isUserBlog);
+            setBlogs(myBlogs);
+            setCurrentPage(page);
+            setIsLastPage(myBlogs.length < pageSize);
+
+        } catch(error) {
+            console.error("Failed to fetch blogs:", error);
+        }
+    }
+
     const vote = async(e: React.MouseEvent, id: number, voteType:string) => {
         e.stopPropagation();
         const accessToken = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
 
-        if (!refreshToken || isTokenExpired(refreshToken)) {
-            router.push('/login');
-            return;
-        }
-        if (!accessToken || isTokenExpired(accessToken)) {
-            // refresh it. 
-            const update = await fetch('/api/users/refresh', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({refreshToken})
-            });
-            if (update.ok) {
-                const { accessToken: newAccessToken } = await update.json();
-                localStorage.setItem("accessToken", newAccessToken);
-            } else {
-                // If token refresh fails, redirect to login
-                router.push('/login');
-                return;
+        if (!accessToken) {
+            router.push("/login");
+        } else {
+          try {
+
+            // decode the token and cast it to the JwtPayload type
+            const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+            const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+        
+            // check if the token is expired
+            if (decodedToken.exp && decodedToken.exp < currentTime) {
+        
+              // if the token is expired thenredirect to login;
+              console.warn("Token expired. Redirecting to login.")
+              router.push("/login");
+              return
+            }} catch(error) {
+              console.log("something went wrong saving.");
             }
         }
         try {
@@ -121,7 +174,7 @@ export default function Blogs() {
                 },
                 body: JSON.stringify({voteType})},);
                 if (response.ok) {
-                        getBlogs();
+                        getBlogs(currentPage);
                     };
                 
         } catch(error) {
@@ -163,9 +216,48 @@ export default function Blogs() {
         }
     };
 
+    const handleRegularNextPage = () => {
+        if (!isLastPage) {
+          getBlogs(currentPage + 1);
+        }
+      };
+      
+      const handleRegularPreviousPage = () => {
+        if (currentPage > 1) {
+            getBlogs(currentPage - 1);
+        }
+      };
+
+      const handleMyNextPage = () => {
+        if (!isLastPage) {
+          getMyBlogs(currentPage + 1);
+        }
+      };
+      
+      const handleMyPreviousPage = () => {
+        if (currentPage > 1) {
+            getMyBlogs(currentPage - 1);
+        }
+      };
+      
+
     useEffect(()=>  {
-        getBlogs();
+
+        if (!showMyBlogs) {
+            getBlogs(currentPage);
+        } else {
+            getMyBlogs(currentPage);
+        }
     }, [title, description, tags, templateTitle]);
+
+    // useEffect(() => {
+    //     if (!showMyBlogs) {
+    //         getBlogs(1); // Load the first page by default
+    //     } else {
+    //         getMyBlogs(1);
+    //     }
+    //   }, []);
+      
     
     useEffect(() => {
         // Sort blogs whenever the sort order or blogs change
@@ -173,8 +265,128 @@ export default function Blogs() {
     }, [sort]);
     
     const handleCreateButton = () => {
+        const accessToken = localStorage.getItem('accessToken');
+
+        if (!accessToken) {
+            router.push("/login");
+        } else {
+          try {
+
+            // decode the token and cast it to the JwtPayload type
+            const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+            const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+        
+            // check if the token is expired
+            if (decodedToken.exp && decodedToken.exp < currentTime) {
+        
+              // if the token is expired thenredirect to login;
+              console.warn("Token expired. Redirecting to login.")
+              router.push("/login");
+              return
+            }} catch(error) {
+              console.log("something went wrong creating button.");
+            }
+        }
         router.push(`/blog/create`);
+        return;
     }
+
+    const handleMyBlogs = async (page:number) => {
+        const accessToken = localStorage.getItem("accessToken");
+      
+        if (!accessToken) {
+          console.warn("User not authenticated. Redirecting to login.");
+          setShowMyBlogs(false);
+          setBlogs([]); // Clear blogs if unauthenticated
+          return;
+        }
+      
+        try {
+          // Decode token and retrieve user ID
+          const decodedToken = jwtDecode<JwtPayload>(accessToken);
+          const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      
+          // Check if token is expired
+          if (decodedToken.exp && decodedToken.exp < currentTime) {
+            console.warn("Token expired. Redirecting to login.");
+            setShowMyBlogs(false);
+            router.push("/login");
+            return;
+          }
+      
+          const userId = decodedToken.id;
+      
+          // Fetch blogs created by the user
+          const response = await fetch(`/api/blogs?title=${title}&tags=${tags}&description=${description}&templateTitle=${templateTitle}&page=${page}&limit=${pageSize}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const hidden = await fetch(`/api/blogs/view-hidden`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          });
+      
+          if (!hidden.ok || !response.ok) {
+            throw new Error(`Failed to fetch blogs: ${response.statusText}, ${hidden.statusText}`);
+          }
+      
+          const userBlogs = await response.json();
+          const userHiddenBlogs = await hidden.json();
+          var processedHiddenBlogs: Blog[] = [];
+
+          if (userHiddenBlogs.length > 0) {
+            processedHiddenBlogs = userHiddenBlogs.map((blog: { id: number; title: string; description: string; tags: string; templates: any[]; author: any; upvote: number; downvote: number }) => ({
+                id: blog.id,
+                title: blog.title,
+                description: blog.description,
+                tags: blog.tags,
+                templateTitles: blog.templates.map((template) => template.title).join(", "),
+                username: blog.author.userName,
+                isUserBlog: blog.author.id === userId,
+                upvote: blog.upvote,
+                downvote: blog.downvote,
+              }));
+          }
+
+          const processedBlogs = userBlogs.map((blog: { id: number; title: string; description: string; tags: string; templates: any[]; author: any; upvote: number; downvote: number }) => ({
+            id: blog.id,
+            title: blog.title,
+            description: blog.description,
+            tags: blog.tags,
+            templateTitles: blog.templates.map((template) => template.title).join(", "),
+            username: blog.author.userName,
+            isUserBlog: blog.author.id === userId,
+            upvote: blog.upvote,
+            downvote: blog.downvote,
+          }));
+          
+          setCurrentPage(page);
+          setIsLastPage(processedBlogs.length + processedHiddenBlogs.length < pageSize);
+      
+          setShowMyBlogs(true);
+          setBlogs(
+            [...processedBlogs, ...processedHiddenBlogs].filter(
+              (blog: Blog) => blog.isUserBlog
+            )
+          );
+          
+
+        } catch (error) {
+          console.error("Error fetching user's blogs:", error);
+          setShowMyBlogs(false);
+        //   setBlogs([]); // Clear blogs if an error occurs
+        }
+      };
+
+      const handleShowAllBlogs = async () => {
+        getBlogs(1);
+        setShowMyBlogs(false);
+      }
 
     return (
         <div className="flex flex-col lg:flex-row">
@@ -195,11 +407,24 @@ export default function Blogs() {
             <div className="ml-4 mr-4 mt-4 flex items-center justify-between mb-4">
                 {/* Blog Title */}
                 <h1 className="text-3xl font-bold">Blogs</h1>
-
+                <div>
                 {/* Create Blog Button */}
-                <button onClick={() => handleCreateButton()} className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
+                <button onClick={() => handleCreateButton()} className="ml-4 px-6 bg-blue-500 text-white py-3 hover:bg-blue-700 font-semibold rounded-lg transition-all cursor-pointer">
                 Create Blog
                 </button>
+                <button
+                onClick={() => handleMyBlogs(1)}
+                className={`ml-4 px-6 bg-green-500 text-white py-3 hover:bg-green-700 font-semibold rounded-lg transition-all cursor-pointer`}
+                >My Blogs</button>
+                {/* Show All Blogs Button */}
+                {showMyBlogs && (
+                    <button
+                    onClick={() => handleShowAllBlogs()}
+                    className="ml-4 px-6 bg-gray-500 text-white py-3 hover:bg-gray-700 font-semibold rounded-lg transition-all cursor-pointer"
+                    >
+                    All Blogs
+                    </button>)}
+                </div>
             </div>
             <p className="ml-4">Here are the blog posts sorted by {sort}.</p>
 
@@ -221,14 +446,31 @@ export default function Blogs() {
                         templateTitles={blog.templateTitles}/>
                 ))
                 ) : (
-                <p>No blogs found. Try adjusting the filters.</p>
+                <p className="mt-4 text-red-600 font-semibold ml-4">No blogs found. Try adjusting the filters.</p>
+                
                 )}
+                {!showMyBlogs && <div className="pagination flex flex-row items-center justify-center">
+                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700"onClick={handleRegularPreviousPage} disabled={currentPage === 1}>
+                        Previous
+                    </button>
+                    <span>Page {currentPage}</span>
+                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleRegularNextPage} disabled={isLastPage}>
+                        Next
+                    </button>
+                    </div>}
+
+                    {showMyBlogs && <div className="pagination flex flex-row items-center justify-center">
+                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleMyPreviousPage} disabled={currentPage === 1}>
+                        Previous
+                    </button>
+                    <span>Page {currentPage}</span>
+                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleMyNextPage} disabled={isLastPage}>
+                        Next
+                    </button>
+                    </div>}
             </div>
         </div>
- 
     );
-    
-
 }
 
 

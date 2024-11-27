@@ -74,8 +74,8 @@ interface Comment {
         {/* Blog Header */}
         <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
-        <div>{editButton && <button className="bg-blue-100 mr-3 mt-3 mb-3 font-semibold text-blue-800 p-2 rounded-lg">{editButton}</button>}
-          {deleteButton && <button className="bg-red-100 mr-3 mt-3 mb-3 font-semibold text-red-800 p-2 rounded-lg">{deleteButton}</button>}
+        <div>{editButton && <button className="bg-blue-100 mr-3 mt-3 mb-3 font-semibold text-blue-700 p-3 rounded-lg hover:bg-blue-700 hover:text-blue-100">{editButton}</button>}
+          {deleteButton && <button className="bg-red-100 mr-3 mt-3 mb-3 font-semibold text-red-700 p-3 rounded-lg hover:bg-red-700 hover:text-red-100">{deleteButton}</button>}
         
         </div>
         </div>

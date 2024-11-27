@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         // validation checks
         if (!firstName || !lastName || !userName || !password || !email) {
             // i made phone number a default of empty string, not necessary to input
-            return res.status(400).json({error: `Please provide all registration fields`});
+            return res.status(400).json({error: `Please provide all required fields`});
         }
 
         // incorrect password length
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         let phoneNumberToCheck = phoneNumber && isValidPhoneNumber(phoneNumber) ? phoneNumber : null;
 
         if (role !== "USER" && role !== "ADMIN") {
-            return res.status(400).json({error: "role accepts USER or ADMIN"});
+            return res.status(400).json({error: "role is USER or ADMIN"});
         }
 
         if (phoneNumber && !isValidPhoneNumber(phoneNumber)) {
