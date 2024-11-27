@@ -197,7 +197,7 @@ export default function Blogs() {
                 <h1 className="text-3xl font-bold">Blogs</h1>
 
                 {/* Create Blog Button */}
-                <button onClick={() => handleCreateButton()} className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
+                <button onClick={() => handleCreateButton()} className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-800 transition">
                 Create Blog
                 </button>
             </div>
