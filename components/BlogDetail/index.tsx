@@ -12,50 +12,50 @@ type JwtPayload = {
 };
 
 interface Comment {
-  parentId: any;
-  id: number;
-  author: {
-    userName: string;
-    avatar?: string;
-  };
-  content: string;
-  upvote: number;
-  downvote: number;
-  createdAt: string;
-  replies: Comment[];
-  hidden?: boolean;
-}
-
-interface Template {
-  id: number;
-  title: string;
-  explanation: string;
-  tags: string;
-}
-
-interface BlogDetailProps {
-  id: number;
-  title: string;
-  author: {
-    userName: string;
-    firstName?: string;
-    lastName?: string;
-    avatar?: string;
-  };
-  description: string;
-  upvote: number;
-  downvote: number;
-  tags: string;
-  templates: Template[];
-  comments: Comment[];
-  handleUpvote: (e: React.MouseEvent, id: number, voteType: string) => void;
-  handleDownvote: (e: React.MouseEvent, id: number, voteType: string) => void;
-  onTemplateClick: (value: number) => void;
-  handleCommentUpvote: (id: number, voteType: string) => void;
-  handleCommentDownvote: (id: number, voteType: string) => void;
-  deleteButton?: React.ReactNode;
-  editButton?: React.ReactNode;
-}
+    parentId: any;
+    id: number;
+    author: {
+      userName: string;
+      avatar?: string;
+    };
+    content: string;
+    upvote: number;
+    downvote: number;
+    createdAt: string;
+    replies: Comment[];
+  }
+  
+  interface Template {
+    id: number;
+    title: string;
+    explanation: string;
+    tags: string;
+  }
+  
+  interface BlogDetailProps {
+    id:number
+    title: string;
+    author: {
+      userName: string;
+      firstName?: string;
+      lastName?: string;
+      avatar?: string;
+    };
+    description: string;
+    upvote: number;
+    downvote: number;
+    tags: string;
+    templates: Template[];
+    comments: Comment[];
+    handleUpvote:(e: React.MouseEvent, id:number, voteType: string) => void;
+    handleDownvote: (e: React.MouseEvent, id:number, voteType: string) => void;
+    onTemplateClick: (value: number) => void;
+    handleCommentUpvote:(id:number, voteType: string) => void;
+    handleCommentDownvote: (id:number, voteType: string) => void;
+    handleReport: (e: React.MouseEvent, id: number) => void;
+    deleteButton?: React.ReactNode;
+    editButton?: React.ReactNode;
+  }
 
 const BlogDetail: React.FC<BlogDetailProps> = ({
   id,
@@ -69,6 +69,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   comments,
   handleUpvote,
   handleDownvote,
+  handleReport,
   onTemplateClick,
   handleCommentUpvote,
   handleCommentDownvote,
@@ -220,57 +221,62 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
             </button>
           )}
         </div>
-      </div>
-
-      <div className="flex items-center mt-2 text-sm text-gray-700">
-        {author.avatar && (
-          <img
-            src={author.avatar}
-            alt="Author Avatar"
-            className="w-8 h-8 rounded-full mr-2"
-          />
-        )}
-        <span className="font-semibold">
-          Author: {author.firstName} {author.lastName || author.userName}
-        </span>
-      </div>
-
-      <div className="mt-4 text-gray-600">
-        <p>{description}</p>
-      </div>
-
-      {/* Tags */}
-      <div className="mt-4">
-        <span className="text-sm text-gray-500 font-medium">Tags: {tags}</span>
-      </div>
-
-      {/* Upvote/Downvote Section */}
-      <div className="mt-4 flex items-center space-x-4">
-        <button onClick={(e) => handleUpvote(e, id, 'upvote')} className="text-green-600 hover:font-semibold focus:outline-none">
-          👍<span>Upvote: {upvote}</span>
-        </button>
-        <button onClick={(e) => handleDownvote(e, id, 'downvote')} className="text-red-600 hover:font-semibold focus:outline-none">
-          👎<span> Downvote: {downvote} </span>
-        </button>
-      </div>
-
-      {/* Templates Section */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold">Related Templates</h2>
-        <ul className="mt-4">
-          {templates.map((template) => (
-            <li
-              key={template.id}
-              className="border rounded-lg p-4 mb-4 bg-white shadow-md cursor-pointer hover:shadow-xl hover:bg-slate-200 duration-50"
-              onClick={() => onTemplateClick(template.id)}
+        </div>
+        <div className="flex items-center mt-2 text-sm text-gray-700">
+          {author.avatar && (
+            <img
+              src={author.avatar}
+              alt="Author Avatar"
+              className="w-8 h-8 rounded-full mr-2"
+            />
+          )}
+          <span className="font-semibold">
+            Author: {author.firstName} {author.lastName || author.userName}
+          </span>
+        </div>
+        <div className="mt-4 text-gray-600">
+          <p>{description}</p>
+        </div>
+  
+        {/* Tags */}
+        <div className="mt-4">
+          <span className="text-sm text-gray-500 font-medium">Tags: {tags}</span>
+        </div>
+  
+        {/* Upvote/Downvote Section */}
+        <div className="mt-4 flex items-center space-x-4">
+          <button onClick={(e) => handleUpvote(e, id, "upvote")} className="text-green-600 hover:font-semibold focus:outline-none">
+            👍<span>Upvote: {upvote}</span>
+          </button>
+          <button onClick={(e) => handleDownvote(e, id,"downvote")} className="text-red-600 hover:font-semibold focus:outline-none">
+            👎<span> Downvote: {downvote} </span>
+          </button>
+          <button
+            className="text-red-500 hover:font-semibold focus:outline-none transition-colors"
+            onClick={(e) => handleReport(e, id)} // Report action
+            title="Report"
             >
-              <h3 className="font-bold">{template.title}</h3>
-              <p className="text-gray-600">{template.explanation}</p>
-              <span className="text-sm text-gray-500">Tags: {template.tags}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+            <div>🚩</div>
+            </button>
+        </div>
+  
+        {/* Templates Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold">Related Templates</h2>
+          <ul className="mt-4">
+            {templates.map((template) => (
+              <li
+                key={template.id}
+                className="border rounded-lg p-4 mb-4 bg-white shadow-md cursor-pointer hover:shadow-xl hover:bg-slate-200 duration-50"
+                onClick={() => onTemplateClick(template.id)}
+              >
+                <h3 className="font-bold">{template.title}</h3>
+                <p className="text-gray-600">{template.explanation}</p>
+                <span className="text-sm text-gray-500">Tags: {template.tags}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
       {/* Comments Section */}
       <div className="mt-8">

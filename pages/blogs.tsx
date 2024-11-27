@@ -182,6 +182,41 @@ export default function Blogs() {
         }
     }
 
+    const report = async(e: React.MouseEvent, id: number) => {
+        e.stopPropagation();
+
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            router.push("/login");
+        } else {
+          try {
+
+            // decode the token and cast it to the JwtPayload type
+            const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+            const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+        
+            // check if the token is expired
+            if (decodedToken.exp && decodedToken.exp < currentTime) {
+        
+              // if the token is expired thenredirect to login;
+              console.warn("Token expired. Redirecting to login.")
+              router.push("/login");
+              return
+            }} catch(error) {
+              console.log("something went wrong saving.");
+            }
+        }
+        try {
+           router.push({
+            pathname: '/report',
+            query: {blogId: id},
+           })
+        } catch(error) {
+            console.log("Error with reporting");
+        }
+
+    }
+
     const handleFilterChange = (field: string, value: string) => {
         switch (field) {
             case "title":
@@ -445,7 +480,9 @@ export default function Blogs() {
                         downvoteNum={blog.downvote}
                         username={blog.username}
                         tags={blog.tags}
+                        handleReport={(e) => report(e, blog.id)}
                         templateTitles={blog.templateTitles}/>
+                        
                 ))
                 ) : (
                 <p className="mt-4 text-red-600 font-semibold ml-4">No blogs found. Try adjusting the filters.</p>
