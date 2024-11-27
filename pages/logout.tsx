@@ -1,12 +1,14 @@
-import Image from "next/image";
-import localFont from "next/font/local";
-import NavigationBar from "../components/NavigationBar";
+import { useRouter } from "next/router";
 
 
-export default function Logout() {
 
-  return (
-    <>
-    </>
-  )
-} 
+const logout = () => {
+  const router = useRouter();
+
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  router.push("/") // Redirect to the homepage
+  return;
+};
+
+export default logout;
