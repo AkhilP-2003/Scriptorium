@@ -36,6 +36,7 @@ export default function Profile() {
       if (!accessToken) {
         setError("User not logged in.");
         setIsLoading(false);
+        router.push("/login");
         return;
       }
 
