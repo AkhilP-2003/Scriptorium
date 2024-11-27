@@ -1,5 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { jwtDecode } from 'jwt-decode';
 import NestedComment from './comment';
+
+type JwtPayload = {
+  id: number;
+  userName: string;
+  email: string;
+  role: string;
+  exp?: number;
+};
 
 interface Comment {
     parentId: any;
@@ -39,46 +49,177 @@ interface Comment {
     comments: Comment[];
     handleUpvote:(e: React.MouseEvent, id:number, voteType: string) => void;
     handleDownvote: (e: React.MouseEvent, id:number, voteType: string) => void;
-    handleReport: (e: React.MouseEvent, id: number) => void;
     onTemplateClick: (value: number) => void;
     handleCommentUpvote:(id:number, voteType: string) => void;
     handleCommentDownvote: (id:number, voteType: string) => void;
+    handleReport: (e: React.MouseEvent, id: number) => void;
     deleteButton?: React.ReactNode;
     editButton?: React.ReactNode;
   }
 
-  const BlogDetail: React.FC<BlogDetailProps> = ({
-    id,
-    title,
-    author,
-    description,
-    upvote,
-    downvote,
-    tags,
-    templates,
-    comments,
-    handleUpvote,
-    handleDownvote,
-    handleReport,
-    onTemplateClick,
-    handleCommentUpvote,
-    handleCommentDownvote,
-    deleteButton,
-    editButton
+const BlogDetail: React.FC<BlogDetailProps> = ({
+  id,
+  title,
+  author,
+  description,
+  upvote,
+  downvote,
+  tags,
+  templates,
+  comments,
+  handleUpvote,
+  handleDownvote,
+  handleReport,
+  onTemplateClick,
+  handleCommentUpvote,
+  handleCommentDownvote,
+  deleteButton,
+  editButton,
+}) => {
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [isAddingComment, setIsAddingComment] = useState(false); // State for toggling comment input
+  const [newComment, setNewComment] = useState(''); // State for holding the comment content
+  const [commentsState, setCommentsState] = useState<Comment[]>(comments); // Track comments in state
+  const router = useRouter();
 
-  }) => {
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      router.push('/login');
+      return;
+    }
 
-    const topLevelComments = comments.filter((comment) => !comment.parentId);
+    try {
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken);
+      setUserId(decodedToken.id);
+      setIsUserAuthenticated(true);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      router.push('/login');
+    }
+  }, [router]);
+
+  const handleAddComment = () => {
+    const accessToken = localStorage.getItem('accessToken');
     
+    if (!accessToken) {
+      router.push('/login');
+      return;
+    }
+  
+    try {
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken);
+      const currentTime = Math.floor(Date.now() / 1000); // current time in seconds
+  
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+        console.warn("Token expired. Redirecting to login.");
+        router.push("/login");
+        return;
+      }
+  
+      setIsAddingComment((prev) => !prev);
+  
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      router.push('/login');
+    }
+  };
 
-    return (
-      <div className="p-6 bg-gray-100 shadow-xl rounded-lg max-w-4xl mx-auto">
-        {/* Blog Header */}
-        <div className="flex items-center justify-between">
+  const handleCommentSubmit = async () => {
+    if (!newComment.trim()) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/blogs/${id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({
+          content: newComment,
+          userId: userId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add comment');
+      }
+
+      const responseData = await response.json();
+
+      setCommentsState((prevComments) => [
+        ...prevComments,
+        responseData.newComment, // Assuming the backend returns the newly created comment
+      ]);
+
+      setNewComment('');
+      setIsAddingComment(false);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  // Handle reply submission
+  const handleReplySubmit = async (parentId: number, content: string) => {
+    try {
+      const response = await fetch(`/api/blogs/${id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({
+          content: content,
+          parentId: parentId, // Send parentId to create a reply
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to submit reply');
+      }
+      
+  
+      const responseData = await response.json();
+
+      const newCommentWithAuthor = {
+        ...responseData.newComment,
+        author: {
+          userName: responseData.newComment.author?.userName || 'here is your comment/reply!', 
+          avatar: responseData.newComment.author?.avatar
+        }
+      };
+
+      setCommentsState((prevComments) => [
+        ...prevComments,
+        responseData.newComment, // Add the new comment (reply) to the state
+      ]);
+    } catch (error) {
+      console.error('Error submitting reply:', error);
+    }
+  };
+  
+
+  const topLevelComments = commentsState.filter((comment) => !comment.parentId);
+
+  return (
+    <div className="p-6 bg-gray-100 shadow-xl rounded-lg max-w-4xl mx-auto">
+      {/* Blog Header */}
+      <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
-        <div>{editButton && <button className="bg-blue-100 mr-3 mt-3 mb-3 font-semibold text-blue-700 p-3 rounded-lg hover:bg-blue-700 hover:text-blue-100">{editButton}</button>}
-          {deleteButton && <button className="bg-red-100 mr-3 mt-3 mb-3 font-semibold text-red-700 p-3 rounded-lg hover:bg-red-700 hover:text-red-100">{deleteButton}</button>}
-        
+        <div>
+          {editButton && (
+            <button className="bg-blue-100 mr-3 mt-3 mb-3 font-semibold text-blue-700 p-3 rounded-lg hover:bg-blue-700 hover:text-blue-100">
+              {editButton}
+            </button>
+          )}
+          {deleteButton && (
+            <button className="bg-red-100 mr-3 mt-3 mb-3 font-semibold text-red-700 p-3 rounded-lg hover:bg-red-700 hover:text-red-100">
+              {deleteButton}
+            </button>
+          )}
         </div>
         </div>
         <div className="flex items-center mt-2 text-sm text-gray-700">
@@ -111,12 +252,12 @@ interface Comment {
             👎<span> Downvote: {downvote} </span>
           </button>
           <button
-          className="text-red-500 hover:font-semibold focus:outline-none transition-colors"
-          onClick={(e) => handleReport(e, id)} // Report action
-          title="Report"
-          >
-          <div>🚩</div>
-          </button>
+            className="text-red-500 hover:font-semibold focus:outline-none transition-colors"
+            onClick={(e) => handleReport(e, id)} // Report action
+            title="Report"
+            >
+            <div>🚩</div>
+            </button>
         </div>
   
         {/* Templates Section */}
@@ -137,27 +278,53 @@ interface Comment {
           </ul>
         </div>
 
-        <div className="mt-8">
+      {/* Comments Section */}
+      <div className="mt-8">
         <h2 className="text-2xl font-semibold">Comments</h2>
-        
+
+        {/* Add Comment Button */}
         <div>
-        <input placeholder="Add a comment..." className="mt-3 mb-3 rounded text-gray-800 p-3 border border-gray-1 w-full"></input>
+          <button
+            onClick={handleAddComment}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+          >
+            Add Comment
+          </button>
         </div>
 
-        <ul className="mt-4">
-            {topLevelComments.map((comment) => (
-            <NestedComment
-                key={comment.id}
-                comment={comment}
-                allComments={comments} // Pass all comments here
-                handleCommentUpvote={handleCommentUpvote} // Correctly pass the handler
-                handleCommentDownvote={handleCommentDownvote} // Correctly pass the handler
+        {/* Comment Input */}
+        {isAddingComment && (
+          <div>
+            <textarea
+              placeholder="Write your comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="mt-3 mb-3 rounded text-gray-800 p-3 border border-gray-1 w-full"
             />
-            ))}
+            <button
+              onClick={handleCommentSubmit}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+            >
+              Submit Comment
+            </button>
+          </div>
+        )}
+
+        <ul className="mt-4">
+          {topLevelComments.map((comment) => (
+            <NestedComment
+              key={comment.id}
+              comment={comment}
+              allComments={commentsState}
+              handleCommentUpvote={handleCommentUpvote}
+              handleCommentDownvote={handleCommentDownvote}
+              handleReplySubmit={handleReplySubmit} // Pass handleReplySubmit here
+            />
+          ))}
         </ul>
-        </div>
       </div>
-    );
-  };
-  
-  export default BlogDetail;
+    </div>
+  );
+};
+
+export default BlogDetail;

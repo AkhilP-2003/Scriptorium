@@ -302,6 +302,7 @@ export default function CurrentBlogPage() {
             upvote={blog.upvote}
             handleUpvote={(e) => vote(e, blog.id, 'upvote')}
             handleDownvote={(e) => vote(e, blog.id, 'downvote')}
+            handleReport={(e)=> report(e, blog.id)}
             handleCommentUpvote={(commentId) => commentVote(blog.id, commentId, 'upvote')} // For comments
             handleCommentDownvote={(commentId) => commentVote(blog.id, commentId, 'downvote')} // For comments
             onTemplateClick={handleTemplateClick}
