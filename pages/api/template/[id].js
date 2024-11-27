@@ -52,7 +52,7 @@ export default async function handler(req, res) {
               output: template.code.output || "",
               error: template.code.error || ""
             }
-          : null
+          : null,
         }
       })
     } catch (error) {
