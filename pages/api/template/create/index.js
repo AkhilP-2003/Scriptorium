@@ -42,8 +42,6 @@ const handler = async (req, res) => {
 
     }
 
-    const { output, error } = await executeCode(code, language, input);
-
     // create a new template with the required fields in our db
     const newTemplate = await prisma.template.create({
       data: {
@@ -63,8 +61,8 @@ const handler = async (req, res) => {
         code,
         language,
         input,
-        output,
-        error,
+        output:"",
+        error:"",
         associatedTemplateId: newTemplate.id, //set later
       },
     })

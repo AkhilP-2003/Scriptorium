@@ -41,6 +41,22 @@ const HomePage: React.FC = () => {
             Start Coding
           </button>
         </div>
+
+        {/* Login and Sign Up Section */}
+        <div style={styles.authButtonSection}>
+          <button
+            style={styles.button}
+            onClick={() => router.push("/login")}
+          >
+            Login
+          </button>
+          <button
+            style={styles.button}
+            onClick={() => router.push("/signup")}
+          >
+            Sign Up
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -86,6 +102,14 @@ const styles = {
     justifyContent: "center",
     gap: "20px",
     marginTop: "30px",
+    flexWrap: "wrap", // Allows buttons to wrap in smaller screens
+  },
+  authButtonSection: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
+    marginTop: "20px", // Adds some space between the sections
+    flexWrap: "wrap",
   },
   button: {
     padding: "15px 30px",
@@ -114,6 +138,9 @@ const styles = {
     },
     buttonSection: {
       flexDirection: "column", // Stack buttons vertically on mobile
+    },
+    authButtonSection: {
+      flexDirection: "column", // Stack the auth buttons vertically on mobile
     },
     button: {
       width: "100%", // Full width buttons on mobile

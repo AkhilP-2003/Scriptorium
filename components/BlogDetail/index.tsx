@@ -151,6 +151,26 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
 
   // Handle reply submission
   const handleReplySubmit = async (parentId: number, content: string) => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      router.push("/login");
+    } else {
+      try {
+        // decode the token and cast it to the JwtPayload type
+        const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken);
+        const currentTime = Math.floor(Date.now() / 1000); // current time in seconds
+
+        // check if the token is expired
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+          console.warn("Token expired. Redirecting to login.");
+          router.push("/login");
+          return;
+        }
+      } catch (error) {
+        console.log("something went wrong saving.");
+      }
+    }
+    
     try {
       const response = await fetch(`/api/blogs/${id}/comments`, {
         method: 'POST',

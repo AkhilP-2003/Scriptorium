@@ -76,6 +76,7 @@ const NewTemplate: React.FC = () => {
     };
 
     try {
+      console.log(newTemplate);
       const response = await fetch('/api/template/create', {
         method: 'POST',
         headers: {
@@ -85,12 +86,16 @@ const NewTemplate: React.FC = () => {
         body: JSON.stringify(newTemplate),
       });
 
+
       if (!response.ok) {
+
         throw new Error('Failed to save template');
       }
 
+
       alert('Template saved successfully');
       router.push('/templates');
+      return; 
     } catch (error) {
       console.error('Error saving template:', error);
       alert('Failed to save template. Please try again.');
