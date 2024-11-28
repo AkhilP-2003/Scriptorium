@@ -44,9 +44,9 @@ const ReportPage: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         alert("Thank you for your report. It has been submitted.");
-        router.push(isBlogReport ? `/blog/${blogId}` : `/comment/${commentId}`);
+        router.push(isBlogReport ? `/blog/${blogId}` : `/blogs`);
       } else {
-        setError(data.message || "An error occurred while submitting your report.");
+        setError(data.message || "An error occurred while submitting your reports.");
       }
     } catch (error) {
       setError("An error occurred while submitting your report.");

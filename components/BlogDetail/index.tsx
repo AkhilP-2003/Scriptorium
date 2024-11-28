@@ -52,9 +52,11 @@ interface Comment {
     onTemplateClick: (value: number) => void;
     handleCommentUpvote:(id:number, voteType: string) => void;
     handleCommentDownvote: (id:number, voteType: string) => void;
+    handleCommentReport: (id: number) => void;
     handleReport: (e: React.MouseEvent, id: number) => void;
     deleteButton?: React.ReactNode;
     editButton?: React.ReactNode;
+    adminButton: React.ReactNode;
   }
 
 const BlogDetail: React.FC<BlogDetailProps> = ({
@@ -70,11 +72,13 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   handleUpvote,
   handleDownvote,
   handleReport,
+  handleCommentReport,
   onTemplateClick,
   handleCommentUpvote,
   handleCommentDownvote,
   deleteButton,
   editButton,
+  adminButton
 }) => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
@@ -82,23 +86,6 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   const [newComment, setNewComment] = useState(''); // State for holding the comment content
   const [commentsState, setCommentsState] = useState<Comment[]>(comments); // Track comments in state
   const router = useRouter();
-
-  useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      router.push('/login');
-      return;
-    }
-
-    try {
-      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken);
-      setUserId(decodedToken.id);
-      setIsUserAuthenticated(true);
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      router.push('/login');
-    }
-  }, [router]);
 
   const handleAddComment = () => {
     const accessToken = localStorage.getItem('accessToken');
@@ -220,6 +207,11 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
               {deleteButton}
             </button>
           )}
+          {adminButton && (
+            <button className="bg-green-100 mr-3 mt-3 mb-3 font-semibold text-green-700 p-3 rounded-lg hover:bg-green-700 hover:text-green-100">
+              {adminButton}
+            </button>
+          )}
         </div>
         </div>
         <div className="flex items-center mt-2 text-sm text-gray-700 dark:text-gray-300">
@@ -318,6 +310,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
               allComments={commentsState}
               handleCommentUpvote={handleCommentUpvote}
               handleCommentDownvote={handleCommentDownvote}
+              handleCommentReport={handleCommentReport}
               handleReplySubmit={handleReplySubmit} // Pass handleReplySubmit here
             />
           ))}

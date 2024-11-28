@@ -32,6 +32,7 @@ export default function CurrentBlogPage() {
   const router = useRouter();
   const {id} = router.query; // this is the current blog we are on.
   const [isAuthor, setIsAuthor] = useState(false);
+  const [isAdmin, setAdmin] = useState(false);
   
   useEffect(() => {
     if (blog) {
@@ -40,6 +41,8 @@ export default function CurrentBlogPage() {
         try {
           const decoded = jwtDecode(accessToken) as JwtPayload;
           const userId = decoded.id;
+          const userRole = decoded.role;
+          setAdmin(userRole === 'ADMIN');
           setIsAuthor(userId === blog.author.id); // Compare user ID with blog author's ID
         } catch (error) {
           console.error("Error decoding token", error);
@@ -142,6 +145,40 @@ export default function CurrentBlogPage() {
     } catch(error) {
         console.log("Error with reporting");
     }
+
+}
+
+const reportComment = async(commentId: number) => {
+
+  const accessToken = localStorage.getItem('accessToken');
+  if (!accessToken) {
+      router.push("/login");
+  } else {
+    try {
+
+      // decode the token and cast it to the JwtPayload type
+      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+      const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+  
+      // check if the token is expired
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+  
+        // if the token is expired thenredirect to login;
+        console.warn("Token expired. Redirecting to login.")
+        router.push("/login");
+        return
+      }} catch(error) {
+        console.log("something went wrong saving.");
+      }
+  }
+  try {
+     router.push({
+      pathname: '/report',
+      query: {commentId: commentId},
+     })
+  } catch(error) {
+      console.log("Error with reporting");
+  }
 
 }
   const commentVote = async(blogId:number, id: number, voteAction:string) => {
@@ -253,10 +290,63 @@ export default function CurrentBlogPage() {
     return;
   }
 
+  const handleAdminHide = async (blogId: number) => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      router.push("/login");
+      return;
+    } else {
+      try {
+
+        // decode the token and cast it to the JwtPayload type
+        const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken)
+        const currentTime = Math.floor(Date.now() / 1000) // current time in seconds
+    
+        // check if the token is expired
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+    
+          // if the token is expired thenredirect to login
+          console.warn("Token expired. Redirecting to login.")
+          router.push("/login")
+          return
+        }} catch(error) {
+          console.log("something went wrong saving.")
+        }
+    }
+  try {
+    const response = await fetch(`/api/blogs/${blogId}/hide`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Blog post hidden successfully.");
+      router.push('/blogs');
+      // Optionally, update your local state to reflect the hidden blog
+    } else {
+      alert(`Error: ${data.error}`);
+    }
+  } catch (error) {
+    console.error("Error hiding blog post:", error);
+    alert("Something went wrong. Please try again.");
+  }
+}
+
+
   if (blog && isAuthor ===false) {
     return (
       <div>
           <BlogDetail
+          adminButton={isAdmin ? (
+            <button onClick={() => handleAdminHide(blog.id)}>
+              Hide
+            </button>
+          ) : null} 
             id={blog.id}
             title={blog.title}
             description={blog.description}
@@ -265,6 +355,7 @@ export default function CurrentBlogPage() {
             handleDownvote={(e) => vote(e, blog.id, 'downvote')}
             handleCommentUpvote={(commentId) => commentVote(blog.id, commentId, 'upvote')} // For comments
             handleCommentDownvote={(commentId) => commentVote(blog.id, commentId, 'downvote')} // For comments
+            handleCommentReport={(commentId) => reportComment(commentId)}
             handleReport={(e) => report(e, blog.id)}
             onTemplateClick={handleTemplateClick}
             downvote={blog.downvote}
@@ -282,6 +373,11 @@ export default function CurrentBlogPage() {
     return (
       <div>
           <BlogDetail
+          adminButton={isAdmin ? (
+            <button onClick={() => handleAdminHide(blog.id)}>
+              Hide
+            </button>
+          ) : null} 
           editButton={
             <button
               onClick={() => handleEdit(blog.id)}
@@ -305,6 +401,7 @@ export default function CurrentBlogPage() {
             handleReport={(e)=> report(e, blog.id)}
             handleCommentUpvote={(commentId) => commentVote(blog.id, commentId, 'upvote')} // For comments
             handleCommentDownvote={(commentId) => commentVote(blog.id, commentId, 'downvote')} // For comments
+            handleCommentReport={(commentId) => reportComment(commentId)}
             onTemplateClick={handleTemplateClick}
             downvote={blog.downvote}
             tags={blog.tags}
@@ -320,3 +417,4 @@ export default function CurrentBlogPage() {
   
   
 } 
+  
