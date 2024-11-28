@@ -19,6 +19,7 @@ interface NestedCommentProps {
   allComments: CommentProps[]; // Pass all comments to find replies
   handleCommentUpvote: (id: number, voteType: string) => void;
   handleCommentDownvote: (id: number, voteType: string) => void;
+  handleCommentReport: (id: number) => void
   handleReplySubmit: (parentId: number, content: string) => void; // New handler for submitting a reply
 }
 
@@ -27,6 +28,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
   allComments,
   handleCommentUpvote,
   handleCommentDownvote,
+  handleCommentReport,
   handleReplySubmit,
 }) => {
   const [isReplying, setIsReplying] = useState(false);
@@ -84,6 +86,13 @@ const NestedComment: React.FC<NestedCommentProps> = ({
         <button onClick={() => handleCommentDownvote(comment.id, 'downvote')} className="!ml-1 text-sm font-semibold">
           👎<span className="!ml-1 text-sm text-red-600 font-semibold">{comment.downvote} </span>
         </button>
+        <button
+            className="text-red-500 hover:font-semibold focus:outline-none transition-colors"
+            onClick={() => handleCommentReport(comment.id)} // Report action
+            title="Report"
+            >
+            <div>🚩</div>
+            </button>
       </div>
 
       {/* Reply Button */}
@@ -118,6 +127,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
             handleCommentUpvote={handleCommentUpvote}
             handleCommentDownvote={handleCommentDownvote}
             handleReplySubmit={handleReplySubmit}
+            handleCommentReport={handleCommentReport}
           />
         ))}
       </ul>

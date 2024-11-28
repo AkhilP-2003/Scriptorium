@@ -52,6 +52,7 @@ interface Comment {
     onTemplateClick: (value: number) => void;
     handleCommentUpvote:(id:number, voteType: string) => void;
     handleCommentDownvote: (id:number, voteType: string) => void;
+    handleCommentReport: (id: number) => void;
     handleReport: (e: React.MouseEvent, id: number) => void;
     deleteButton?: React.ReactNode;
     editButton?: React.ReactNode;
@@ -71,6 +72,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   handleUpvote,
   handleDownvote,
   handleReport,
+  handleCommentReport,
   onTemplateClick,
   handleCommentUpvote,
   handleCommentDownvote,
@@ -84,7 +86,6 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   const [newComment, setNewComment] = useState(''); // State for holding the comment content
   const [commentsState, setCommentsState] = useState<Comment[]>(comments); // Track comments in state
   const router = useRouter();
-
 
   const handleAddComment = () => {
     const accessToken = localStorage.getItem('accessToken');
@@ -309,6 +310,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
               allComments={commentsState}
               handleCommentUpvote={handleCommentUpvote}
               handleCommentDownvote={handleCommentDownvote}
+              handleCommentReport={handleCommentReport}
               handleReplySubmit={handleReplySubmit} // Pass handleReplySubmit here
             />
           ))}
