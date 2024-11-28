@@ -74,6 +74,7 @@ export default function CurrentBlogPage() {
 
     if (!accessToken) {
       router.push("/login");
+      return;
     } else {
       try {
 
@@ -116,6 +117,7 @@ export default function CurrentBlogPage() {
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
         router.push("/login");
+        return;
     } else {
       try {
 
@@ -149,6 +151,7 @@ export default function CurrentBlogPage() {
 
     if (!accessToken) {
       router.push("/login");
+      return;
     } else {
       try {
 

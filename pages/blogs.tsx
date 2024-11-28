@@ -265,32 +265,29 @@ export default function Blogs() {
 
       const handleMyNextPage = () => {
         if (!isLastPage) {
-          handleMyBlogs(currentPage + 1);
+          getMyBlogs(currentPage + 1);
         }
       };
       
       const handleMyPreviousPage = () => {
         if (currentPage > 1) {
-          handleMyBlogs(currentPage - 1);
+          getMyBlogs(currentPage - 1);
         }
       };
       
+    
 
     useEffect(()=>  {
-        if (!showMyBlogs) {
+        if (showMyBlogs === false) {
             getBlogs(1);
         } else {
-            handleMyBlogs(1);
+            getMyBlogs(1);
         }
     }, [title, description, tags, templateTitle]);
-
-    // useEffect(() => {
-    //     if (!showMyBlogs) {
-    //         getBlogs(1); // Load the first page by default
-    //     } else {
-    //         getMyBlogs(1);
-    //     }
-    //   }, []);
+    
+    useEffect(()=>  {
+          getBlogs(1);
+  }, []);
       
     
     useEffect(() => {
@@ -399,9 +396,10 @@ export default function Blogs() {
             upvote: blog.upvote,
             downvote: blog.downvote,
           }));
-          setShowMyBlogs(true);
+
           setCurrentPage(page);
           setIsLastPage(processedBlogs.length + processedHiddenBlogs.length < pageSize);
+          setShowMyBlogs(true);
           setBlogs(
             [...processedBlogs, ...processedHiddenBlogs].filter(
               (blog: Blog) => blog.isUserBlog
@@ -421,8 +419,7 @@ export default function Blogs() {
         setShowMyBlogs(false);
       }
       const handleMyBlogs2 = async () => {
-        handleMyBlogs(1);
-        setShowMyBlogs(true);
+        getMyBlogs(1);
       }
 
     return (
