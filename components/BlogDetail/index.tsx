@@ -56,6 +56,7 @@ interface Comment {
     handleReport: (e: React.MouseEvent, id: number) => void;
     deleteButton?: React.ReactNode;
     editButton?: React.ReactNode;
+    adminButton: React.ReactNode;
   }
 
 const BlogDetail: React.FC<BlogDetailProps> = ({
@@ -77,6 +78,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   handleCommentDownvote,
   deleteButton,
   editButton,
+  adminButton
 }) => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
@@ -203,6 +205,11 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
           {deleteButton && (
             <button className="bg-red-100 mr-3 mt-3 mb-3 font-semibold text-red-700 p-3 rounded-lg hover:bg-red-700 hover:text-red-100">
               {deleteButton}
+            </button>
+          )}
+          {adminButton && (
+            <button className="bg-green-100 mr-3 mt-3 mb-3 font-semibold text-green-700 p-3 rounded-lg hover:bg-green-700 hover:text-green-100">
+              {adminButton}
             </button>
           )}
         </div>
