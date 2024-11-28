@@ -53,7 +53,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
   };
 
   return (
-    <li className="border rounded-lg p-4 mb-3 bg-white shadow-sm hover:shadow-md">
+    <li className="border dark:border-gray-700 rounded-lg p-4 mb-3 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md">
       <div className="flex justify-between items-center">
         {/* Left side: Avatar and Username */}
         <div className="flex items-center">
@@ -64,20 +64,20 @@ const NestedComment: React.FC<NestedCommentProps> = ({
               className="w-6 h-6 rounded-full mr-2"
             />
           )}
-          <span className="text-gray-700 font-semibold">{comment.author?.userName}</span>
-        </div>
+          <span className="text-gray-700 dark:text-gray-200 font-semibold">{comment.author?.userName}</span>
+          </div>
 
         {/* Right side: Date */}
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500 dark:text-gray-400">
           {new Date(comment.createdAt).toLocaleString()}
         </span>
       </div>
 
       {/* Comment Content */}
-      <p className="text-gray-800 mt-1">{comment.content}</p>
+      <p className="text-gray-800 dark:text-gray-200 mt-1">{comment.content}</p>
 
       {/* Upvotes/Downvotes */}
-      <div className="mt-1 text-sm text-gray-500 flex items-center justify-end space-x-4">
+      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-end space-x-4">
         <button onClick={() => handleCommentUpvote(comment.id, 'upvote')} className="!ml-1 text-sm font-semibold">
           👍<span className="!ml-1 mr-2 text-sm text-green-600 font-semibold">{comment.upvote}</span>
         </button>
@@ -87,9 +87,9 @@ const NestedComment: React.FC<NestedCommentProps> = ({
       </div>
 
       {/* Reply Button */}
-      <div className="mt-2 text-sm text-gray-500">
-        <button onClick={handleReplyClick} className="text-blue-500">
-          Reply
+      <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      <button onClick={handleReplyClick} className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">
+      Reply
         </button>
       </div>
 
@@ -99,7 +99,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
           <textarea
             value={replyContent}
             onChange={handleReplyChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
             placeholder="Write a reply..."
           />
           <button type="submit" className="bg-blue-500 text-white mt-2 px-4 py-2 rounded-md">
@@ -109,7 +109,7 @@ const NestedComment: React.FC<NestedCommentProps> = ({
       )}
 
       {/* Render Replies (Recursive Nested Comments) */}
-      <ul className="mt-4 pl-6 border-l-2 border-gray-200">
+      <ul className="mt-4 pl-6 border-l-2 border-gray-200 dark:border-gray-700">
         {childComments.map((child) => (
           <NestedComment
             key={child.id}

@@ -130,9 +130,9 @@ const BlogEdit: React.FC = () => {
     
     return (
       <div className="p-4 max-w-2xl mx-auto bg-gray-50 rounded shadow-xl">
-        <h1 className="font-bold text-2xl mb-4">Edit Blog</h1>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-bold text-lg md:text-lg sm:text-md mb-2" htmlFor="title">
+        <h1 className="font-bold text-2xl mb-4 dark:text-black">Edit Blog</h1>
+        <div className="mb-4 dark:text-black">
+          <label className="block text-gray-700 font-bold text-lg md:text-lg sm:text-md mb-2 darkL:text-white" htmlFor="title">
             Title
           </label>
           <input
@@ -145,7 +145,7 @@ const BlogEdit: React.FC = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold text-lg md:text-lg sm:text-md mb-2" htmlFor="description">
+          <label className="block text-gray-700 font-bold text-lg md:text-lg sm:text-md mb-2 " htmlFor="description">
             Description
           </label>
           <textarea
@@ -153,7 +153,7 @@ const BlogEdit: React.FC = () => {
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border rounded dark:text-black"
           />
         </div>
         <div className="mb-4">
@@ -166,21 +166,21 @@ const BlogEdit: React.FC = () => {
             name="tags"
             value={formData.tags}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border rounded dark:text-black"
           />
         </div>
         {sError && <p className="text-red-600 font-semibold bg-red-100 rounded-md mr-2 mt-2 mb-2 p-2">
           {sError.message}
         </p>}
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2 text-lg md:text-lg sm:text-md">Templates</label>
+          <label className="block text-gray-700 font-bold mb-2 text-lg md:text-lg sm:text-md dark:text-black">Templates</label>
           <ul>
             {templates && templates.map((template: Template) => (
-              <li key={template.id} className="flex items-center justify-between">
+              <li key={template.id} className="flex items-center justify-between dark:text-black">
                 <span>{template.title}</span>
                 {selectedTemplates.includes(template.id) ? (
                   <button
-                    className="bg-red-100 font-semibold text-red-600 p-2 m-1 rounded-md"
+                    className="bg-red-100 font-semibold text-red-600 p-2 m-1 rounded-md dark:text-black"
                     onClick={() => handleTemplateChange(template.id, "remove")}
                   >
                     Remove
