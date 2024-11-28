@@ -14,13 +14,17 @@ echo "Starting setup for Next.js backend..."
 
 # Check for Node.js 20+
 echo "Checking Node.js version..."
-NODE_VERSION=$(node -v)
-REQUIRED_NODE_VERSION="v20"
+REQUIRED_NODE_VERSION="20"
 
-if [[ $NODE_VERSION != $REQUIRED_NODE_VERSION* ]]; then
-    echo "Error: Node.js 20+ is required. Current version: $NODE_VERSION"
+# Get the current installed Node.js version
+NODE_VERSION=$(node -v | sed 's/v//')
+
+# Compare versions
+if [ "$(echo -e "$REQUIRED_NODE_VERSION\n$NODE_VERSION" | sort -V | head -n1)" != "$REQUIRED_NODE_VERSION" ]; then
+    echo "Error: Node.js $REQUIRED_NODE_VERSION+ is required. Current version: $NODE_VERSION"
     exit 1
 fi
+
 echo "Node.js version is $NODE_VERSION"
 
 # 1. Install npm packages
@@ -94,46 +98,10 @@ if ! node -e "$NODE_SCRIPT"; then
 fi
 
 # 4. Check for required compilers/interpreters (gcc, g++, Python, Java)
-echo "Checking for required compilers/interpreters..."
+echo "Building docker images, this may take a while...."
 
-# Check if GCC is installed
-if ! command -v gcc &> /dev/null; then
-    echo "Error: GCC (C compiler) could not be found. Please install GCC."
-    exit 1
-fi
-echo "GCC found."
-
-# Check if G++ is installed
-if ! command -v g++ &> /dev/null; then
-    echo "Error: G++ (C++ compiler) could not be found. Please install G++."
-    exit 1
-fi
-echo "G++ found."
-
-# Check if Python 3.10+ is installed
-if ! command -v python3 &> /dev/null; then
-    echo "Error: Python 3 is not installed."
-    exit 1
-fi
-
-PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
-REQUIRED_PYTHON_VERSION="3.10"
-
-# Compare versions
-if ! python3 -c "import sys; sys.exit(not (sys.version_info >= (3, 10)))"; then
-    echo "Error: Python 3.10+ is required. Current version: $PYTHON_VERSION"
-    exit 1
-fi
-
-echo "Python version is $PYTHON_VERSION"
-
-# Check if Java 20+ is installed
-JAVA_VERSION=$(java -version 2>&1 | head -n 1)
-REQUIRED_JAVA_VERSION="20"
-if [[ $JAVA_VERSION != *$REQUIRED_JAVA_VERSION* ]]; then
-    echo "Error: Java 20+ is required. Current version: $JAVA_VERSION"
-    exit 1
-fi
-echo "Java version is $JAVA_VERSION"
+#Call build all to build all the docker images
+chmod +x ./utils/dockerfiles/build-all.sh
+. ./utils/dockerfiles/build-all.sh
 
 echo "Setup complete. You can now run the server using run.sh."
