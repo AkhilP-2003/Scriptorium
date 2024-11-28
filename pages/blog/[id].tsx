@@ -25,6 +25,16 @@ type JwtPayload = {
   exp?: number; // Optional expiration time
 };
 
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const { exp } = jwtDecode<{ exp: number }>(token); // Decode token
+    return Date.now() >= exp * 1000; // Check if current time is past expiry
+  } catch (error) {
+    return true; // If token can't be decoded, consider it expired
+  }
+};
+
+
 export default function CurrentBlogPage() {
 
   const [blog, setBlog] = useState<Blog| null>(null)
@@ -151,6 +161,8 @@ export default function CurrentBlogPage() {
 const reportComment = async(commentId: number) => {
 
   const accessToken = localStorage.getItem('accessToken');
+  const refreshToken = localStorage.getItem('accessToken');
+
   if (!accessToken) {
       router.push("/login");
   } else {

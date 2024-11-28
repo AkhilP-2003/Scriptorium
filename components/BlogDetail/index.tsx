@@ -215,13 +215,13 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
         </div>
         </div>
         <div className="flex items-center mt-2 text-sm text-gray-700">
-          {author.avatar && (
+          {
             <img
               src={author.avatar}
               alt="Author Avatar"
               className="w-8 h-8 rounded-full mr-2"
             />
-          )}
+          }
           <span className="font-semibold">
             Author: {author.firstName} {author.lastName || author.userName}
           </span>
