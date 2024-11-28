@@ -89,7 +89,7 @@ export default function Blogs() {
         if (!accessToken) {
             console.warn("User not authenticated. Redirecting to login.");
             setShowMyBlogs(false);
-            setBlogs([]); // Clear blogs if unauthenticated
+            router.push("/login");
             return;
           }
         
@@ -265,23 +265,22 @@ export default function Blogs() {
 
       const handleMyNextPage = () => {
         if (!isLastPage) {
-          getMyBlogs(currentPage + 1);
+          handleMyBlogs(currentPage + 1);
         }
       };
       
       const handleMyPreviousPage = () => {
         if (currentPage > 1) {
-            getMyBlogs(currentPage - 1);
+          handleMyBlogs(currentPage - 1);
         }
       };
       
 
     useEffect(()=>  {
-
         if (!showMyBlogs) {
-            getBlogs(currentPage);
+            getBlogs(1);
         } else {
-            getMyBlogs(currentPage);
+            handleMyBlogs(1);
         }
     }, [title, description, tags, templateTitle]);
 
@@ -333,7 +332,7 @@ export default function Blogs() {
         if (!accessToken) {
           console.warn("User not authenticated. Redirecting to login.");
           setShowMyBlogs(false);
-          setBlogs([]); // Clear blogs if unauthenticated
+          router.push("/login");
           return;
         }
       
@@ -400,11 +399,9 @@ export default function Blogs() {
             upvote: blog.upvote,
             downvote: blog.downvote,
           }));
-          
+          setShowMyBlogs(true);
           setCurrentPage(page);
           setIsLastPage(processedBlogs.length + processedHiddenBlogs.length < pageSize);
-      
-          setShowMyBlogs(true);
           setBlogs(
             [...processedBlogs, ...processedHiddenBlogs].filter(
               (blog: Blog) => blog.isUserBlog
@@ -422,6 +419,10 @@ export default function Blogs() {
       const handleShowAllBlogs = async () => {
         getBlogs(1);
         setShowMyBlogs(false);
+      }
+      const handleMyBlogs2 = async () => {
+        handleMyBlogs(1);
+        setShowMyBlogs(true);
       }
 
     return (
@@ -449,7 +450,7 @@ export default function Blogs() {
                 Create Blog
                 </button>
                 <button
-                onClick={() => handleMyBlogs(1)}
+                onClick={() => handleMyBlogs2()}
                 className={`ml-4 px-6 bg-green-500 text-white py-3 hover:bg-green-700 font-semibold rounded-lg transition-all cursor-pointer`}
                 >My Blogs</button>
                 {/* Show All Blogs Button */}
