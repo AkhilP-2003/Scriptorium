@@ -175,9 +175,9 @@ export default function Login() {
   }, [submit]);
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen">
+    <div className="flex flex-col lg:flex-row h-screen dark:bg-gray-800">
       {/* Left Section */}
-      <div className="flex flex-col items-center justify-center w-full lg:w-1/2 bg-blue-50 z-10 shadow-2xl p-6">
+      <div className="flex flex-col items-center justify-center w-full lg:w-1/2 bg-blue-50 z-10 shadow-2xl p-6 dark:bg-gray-900">
         <h1 className="font-bold lg:text-4xl md:text-3xl sm:text-lg text-blue-800 p-3">
           Welcome to <span className="text-blue-600">Scriptorium!</span>
         </h1>
@@ -187,15 +187,15 @@ export default function Login() {
       </div>
 
       {/* Right Side */}
-      <div id="login-container" className="flex flex-col items-center justify-center w-full lg:w-1/2 p-8">
-        <div id="login-title" className="title w-full max-w-md">
-          <h2 className="text-center lg:text-xl md:text-lg sm:text-md text-blue-800 mb-6 font-semibold">Log in</h2>
+      <div id="login-container" className="flex flex-col items-center justify-center w-full lg:w-1/2 p-8 dark:bg-white">
+        <div id="login-title" className="title w-full max-w-md dark:text-black">
+          <h2 className="text-center lg:text-xl md:text-lg sm:text-md text-blue-800 mb-6 font-semibold dark:text-black dark:bg-white-900">Log in</h2>
 
           <AuthInput
-            title="Username"
+            title="Username" 
             value={userName}
             onChange={handleUsernameChange}
-            className="border border-gray-300 rounded-lg p-3 w-full mb-4 focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-lg p-3 w-full mb-4 focus:ring-2 focus:ring-blue-500 "
           />
 
           <PasswordInput
@@ -213,7 +213,7 @@ export default function Login() {
           Log In
         </button>
 
-          <div className="mt-9 text-center p-2">
+          <div className="mt-9 text-center p-2 dark:text-black">
           Don't have an account? 
           <span>
             <Link className="ml-2 bg-green-500 hover:bg-green-600 p-3 rounded-lg font-semibold text-white" href="/signup">

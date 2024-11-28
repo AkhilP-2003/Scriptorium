@@ -2,6 +2,8 @@ import NavigationBar from "@/components/NavigationBar";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
+import DarkModeToggle from "@/components/DarkModeToggle";
+
 
 export default function App({ Component, pageProps }: AppProps) {
   // this part is for setting the global navigation so it doens't re render everytim we load a diff page
@@ -36,6 +38,12 @@ export default function App({ Component, pageProps }: AppProps) {
           links={links}
           className="!shadow-2xl"
         />
+
+        {/* Dark Mode Toggle */}
+        <div className="flex justify-end p-4">
+            <DarkModeToggle /> {/* Dark Mode Toggle */}
+        </div>
+
       </div>
 
       {/* Main content section */}

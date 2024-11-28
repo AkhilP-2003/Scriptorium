@@ -427,89 +427,89 @@ export default function Blogs() {
       }
 
     return (
-        <div className="flex flex-col lg:flex-row">
-            {/* Left Side - Filter Section */}
-            <div className="lg:w-1/5 w-full bg-gray-200 shadow-xl p-4 lg:h-screen">
-                <FilterSection
-                    title={title}
-                    description={description}
-                    tags={tags}
-                    templateTitle={templateTitle}
-                    handleFilterChange={handleFilterChange}
-                    sort={sort}
-                    handleSortChange={handleSortChange}
-                    
-                />
-            </div>
-            <div className="lg:w-4/5 w-full p-5 bg-white shadow-xl">
-            <div className="ml-4 mr-4 mt-4 flex items-center justify-between mb-4">
-                {/* Blog Title */}
-                <h1 className="text-3xl font-bold">Blogs</h1>
-                <div>
-                {/* Create Blog Button */}
-                <button onClick={() => handleCreateButton()} className="ml-4 px-6 bg-blue-500 text-white py-3 hover:bg-blue-700 font-semibold rounded-lg transition-all cursor-pointer">
-                Create Blog
-                </button>
-                <button
-                onClick={() => handleMyBlogs2()}
-                className={`ml-4 px-6 bg-green-500 text-white py-3 hover:bg-green-700 font-semibold rounded-lg transition-all cursor-pointer`}
-                >My Blogs</button>
-                {/* Show All Blogs Button */}
-                {showMyBlogs && (
-                    <button
-                    onClick={() => handleShowAllBlogs()}
-                    className="ml-4 px-6 bg-gray-500 text-white py-3 hover:bg-gray-700 font-semibold rounded-lg transition-all cursor-pointer"
-                    >
-                    All Blogs
-                    </button>)}
-                </div>
-            </div>
-            <p className="ml-4">Here are the blog posts sorted by {sort}.</p>
+      <div className="flex flex-col lg:flex-row">
+          {/* Left Side - Filter Section */}
+          <div className="lg:w-1/5 w-full bg-white dark:bg-gray-800 shadow-xl p-4 lg:h-screen">
+          <FilterSection
+                  className="w-full p-2 mb-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  title={title}
+                  description={description}
+                  tags={tags}
+                  templateTitle={templateTitle}
+                  handleFilterChange={handleFilterChange}
+                  sort={sort}
+                  handleSortChange={handleSortChange}
+              />
+          </div>
+          <div className="lg:w-4/5 w-full p-5 bg-white dark:bg-gray-900 shadow-xl">
+              <div className="ml-4 mr-4 mt-4 flex items-center justify-between mb-4">
+                  {/* Blog Title */}
+                  <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Blogs</h1>
+                  <div>
+                      {/* Create Blog Button */}
+                      <button onClick={() => handleCreateButton()} className="ml-4 px-6 bg-blue-500 text-white py-3 hover:bg-blue-700 font-semibold rounded-lg transition-all cursor-pointer">
+                          Create Blog
+                      </button>
+                      <button
+                          onClick={() => handleMyBlogs2()}
+                          className={`ml-4 px-6 bg-green-500 text-white py-3 hover:bg-green-700 font-semibold rounded-lg transition-all cursor-pointer`}
+                      >My Blogs</button>
+                      {/* Show All Blogs Button */}
+                      {showMyBlogs && (
+                          <button
+                          onClick={() => handleShowAllBlogs()}
+                          className="ml-4 px-6 bg-gray-500 text-white py-3 hover:bg-gray-700 font-semibold rounded-lg transition-all cursor-pointer"
+                          >
+                          All Blogs
+                          </button>)}
+                  </div>
+              </div>
+              <p className="ml-4 text-gray-700 dark:text-gray-300">Here are the blog posts sorted by {sort}.</p>
+              
+              {/* Map through blogs */}
+              {blogs.length > 0 ? (
+                  blogs.map((blog) => (
+                      <BlogCard
+                          onClick={() => navigateToBlog(blog.id)}
+                          className="m-4 p-6 rounded-lg shadow-lg cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all duration-200"
+                          id={blog.id}
+                          key={blog.id}
+                          title={blog.title}
+                          handleUpvote={(e) => vote(e, blog.id, 'upvote')}
+                          handleDownvote={(e) => vote(e, blog.id, 'downvote')}
+                          upvoteNum={blog.upvote}
+                          downvoteNum={blog.downvote}
+                          username={blog.username}
+                          tags={blog.tags}
+                          handleReport={(e) => report(e, blog.id)}
+                          templateTitles={blog.templateTitles}/>
+                  ))
+              ) : (
+                  <p className="mt-4 text-red-600 font-semibold ml-4">No blogs found. Try adjusting the filters.</p>
+              )}
 
-                
-                {blogs.length > 0 ? (
-                blogs.map((blog) => (
-                    <BlogCard
-                        onClick={() => navigateToBlog(blog.id)}
-                        className=""
-                        id={blog.id}
-                        key={blog.id}
-                        title={blog.title}
-                        handleUpvote={(e) => vote(e, blog.id, 'upvote')}
-                        handleDownvote={(e) => vote(e, blog.id, 'downvote')}
-                        upvoteNum={blog.upvote}
-                        downvoteNum={blog.downvote}
-                        username={blog.username}
-                        tags={blog.tags}
-                        handleReport={(e) => report(e, blog.id)}
-                        templateTitles={blog.templateTitles}/>
-                        
-                ))
-                ) : (
-                <p className="mt-4 text-red-600 font-semibold ml-4">No blogs found. Try adjusting the filters.</p>
-                
-                )}
-                {!showMyBlogs && <div className="pagination flex flex-row items-center justify-center">
-                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700"onClick={handleRegularPreviousPage} disabled={currentPage === 1}>
-                        Previous
-                    </button>
-                    <span>Page {currentPage}</span>
-                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleRegularNextPage} disabled={isLastPage}>
-                        Next
-                    </button>
-                    </div>}
+              {/* Pagination */}
+              {!showMyBlogs && <div className="pagination flex flex-row items-center justify-center">
+                  <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700"onClick={handleRegularPreviousPage} disabled={currentPage === 1}>
+                      Previous
+                  </button>
+                  <span>Page {currentPage}</span>
+                  <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleRegularNextPage} disabled={isLastPage}>
+                      Next
+                  </button>
+              </div>}
 
-                    {showMyBlogs && <div className="pagination flex flex-row items-center justify-center">
-                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleMyPreviousPage} disabled={currentPage === 1}>
-                        Previous
-                    </button>
-                    <span>Page {currentPage}</span>
-                    <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleMyNextPage} disabled={isLastPage}>
-                        Next
-                    </button>
-                    </div>}
-            </div>
-        </div>
+              {showMyBlogs && <div className="pagination flex flex-row items-center justify-center">
+                  <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleMyPreviousPage} disabled={currentPage === 1}>
+                      Previous
+                  </button>
+                  <span>Page {currentPage}</span>
+                  <button className="bg-red-500 p-3 m-3 rounded-md font-semibold text-white hover:bg-red-700" onClick={handleMyNextPage} disabled={isLastPage}>
+                      Next
+                  </button>
+              </div>}
+          </div>
+      </div>
     );
 }
 

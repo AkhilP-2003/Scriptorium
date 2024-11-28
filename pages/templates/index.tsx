@@ -348,13 +348,13 @@ const handleMyTemplates = () => {
   return (
     <>
       <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-4 text-center">Code Templates</h1>
+      <h1 className="text-3xl font-bold mb-4 text-center dark:text-white">Code Templates</h1>
 
         {/* create new template button */}
         <div className="flex justify-end mb-4 mt-4">
         <a
           onClick={handleCreateTemplate}
-          className=" px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-all cursor-pointer"
+          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-all cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-700"
         >
           Create New Template
         </a>
@@ -393,7 +393,7 @@ const handleMyTemplates = () => {
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Search by title, tags, or explanation"
-            className="border p-2 rounded w-1/2"
+            className="border p-2 rounded w-1/2 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
           />
         </div>
 
