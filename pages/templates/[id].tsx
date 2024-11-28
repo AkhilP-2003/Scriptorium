@@ -123,20 +123,20 @@ export default function TemplateDetails({ template }: TemplateDetailsProps) {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Currently Viewing Code Template: {template.title}</h1>
-      <p className="text-gray-600 mb-4">Author: {template.owner.userName}</p>
+<h1 className="text-3xl font-bold mb-4 dark:text-white">Currently Viewing Code Template: {template.title}</h1>
+<p className="text-gray-600 mb-4">Author: {template.owner.userName}</p>
       <div className="border p-4 rounded shadow mb-4">
         <p className="mb-2 text-lg">{template.explanation}</p>
         <p className="text-sm text-gray-600">Tags: {template.tags}</p>
       </div>
 
       {template.code && (
-        <div className="border p-6 rounded shadow mb-6 bg-gray-100">
-          <h3 className="text-2xl font-semibold mb-4">Code:</h3>
+        <div className="border p-6 rounded shadow mb-6 bg-gray-100 dark:bg-gray-800">
+          <h3 className="text-2xl font-semibold mb-4 dark:text-white">Code:</h3>
           <SyntaxHighlighter language={template.code.language} style={oneDark}>
             {template.code.code}
           </SyntaxHighlighter>
-          <p className="text-sm text-gray-600 mt-4">Language: {template.code.language}</p>
+          <p className="text-sm text-gray-600 mt-4 dark:text-gray-400">Language: {template.code.language}</p>
         </div>
       )}
 

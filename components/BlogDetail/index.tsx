@@ -56,6 +56,7 @@ interface Comment {
     handleReport: (e: React.MouseEvent, id: number) => void;
     deleteButton?: React.ReactNode;
     editButton?: React.ReactNode;
+    adminButton: React.ReactNode;
   }
 
 const BlogDetail: React.FC<BlogDetailProps> = ({
@@ -77,6 +78,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   handleCommentDownvote,
   deleteButton,
   editButton,
+  adminButton
 }) => {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
@@ -190,25 +192,30 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   const topLevelComments = commentsState.filter((comment) => !comment.parentId);
 
   return (
-    <div className="p-6 bg-gray-100 shadow-xl rounded-lg max-w-4xl mx-auto">
+    <div className="p-6 bg-gray-100 dark:bg-gray-800 shadow-xl rounded-lg max-w-4xl mx-auto">
       {/* Blog Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
-        <div>
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{title}</h1>
+      <div>
           {editButton && (
-            <button className="bg-blue-100 mr-3 mt-3 mb-3 font-semibold text-blue-700 p-3 rounded-lg hover:bg-blue-700 hover:text-blue-100">
+            <button className="bg-blue-100 dark:bg-blue-800 mr-3 mt-3 mb-3 font-semibold text-blue-700 dark:text-blue-200 p-3 rounded-lg hover:bg-blue-700 hover:text-blue-100 dark:hover:bg-blue-600">
               {editButton}
             </button>
           )}
           {deleteButton && (
-            <button className="bg-red-100 mr-3 mt-3 mb-3 font-semibold text-red-700 p-3 rounded-lg hover:bg-red-700 hover:text-red-100">
+            <button className="bg-red-100 dark:bg-red-800 mr-3 mt-3 mb-3 font-semibold text-red-700 dark:text-red-200 p-3 rounded-lg hover:bg-red-700 hover:text-red-100 dark:hover:bg-red-600">
               {deleteButton}
+            </button>
+          )}
+          {adminButton && (
+            <button className="bg-green-100 mr-3 mt-3 mb-3 font-semibold text-green-700 p-3 rounded-lg hover:bg-green-700 hover:text-green-100">
+              {adminButton}
             </button>
           )}
         </div>
         </div>
-        <div className="flex items-center mt-2 text-sm text-gray-700">
-          {author.avatar && (
+        <div className="flex items-center mt-2 text-sm text-gray-700 dark:text-gray-300">
+        {author.avatar && (
             <img
               src={author.avatar}
               alt="Author Avatar"
@@ -219,13 +226,13 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
             Author: {author.firstName} {author.lastName || author.userName}
           </span>
         </div>
-        <div className="mt-4 text-gray-600">
-          <p>{description}</p>
+        <div className="mt-4 text-gray-600 dark:text-gray-300">
+        <p>{description}</p>
         </div>
   
         {/* Tags */}
         <div className="mt-4">
-          <span className="text-sm text-gray-500 font-medium">Tags: {tags}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Tags: {tags}</span>
         </div>
   
         {/* Upvote/Downvote Section */}
@@ -247,17 +254,17 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   
         {/* Templates Section */}
         <div className="mt-8">
-          <h2 className="text-2xl font-semibold">Related Templates</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">Related Templates</h2>
           <ul className="mt-4">
             {templates.map((template) => (
               <li
                 key={template.id}
-                className="border rounded-lg p-4 mb-4 bg-white shadow-md cursor-pointer hover:shadow-xl hover:bg-slate-200 duration-50"
+                className="border dark:border-gray-600 rounded-lg p-4 mb-4 bg-white dark:bg-gray-700 shadow-md cursor-pointer hover:shadow-xl hover:bg-slate-200 dark:hover:bg-gray-600 duration-50"
                 onClick={() => onTemplateClick(template.id)}
               >
-                <h3 className="font-bold">{template.title}</h3>
-                <p className="text-gray-600">{template.explanation}</p>
-                <span className="text-sm text-gray-500">Tags: {template.tags}</span>
+              <h3 className="font-bold text-gray-800 dark:text-gray-100">{template.title}</h3>
+              <p className="text-gray-600 dark:text-gray-300">{template.explanation}</p>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Tags: {template.tags}</span>
               </li>
             ))}
           </ul>
@@ -265,7 +272,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
 
       {/* Comments Section */}
       <div className="mt-8">
-        <h2 className="text-2xl font-semibold">Comments</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">Comments</h2>
 
         {/* Add Comment Button */}
         <div>
@@ -284,7 +291,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
               placeholder="Write your comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="mt-3 mb-3 rounded text-gray-800 p-3 border border-gray-1 w-full"
+              className="mt-3 mb-3 rounded text-gray-800 dark:text-gray-100 p-3 border border-gray-300 dark:border-gray-600 w-full bg-white dark:bg-gray-700"
             />
             <button
               onClick={handleCommentSubmit}
@@ -295,7 +302,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
           </div>
         )}
 
-        <ul className="mt-4">
+        <ul className="mt-4 dark:text-gray-100">
           {topLevelComments.map((comment) => (
             <NestedComment
               key={comment.id}

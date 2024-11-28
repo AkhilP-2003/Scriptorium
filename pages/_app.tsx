@@ -13,6 +13,8 @@ type JwtPayload = {
   role: string;
   exp?: number; // Optional expiration time
 };
+import DarkModeToggle from "@/components/DarkModeToggle";
+
 
 export default function App({ Component, pageProps }: AppProps) {
 
@@ -66,6 +68,12 @@ export default function App({ Component, pageProps }: AppProps) {
           links={links}
           className="!shadow-2xl"
         />
+
+        {/* Dark Mode Toggle */}
+        <div className="flex justify-end p-4">
+            <DarkModeToggle /> {/* Dark Mode Toggle */}
+        </div>
+
       </div>
 
       {/* Main content section */}
