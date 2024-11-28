@@ -52,6 +52,7 @@ interface Comment {
     onTemplateClick: (value: number) => void;
     handleCommentUpvote:(id:number, voteType: string) => void;
     handleCommentDownvote: (id:number, voteType: string) => void;
+    handleCommentReport: (id: number) => void;
     handleReport: (e: React.MouseEvent, id: number) => void;
     deleteButton?: React.ReactNode;
     editButton?: React.ReactNode;
@@ -70,6 +71,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   handleUpvote,
   handleDownvote,
   handleReport,
+  handleCommentReport,
   onTemplateClick,
   handleCommentUpvote,
   handleCommentDownvote,
@@ -318,6 +320,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
               allComments={commentsState}
               handleCommentUpvote={handleCommentUpvote}
               handleCommentDownvote={handleCommentDownvote}
+              handleCommentReport={handleCommentReport}
               handleReplySubmit={handleReplySubmit} // Pass handleReplySubmit here
             />
           ))}
