@@ -15,6 +15,7 @@ const DarkModeToggle = () => {
     }
   }, []);
 
+  
   // Toggle the theme and save the preference in localStorage
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
