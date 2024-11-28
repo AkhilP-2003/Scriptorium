@@ -85,23 +85,6 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   const [commentsState, setCommentsState] = useState<Comment[]>(comments); // Track comments in state
   const router = useRouter();
 
-  useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      router.push('/login');
-      return;
-    }
-
-    try {
-      const decodedToken: JwtPayload = jwtDecode<JwtPayload>(accessToken);
-      setUserId(decodedToken.id);
-      setIsUserAuthenticated(true);
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      router.push('/login');
-    }
-  }, [router]);
-
   const handleAddComment = () => {
     const accessToken = localStorage.getItem('accessToken');
     

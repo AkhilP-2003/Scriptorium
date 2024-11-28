@@ -340,6 +340,7 @@ const reportComment = async(commentId: number) => {
             handleReport={(e)=> report(e, blog.id)}
             handleCommentUpvote={(commentId) => commentVote(blog.id, commentId, 'upvote')} // For comments
             handleCommentDownvote={(commentId) => commentVote(blog.id, commentId, 'downvote')} // For comments
+            handleCommentReport={(commentId) => reportComment(commentId)}
             onTemplateClick={handleTemplateClick}
             downvote={blog.downvote}
             tags={blog.tags}
