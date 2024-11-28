@@ -95,11 +95,11 @@ const CodeEditor: React.FC = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
+    <div style={styles.container} className="dark:bg-gray-900">
+      <header style={styles.header} className="dark:bg-gray-800 dark:text-white">
         <h1>Code Editor</h1>
       </header>
-      <div style={styles.controls}>
+      <div style={styles.controls} className="dark:bg-gray-800">
         <button id="run-button" onClick={handleRun} style={styles.runButton} disabled={isLoading}>
           {isLoading ? 'Running...' : 'Run Code'}
         </button>
@@ -108,6 +108,7 @@ const CodeEditor: React.FC = () => {
           onChange={handleLanguageChange}
           style={styles.languageSelect}
           disabled={isLoading}
+          className="dark:bg-gray-800 dark:text-white"
         >
           <option value="javascript">JavaScript</option>
           <option value="java">Java</option>
@@ -128,6 +129,7 @@ const CodeEditor: React.FC = () => {
         value={code}
         onChange={handleEditorChange}
         theme="vs-dark"
+        className="dark:bg-gray-800 dark:text-white"
         options={{
           minimap: { enabled: false },
           fontSize: 14,
@@ -141,11 +143,12 @@ const CodeEditor: React.FC = () => {
         onChange={(e) => setStdin(e.target.value)}
         style={styles.stdinInput}
         disabled={isLoading}
+        className='dark:bg-gray-800 dark:text-white'
       />
 
-      <div style={styles.outputBox}>
+      <div style={styles.outputBox} className='dark:bg-gray-800 dark:text-black'>
         <strong>Output:</strong>
-        <div>{output}</div>
+        <div className="dark:text-black">{output}</div>
         {error && <div style={styles.error}>{error}</div>}
       </div>
     </div>
@@ -160,6 +163,7 @@ const styles = {
     flexDirection: 'column',
     padding: '10px',
     backgroundColor: '#f5f5f5',
+    dark: 'bg-gray-900'
   },
   header: {
     padding: '10px',
