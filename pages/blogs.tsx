@@ -48,7 +48,7 @@ export default function Blogs() {
     const navigateToBlog = (id: number) => {
         router.push(`/blog/${id}`);
         return;
-      };
+    };
 
     const getBlogs = async (page:number) => {
         try {
@@ -265,13 +265,13 @@ export default function Blogs() {
 
       const handleMyNextPage = () => {
         if (!isLastPage) {
-          getMyBlogs(currentPage + 1);
+          handleMyBlogs(currentPage + 1);
         }
       };
       
       const handleMyPreviousPage = () => {
         if (currentPage > 1) {
-          getMyBlogs(currentPage - 1);
+          handleMyBlogs(currentPage - 1);
         }
       };
       
@@ -281,12 +281,16 @@ export default function Blogs() {
         if (showMyBlogs === false) {
             getBlogs(1);
         } else {
-            getMyBlogs(1);
+          handleMyBlogs(1);
         }
     }, [title, description, tags, templateTitle]);
     
     useEffect(()=>  {
-          getBlogs(1);
+      if (showMyBlogs === false) {
+        getBlogs(1);
+    } else {
+        handleMyBlogs(1);
+    }
   }, []);
       
     
@@ -419,7 +423,7 @@ export default function Blogs() {
         setShowMyBlogs(false);
       }
       const handleMyBlogs2 = async () => {
-        getMyBlogs(1);
+        handleMyBlogs(1);
       }
 
     return (
