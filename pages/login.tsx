@@ -196,7 +196,6 @@ export default function Login() {
             value={userName}
             onChange={handleUsernameChange}
             className="border border-gray-300 rounded-lg p-3 w-full mb-4 focus:ring-2 focus:ring-blue-500 "
-            titleClassName="text-blue-500"
           />
 
           <PasswordInput
